@@ -12,10 +12,10 @@ import 'helper.dart';
 class ListingResultMain extends StatefulWidget {
 
   final bool isLoading;
-  final Marker marker;
+  final ListingManagerForm listing;
   final DashboardModel model;
 
-  const ListingResultMain({super.key, required this.isLoading, required this.marker, required this.model});
+  const ListingResultMain({super.key, required this.isLoading, required this.model, required this.listing});
 
   @override
   State<ListingResultMain> createState() => _ListingResultMainState();
@@ -49,50 +49,82 @@ class _ListingResultMainState extends State<ListingResultMain> {
     );
   }
 
-  Widget noReservationsFound() {
-    return Container();
-  }
-
 
   Widget retrievedReservations(BuildContext context) {
-    return BlocProvider(create: (_) => getIt<ReservationManagerWatcherBloc>()..add(ReservationManagerWatcherEvent.watchReservationsList([widget.marker.markerId.value])),
+    return BlocProvider(create: (_) => getIt<ReservationManagerWatcherBloc>()..add(ReservationManagerWatcherEvent.watchReservationsList([widget.listing.listingServiceId.getOrCrash()], null, null, [ReservationSlotState.requested, ReservationSlotState.cancelled, ReservationSlotState.refunded, ReservationSlotState.current, ReservationSlotState.completed])),
       child: BlocBuilder<ReservationManagerWatcherBloc, ReservationManagerWatcherState>(
         builder: (context, state) {
             return state.maybeMap(
               resLoadInProgress: (_) => isLoadingMainContainer(context),
-              loadReservationListFailure: (_) => retrieveListing(context, []),
-              loadReservationListSuccess: (e) => retrieveListing(context, e.item),
-              orElse: () => retrieveListing(context, [])
+              loadReservationListFailure: (_) => listingSpacesPagePreview(
+                  context,
+                  widget.model,
+                  panelHeight(context) - listingHeaderHeight - 125,
+                  _pageController,
+                  _currentPageIndex,
+                  widget.listing.listingProfileService.spaceSetting.spaceTypes.value.fold((l) => [], (r) => r),
+                  onPageChanged: (page) {
+                    setState(() {
+                      _currentPageIndex = page;
+                  });
+                }
+              ),
+              loadReservationListSuccess: (e) => listingSpacesPagePreview(
+                  context,
+                  widget.model,
+                  panelHeight(context) - listingHeaderHeight - 125,
+                  _pageController,
+                  _currentPageIndex,
+                  widget.listing.listingProfileService.spaceSetting.spaceTypes.value.fold((l) => [], (r) => r),
+                  onPageChanged: (page) {
+                    setState(() {
+                      _currentPageIndex = page;
+                    });
+                  }
+              ),
+              orElse: () => listingSpacesPagePreview(
+                  context,
+                  widget.model,
+                  panelHeight(context) - listingHeaderHeight - 125,
+                  _pageController,
+                  _currentPageIndex,
+                  widget.listing.listingProfileService.spaceSetting.spaceTypes.value.fold((l) => [], (r) => r),
+                  onPageChanged: (page) {
+                    setState(() {
+                      _currentPageIndex = page;
+                    });
+                  }
+              ),
           );
         },
       ),
     );
   }
 
-
-  Widget retrieveListing(BuildContext context, List<ReservationItem> reservations) {
-    return BlocBuilder<PublicListingWatcherBloc, PublicListingWatcherState>(
-        builder: (context, state) {
-          return state.maybeMap(
-              loadAllPublicListingItemsSuccess: (e) => (e.items.map((e) => e.listingServiceId).contains(UniqueId.fromUniqueString(widget.marker.markerId.value))) ?
-              listingSpacesPagePreview(
-                  context,
-                  widget.model,
-                  panelHeight(context) - listingHeaderHeight - 125,
-                  _pageController,
-                  _currentPageIndex,
-                  e.items.firstWhere((element) => element.listingServiceId.getOrCrash() == widget.marker.markerId.value).listingProfileService.spaceSetting.spaceTypes.getOrCrash(),
-                  onPageChanged: (page) {
-                    setState(() {
-                      _currentPageIndex = page;
-                  });
-                }
-              ) : noReservationsFound(),
-              loadAllPublicListingItemsFailure: (e) => noReservationsFound(),
-              orElse: () => noReservationsFound());
-        }
-    );
-  }
+  //
+  // Widget retrieveListing(BuildContext context, List<ReservationItem> reservations) {
+  //   return BlocBuilder<PublicListingWatcherBloc, PublicListingWatcherState>(
+  //       builder: (context, state) {
+  //         return state.maybeMap(
+  //             loadAllPublicListingItemsSuccess: (e) => (e.items.map((e) => e.listingServiceId).contains(UniqueId.fromUniqueString(widget.marker.markerId.value))) ?
+  //             listingSpacesPagePreview(
+  //                 context,
+  //                 widget.model,
+  //                 panelHeight(context) - listingHeaderHeight - 125,
+  //                 _pageController,
+  //                 _currentPageIndex,
+  //                 e.items.firstWhere((element) => element.listingServiceId.getOrCrash() == widget.marker.markerId.value).listingProfileService.spaceSetting.spaceTypes.getOrCrash(),
+  //                 onPageChanged: (page) {
+  //                   setState(() {
+  //                     _currentPageIndex = page;
+  //                 });
+  //               }
+  //             ) : noReservationsFound(),
+  //           loadAllPublicListingItemsFailure: (e) => noReservationsFound(),
+  //           orElse: () => noReservationsFound());
+  //       }
+  //   );
+  // }
 
   /// first check to see if listings internal programs exist - show fpr each program (i guess internal programs should require the making of reservations that are your own)
   /// reservation content
@@ -114,8 +146,6 @@ class _ListingResultMainState extends State<ListingResultMain> {
   //     }
   //   );
   // }
-
-
 
   Widget reservationPageView(BuildContext context, List<ReservationItem> reservations) {
     return SizedBox(

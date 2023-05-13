@@ -20,31 +20,172 @@ import 'package:provider/provider.dart';
 class MapHelper {
 
   static late GoogleMapController mapController;
-  static late UniqueId? selectedMarkerId = null;
-  static Fluster<MapMarker>? clusterManager;
-  static late double currentZoom = 5;
-  static final HashMap<String, MapMarker> markers = HashMap<String, MapMarker>();
 
-  // static bool areMarkersLoading = true;
-  // static final Set<Marker> markers = {};
+  /// [PageController]
+  static late PageController pageController;
 
-  static Future<BitmapDescriptor> getMarkerImageFromUrl(
-      String url, {
-        int? targetWidth,
-      }) async {
-    final File markerImageFile = await DefaultCacheManager().getSingleFile(url);
+  /// Set of displayed markers and cluster markers on the map
+  static final Set<Marker> marker = Set();
 
-    Uint8List markerImageBytes = await markerImageFile.readAsBytes();
+  /// Current map zoom. Initial zoom will be 15, street level
+  static late double currentZoom = 10;
 
-    if (targetWidth != null) {
-      markerImageBytes = await _resizeImageBytes(
-        markerImageBytes,
-        targetWidth,
+  /// Map reLoading flag
+  static bool showMapReload = false;
+
+  /// [Fluster] instance used to manage the clusters
+  static Fluster<MapMarker>? _clusterManager;
+
+  /// [HashMap] of displayed [MapMarker]s and cluster markers on the map
+  static late HashMap<String, MapMarker> _markers = HashMap<String, MapMarker>();
+
+  /// [Stream] for handling all listings
+  static late Stream<List<ListingManagerForm>> listingStream;
+
+  static late int _minZoom = 0;
+  static late int _maxZoom = 19;
+  static late double lng = -79.3832;
+  static late double lat = 43.6532;
+
+  static void initMarkers(BuildContext context, DashboardModel model, List<ListingManagerForm> listings) async {
+
+    marker.clear();
+    _markers.clear();
+    _clusterManager = null;
+    context.read<ListingsSearchRequirementsBloc>().add(const ListingsSearchRequirementsEvent.listingsChange([]));
+    context.read<ListingsSearchRequirementsBloc>().add(ListingsSearchRequirementsEvent.listingsChange(listings));
+    context.read<ListingsSearchRequirementsBloc>().add(const ListingsSearchRequirementsEvent.isMarkersLoading(true));
+    for (ListingManagerForm forms in listings) {
+      String? listingImage;
+
+      for (SpaceOption space in forms.listingProfileService.spaceSetting.spaceTypes.value.fold((l) => [], (r) => r)) {
+        if (space.quantity.where((element) => element.photoUri != null).isNotEmpty) {
+          listingImage = space.quantity.firstWhere((element) => element.photoUri != null).photoUri;
+        }
+      }
+
+      _markers.putIfAbsent(
+          forms.listingServiceId.getOrCrash(),
+              () => MapMarker(
+              childMarkerId: forms.listingServiceId.getOrCrash(),
+              markerId: forms.listingServiceId.getOrCrash(),
+              onMarkerTap: () {
+              },
+              position: LatLng(
+                  forms.listingProfileService.listingLocationSetting.locationPosition?.latitude ?? 0,
+                  forms.listingProfileService.listingLocationSetting.locationPosition?.longitude ?? 0
+              ),
+              markerImageUrl: listingImage,
+              markerTitle: completeTotalPriceWithOutCurrency((forms.listingRulesService.defaultPricingRuleSettings.defaultPricingRate ?? 0).toDouble(), forms.listingProfileService.backgroundInfoServices.currency),
+              icon: BitmapDescriptor.defaultMarker
+          )
       );
     }
 
-    return BitmapDescriptor.fromBytes(markerImageBytes);
+    try {
+
+    _clusterManager = await initClusterManager(
+      _markers.values.toList(),
+      _minZoom,
+      _maxZoom,
+    );
+
+
+    Future.delayed(const Duration(seconds: 2), () async {
+      await _updateMarkers(context, model, currentZoom, _clusterManager, _markers);
+      context.read<ListingsSearchRequirementsBloc>().add(const ListingsSearchRequirementsEvent.isMarkersLoading(false));
+      });
+      } catch (e) {
+    }
+
+
   }
+
+
+  static Future<void> _updateMarkers(BuildContext context, DashboardModel model, double? updatedZoom, Fluster<MapMarker>? manager, HashMap<String, MapMarker> markers) async {
+    if (manager == null) return;
+
+    if (updatedZoom != null) {
+      currentZoom = updatedZoom;
+    }
+
+
+    final updatedMarkers = await getClusterMarkers(
+        context,
+        markers,
+        manager,
+        null,
+        currentZoom,
+        model.webBackgroundColor,
+        model.paletteColor,
+        onMarkerTap: (cluster) async {
+
+            /// update camera position - zoom in and center on marker
+            if (cluster.longitude != null && cluster.latitude != null) {
+              mapController.animateCamera(
+                  CameraUpdate.newCameraPosition(
+                      CameraPosition(
+                          zoom: 11,
+                          target: LatLng(cluster.latitude! - 0.07, cluster.longitude!)
+                      )
+                  )
+              );
+            }
+
+            context.read<ListingsSearchRequirementsBloc>().add(const ListingsSearchRequirementsEvent.selectedListingIdChanged(null));
+            /// update current selected listing
+            if (context.read<ListingsSearchRequirementsBloc>().state.selectedListingId?.getOrCrash() == cluster.markerId) {
+              // context.read<ListingsSearchRequirementsBloc>().add(const ListingsSearchRequirementsEvent.selectedListingIdChanged(null));
+            } else {
+              Future.delayed(const Duration(seconds: 1), () async {
+              context.read<ListingsSearchRequirementsBloc>().add(ListingsSearchRequirementsEvent.selectedListingIdChanged(UniqueId.fromUniqueString(cluster.markerId)));
+              });
+            }
+
+            /// animate to selected listing in [PageController]
+            Future.delayed(const Duration(seconds: 2), () async {
+              if (pageController.positions.isNotEmpty) {
+                final int itemPage = context.read<ListingsSearchRequirementsBloc>().state.listings.toList().indexWhere((element) => element.listingServiceId.getOrCrash() == cluster.markerId);
+                pageController.animateToPage(itemPage, duration: const Duration(milliseconds: 600), curve: Curves.easeInOut);
+              }
+          });
+        });
+
+    marker..clear()
+      ..addAll(updatedMarkers);
+
+    context.read<ListingsSearchRequirementsBloc>().add(ListingsSearchRequirementsEvent.markersDidChange(marker));
+
+  }
+
+
+  // static late UniqueId? selectedMarkerId = null;
+  // static Fluster<MapMarker>? clusterManager;
+  // static late double currentZoom = 5;
+  // static final HashMap<String, MapMarker> markers = HashMap<String, MapMarker>();
+
+  // static bool areMarkersLoading = true;
+  // static final Set<Marker> markers = {};
+  //
+  // static Future<BitmapDescriptor> getMarkerImageFromUrl(
+  //     String url, {
+  //       int? targetWidth,
+  //     }) async {
+  //   final File markerImageFile = await DefaultCacheManager().getSingleFile(url);
+  //
+  //   Uint8List markerImageBytes = await markerImageFile.readAsBytes();
+  //
+  //   if (targetWidth != null) {
+  //     markerImageBytes = await _resizeImageBytes(
+  //       markerImageBytes,
+  //       targetWidth,
+  //     );
+  //   }
+  //
+  //   return BitmapDescriptor.fromBytes(markerImageBytes);
+  // }
+
+
 
   /// Draw a [clusterColor] circle with the [clusterSize] text inside that is [width] wide.
   ///
@@ -52,9 +193,26 @@ class MapHelper {
   /// to be used on the cluster marker icons.
   static Future<BitmapDescriptor> _getClusterMarker(
       String topClusterFee,
+      String? clusterImage,
       Color clusterColor,
       Color textColor,
       ) async {
+    final double size = 150;
+    final File markerImageFile = await DefaultCacheManager().getSingleFile(clusterImage ?? '');
+    final Uint8List imageUint8List = await markerImageFile.readAsBytes();
+    final UI.Codec codec = await UI.instantiateImageCodec(imageUint8List);
+    final UI.FrameInfo imageFI = await codec.getNextFrame();
+
+    //make canvas clip path to prevent image drawing over the circle
+    final Path clipPath = Path();
+    clipPath.addRRect(RRect.fromRectAndRadius(
+        Rect.fromLTWH(18.75, 85, size, size),
+        Radius.circular(size)));
+    clipPath.addRRect(RRect.fromRectAndRadius(
+        Rect.fromLTWH(18.75, 85, size, size),
+        Radius.circular(size)));
+
+
     final UI.PictureRecorder pictureRecorder = UI.PictureRecorder();
     final Canvas canvas = Canvas(pictureRecorder);
     final Paint paint = Paint()..color = clusterColor;
@@ -70,10 +228,12 @@ class MapHelper {
       )
     )..layout();
 
+
     const double padding = 40;
     final rect = Offset.zero & Size(textPainter.width + padding, textPainter.height + padding);
-    canvas.drawRRect(RRect.fromRectAndRadius(rect, Radius.circular(60)), paint);
 
+    canvas.drawRRect(RRect.fromRectAndRadius(rect, Radius.circular(60)), paint);
+    // canvas.drawImage(imageAsset.image, Offset(0,0), paint);
 
     textPainter.layout();
     textPainter.paint(
@@ -81,16 +241,29 @@ class MapHelper {
       const Offset(padding / 2, padding / 2),
     );
 
+    canvas.clipPath(clipPath);
+    paintImage(canvas: canvas, rect: Rect.fromLTWH(18.75, 95, size, size), image: imageFI.image, fit: BoxFit.cover);
 
     final image = await pictureRecorder.endRecording().toImage(
-      (textPainter.width + padding).toInt(),
-      (textPainter.height + padding).toInt(),
+      (textPainter.width + padding + 150).toInt(),
+      (textPainter.height + padding + 150).toInt(),
     );
-    final data = await image.toByteData(format: UI.ImageByteFormat.png);
 
+    final data = await image.toByteData(format: UI.ImageByteFormat.png);
     return BitmapDescriptor.fromBytes(data!.buffer.asUint8List());
   }
-  
+
+  Future<Uint8List?> loadNetworkImage(path) async {
+    final completed = Completer<ImageInfo>();
+    var image = NetworkImage(path);
+    image.resolve(const ImageConfiguration()).addListener(
+        ImageStreamListener((info, _) => completed.complete(info)));
+    final imageInfo = await completed.future;
+    final byteData =
+    await imageInfo.image.toByteData(format: UI.ImageByteFormat.png);
+    return byteData?.buffer.asUint8List();
+  }
+
 
   static Future<UI.Image> _loadUiImage(String imageAssetPath) async {
     final ByteData data = await rootBundle.load(imageAssetPath);
@@ -133,9 +306,7 @@ class MapHelper {
     );
 
     final UI.FrameInfo frameInfo = await imageCodec.getNextFrame();
-
     final data = await frameInfo.image.toByteData(format: UI.ImageByteFormat.png);
-
     return data!.buffer.asUint8List();
   }
 
@@ -149,7 +320,7 @@ class MapHelper {
       maxZoom: maxZoom,
       radius: 150,
       extent: 2048,
-      nodeSize: 64,
+      nodeSize: 74,
       points: markers,
       createCluster: (
           BaseCluster? cluster,
@@ -197,20 +368,24 @@ class MapHelper {
 
       if (mapMarker.isCluster!) {
 
-          mapMarker.markerTitle = clusterMarker?.toMarker().infoWindow.title ?? '';
+
           mapMarker.icon = await _getClusterMarker(
-            clusterMarker?.toMarker().infoWindow.title ?? '',
+            clusterMarker?.markerTitle ?? '',
+            clusterMarker?.markerImageUrl,
             (selectedMarker == mapMarker.childMarkerId) ? clusterTextColor : clusterColor,
             (selectedMarker == mapMarker.childMarkerId) ? clusterColor :  clusterTextColor,
           );
+          mapMarker.markerTitle = null;
 
       } else {
 
         mapMarker.icon = await _getClusterMarker(
-          mapMarker.markerTitle ?? '',
+          mapMarker.markerTitle ?? clusterMarker?.markerTitle ?? '',
+          clusterMarker?.markerImageUrl,
           (selectedMarker == mapMarker.childMarkerId) ? clusterTextColor : clusterColor,
           (selectedMarker == mapMarker.childMarkerId) ? clusterColor :  clusterTextColor,
         );
+        mapMarker.markerTitle = null;
       }
       return mapMarker.toMarker();
     }).toList());
@@ -258,30 +433,6 @@ class MapHelper {
     return Geolocator.distanceBetween(currentPosition.latitude, currentPosition.longitude, distanceTo.latitude, distanceTo.longitude);
   }
 
-
-
-  static Future<void> updateMarkers(BuildContext context, DashboardModel? model, double? updatedZoom, {required Function(MapMarker) markerTap}) async {
-    if (MapHelper.clusterManager == null || updatedZoom == MapHelper.currentZoom) return;
-
-    if (updatedZoom != null) {
-      MapHelper.currentZoom = updatedZoom;
-    }
-
-    final updatedMarkers = await MapHelper.getClusterMarkers(
-      context,
-      MapHelper.markers,
-      MapHelper.clusterManager,
-      (MapHelper.selectedMarkerId != null) ? MapHelper.selectedMarkerId?.getOrCrash() : null,
-      MapHelper.currentZoom,
-      model?.webBackgroundColor ?? Colors.white,
-      model?.paletteColor ?? Colors.black,
-      onMarkerTap: (cluster) async {
-        markerTap(cluster);
-      });
-
-    context.read<ListingsSearchRequirementsBloc>().add(ListingsSearchRequirementsEvent.markersDidChange(updatedMarkers.toSet()));
-
-  }
 
 }
 

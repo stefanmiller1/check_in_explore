@@ -1,15 +1,21 @@
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
+import 'package:check_in_web_mobile_explore/presentation/core/core_helper.dart';
+import 'package:check_in_web_mobile_explore/presentation/screens/facility_preview/facility_preview_screen.dart';
+import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/listing_quick_preview.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/map_helper.dart';
+import 'package:fluster/fluster.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:check_in_facade/check_in_facade.dart';
 import 'helper.dart';
 
 class MapSearchContainer extends StatefulWidget {
@@ -29,76 +35,67 @@ class MapSearchContainer extends StatefulWidget {
 
 class _MapSearchContainerState extends State<MapSearchContainer> {
 
-  late int _minZoom = 0;
-  late int _maxZoom = 19;
   late String _mapStyle = '';
 
   @override
   void initState() {
     super.initState();
+    MapHelper.pageController = PageController();
+    MapHelper.listingStream = FirebaseMapFacade.instance.mapListings(latitude: MapHelper.lat, longitude: MapHelper.lng, selectedRadius: MapHelper.currentZoom);
+    checkForCurrentLocation();
+
 
     SchedulerBinding.instance.addPostFrameCallback((_) {
       rootBundle.loadString('assets/style/map_style.txt').then((string) {
         _mapStyle = string;
       });
     });
+
+    print('init new map');
+
   }
 
-  void _onMapCreated(BuildContext context, GoogleMapController controller, List<ListingManagerForm> listings) {
+  void checkForCurrentLocation() async {
+    // Position position = await MapHelper.determineCurrentPosition(context, widget.model);
+    // if (MapHelper.lat == 43.6532 && MapHelper.lat == -79.3832) {
+    //   MapHelper.lat = position.latitude;
+    //   MapHelper.lng = position.longitude;
+    // }
+
+    final listing = await MapHelper.listingStream.first;
+    MapHelper.initMarkers(context, widget.model, listing);
+
+    print('${MapHelper.lat} lattitude');
+    print('${MapHelper.lng} long');
+    print('${MapHelper.currentZoom} zoooom');
+    print(listing);
+  }
+
+
+  @override
+  void dispose() {
+    MapHelper.pageController.dispose();
+    super.dispose();
+  }
+
+  void _onMapCreated(BuildContext context, GoogleMapController controller) {
     MapHelper.mapController = controller;
 
-    setState(() {
-      _initMarkers(context, listings);
-      widget.selectedListing(null);
-    });
+    // MapHelper.initMarkers(context, widget.model, listings);
   }
 
-  void _initMarkers(BuildContext context, List<ListingManagerForm> listings) async {
-
-    for (ListingManagerForm forms in listings.where((element) =>
-        element.listingProfileService.listingLocationSetting.longLat.isNotEmpty)
-      ..toList()) {
-      MapHelper.markers.putIfAbsent(
-          forms.listingServiceId.getOrCrash(),
-          () => MapMarker(
-              childMarkerId: forms.listingServiceId.getOrCrash(),
-              markerId: forms.listingServiceId.getOrCrash(),
-              position: LatLng(
-                  double.parse(forms
-                      .listingProfileService.listingLocationSetting.longLat
-                      .split(',')[0]),
-                  double.parse(forms
-                      .listingProfileService.listingLocationSetting.longLat
-                      .split(',')[1])),
-              markerTitle: completeTotalPriceWithOutCurrency((forms.listingRulesService.defaultPricingRuleSettings.defaultPricingRate ?? 0).toDouble(), forms.listingProfileService.backgroundInfoServices.currency),
-              icon: BitmapDescriptor.defaultMarker));
-    }
-
-    MapHelper.clusterManager = await MapHelper.initClusterManager(
-      MapHelper.markers.values.toList(),
-      _minZoom,
-      _maxZoom,
-    );
-
-    await MapHelper.updateMarkers(
-        context,
-        widget.model,
-        null, markerTap: (e) {
-          setState(() {
-        });
-    });
-
-  }
 
 
   void _didStartMovingMap(BuildContext context) async {
+
     setState(() {
       context.read<ListingsSearchRequirementsBloc>().add(const ListingsSearchRequirementsEvent.isMarkersLoading(true));
       widget.selectedListing(null);
     });
 
-    Future.delayed(const Duration(seconds: 1), () async {
+    Future.delayed(const Duration(seconds: 3), () async {
       setState(() {
+        MapHelper.showMapReload = true;
         context.read<ListingsSearchRequirementsBloc>().add(const ListingsSearchRequirementsEvent.isMarkersLoading(false));
         widget.selectedListing(null);
       });
@@ -108,18 +105,17 @@ class _MapSearchContainerState extends State<MapSearchContainer> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<PublicListingWatcherBloc, PublicListingWatcherState>(
-        builder: (context, state) {
-      return state.maybeMap(
-          loadAllPublicListingItemsSuccess: (e) => retrievedListings(context, e.items),
-          loadAllPublicListingItemsFailure: (e) => cannotFindAnyListings(),
-          orElse: () => cannotFindAnyListings());
-    });
+
+    return StreamBuilder<List<ListingManagerForm>>(
+        stream: MapHelper.listingStream,
+        builder: (context, snapshot) {
+          return retrievedListings(context, snapshot.data ?? [], snapshot.connectionState == ConnectionState.waiting);
+      },
+    );
   }
 
 
-  Widget retrievedListings(BuildContext context, List<ListingManagerForm> listings) {
-
+  Widget retrievedListings(BuildContext context, List<ListingManagerForm> listings, bool isLoading) {
     return Stack(
       alignment: Alignment.center,
       children: [
@@ -130,31 +126,20 @@ class _MapSearchContainerState extends State<MapSearchContainer> {
             myLocationEnabled: true,
             zoomControlsEnabled: true,
             initialCameraPosition: CameraPosition(
-              target: LatLng(43.7, -79.2),
+              target: LatLng(MapHelper.lat, MapHelper.lng),
               zoom: MapHelper.currentZoom,
             ),
             mapType: MapType.normal,
-            markers: context.read<ListingsSearchRequirementsBloc>().state.markers,
+            markers: MapHelper.marker,
             onCameraMoveStarted: () => _didStartMovingMap(context),
-            onMapCreated: (controller) => _onMapCreated(context, controller, listings),
+            onMapCreated: (controller) => _onMapCreated(context, controller),
             onCameraMove: (CameraPosition position) {
               setState(() {
 
-              MapHelper.updateMarkers(
-                context,
-                widget.model,
-                position.zoom,
-                markerTap: (marker) {
-                  setState(() {
-                    if (marker.childMarkerId != null) {
-                      MapHelper.selectedMarkerId = UniqueId.fromUniqueString(marker.childMarkerId!);
-                      context.read<ListingsSearchRequirementsBloc>().add(ListingsSearchRequirementsEvent.selectedListingIdChanged(UniqueId.fromUniqueString(marker.childMarkerId!)));
-                    } else {
-                      MapHelper.selectedMarkerId = null;
-                      context.read<ListingsSearchRequirementsBloc>().add(const ListingsSearchRequirementsEvent.selectedListingIdChanged(null));
-                  }
-                });
-              });
+                MapHelper.lat = position.target.latitude;
+                MapHelper.lng = position.target.longitude;
+                MapHelper.currentZoom = position.zoom;
+
             });
           }
         ),
@@ -184,23 +169,31 @@ class _MapSearchContainerState extends State<MapSearchContainer> {
             )
           ),
         ),
-
         Positioned(
           right: 15,
           top: 15,
           child: InkWell(
             onTap: () async {
               Position position = await MapHelper.determineCurrentPosition(context, widget.model);
+              MapHelper.listingStream = FirebaseMapFacade.instance.mapListings(latitude: position.latitude, longitude: position.longitude, selectedRadius: 14);
+
+
+              final listing = await MapHelper.listingStream.first;
+              MapHelper.initMarkers(context, widget.model, listing);
+
 
               setState(() {
                 MapHelper.mapController.animateCamera(
                     CameraUpdate.newCameraPosition(
                         CameraPosition(
                             zoom: 14,
-                            target: LatLng(position.latitude, position.longitude)
+                            target: LatLng(position.latitude - 0.005, position.longitude)
                     )
                   )
                 );
+
+
+
               });
             },
             child: Container(
@@ -214,11 +207,58 @@ class _MapSearchContainerState extends State<MapSearchContainer> {
               ),
             ),
           ),
+        ),
+        if (context.read<ListingsSearchRequirementsBloc>().state.selectedListingId != null && context.read<ListingsSearchRequirementsBloc>().state.listings.isNotEmpty)  getListingPagingController(
+          context,
+          widget.model,
+          150 + (MediaQuery.of(context).size.height * 0.21),
+          context.read<ListingsSearchRequirementsBloc>().state.listings.toList(),
+          context.read<ListingsSearchRequirementsBloc>().state.selectedListingId!,
+          didChangePage: (page) {
+            final ListingManagerForm listing = context.read<ListingsSearchRequirementsBloc>().state.listings.toList()[page];
+
+            /// update camera position - zoom in and center on marker
+            MapHelper.mapController.animateCamera(
+                CameraUpdate.newCameraPosition(
+                    CameraPosition(
+                        zoom: 11,
+                        target: LatLng(listing.listingProfileService.listingLocationSetting.locationPosition!.latitude - 0.07, listing.listingProfileService.listingLocationSetting.locationPosition!.longitude)
+                    )
+                )
+            );
+            context.read<ListingsSearchRequirementsBloc>().add(ListingsSearchRequirementsEvent.selectedListingIdChanged(listing.listingServiceId));
+          }
+        ),
+        if (MapHelper.showMapReload) Positioned(
+          top: 15,
+          left: 15,
+          child: InkWell(
+            onTap: () async {
+
+              MapHelper.showMapReload = false;
+              MapHelper.listingStream = FirebaseMapFacade.instance.mapListings(latitude: MapHelper.lat, longitude: MapHelper.lng, selectedRadius: MapHelper.currentZoom);
+              MapHelper.currentZoom = 15;
+
+              final listing = await MapHelper.listingStream.first;
+              MapHelper.initMarkers(context, widget.model, listing);
+
+            },
+            child: Container(
+              height: 40,
+              decoration: BoxDecoration(
+                  color: widget.model.mobileBackgroundColor,
+                  borderRadius: BorderRadius.circular(40)),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 3.0),
+                child: Center(child: Chip(
+                  backgroundColor: Colors.transparent,
+                    label: Text('Refresh', style: TextStyle(color: widget.model.paletteColor, fontWeight: FontWeight.bold),), avatar: Icon(Icons.refresh_rounded, color: widget.model.paletteColor)),
+                ),
+              ),
+            ),
+          ),
         )
       ],
     );
   }
-
-
-
 }

@@ -1,7 +1,11 @@
 import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
+import 'package:check_in_web_mobile_explore/presentation/core/core_helper.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/map_helper.dart';
+import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/pop_over_screen/search_by_slots_time_duration.dart';
+import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/pop_over_screen/search_locations_results.dart';
+import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/pop_over_screen/search_when_where_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:geolocator/geolocator.dart';
@@ -10,6 +14,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import '../components/helper.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class SearchWhereWhenPopOver extends StatefulWidget {
 
@@ -32,7 +37,7 @@ class _SearchWhereWhenPopOverState extends State<SearchWhereWhenPopOver> with Ti
   late int tabIndexWho = 0;
 
 
-  List<String> tabWhenList = ['Calendar', 'I\'m Flexible', 'Custom'];
+  List<String> tabWhenList = ['Slots', 'I\'m Flexible', 'Custom'];
   List<String> tabWhoList = ['A General Amount','A Range'];
 
   @override
@@ -41,6 +46,7 @@ class _SearchWhereWhenPopOverState extends State<SearchWhereWhenPopOver> with Ti
     dController = DateRangePickerController();
     _tabControllerWhen = TabController(length: 3, vsync: this);
     _tabControllerWho = TabController(length: 2, vsync: this);
+
     super.initState();
   }
 
@@ -66,6 +72,7 @@ class _SearchWhereWhenPopOverState extends State<SearchWhereWhenPopOver> with Ti
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
             child: ListView(
               shrinkWrap: true,
+              // physics: const NeverScrollableScrollPhysics(),
               children: [
                 // SizedBox(height: searchHeaderHeight(context) + 75),
                 searchListItem(
@@ -78,11 +85,11 @@ class _SearchWhereWhenPopOverState extends State<SearchWhereWhenPopOver> with Ti
                         searchTab = SearchWhereWhenMarker.where;
                       });
                     },
-                    isFinishedSelection: (context.read<ListingsSearchRequirementsBloc>().state.locationItemId != null) || (context.read<ListingsSearchRequirementsBloc>().state.isSomeWhereNear != null),
+                    isFinishedSelection: (context.read<ListingsSearchRequirementsBloc>().state.locationItemId != null) || (context.read<ListingsSearchRequirementsBloc>().state.isSomeWhereNear != null) || (context.read<ListingsSearchRequirementsBloc>().state.locationCityFromMap != null),
                     iconItem: Icons.search_rounded,
                     selectedTitle: 'Where Abouts?',
                     defaultTitle: 'Where Would You Like to Be?',
-                    subTitle: (context.read<ListingsSearchRequirementsBloc>().state.locationItemId != null) ? getMapOptions.firstWhere((element) => element.locationItemId == context.read<ListingsSearchRequirementsBloc>().state.locationItemId).locationTitle : (context.read<ListingsSearchRequirementsBloc>().state.isSomeWhereNear ?? false) ? 'Somewhere Near Me' :  'Pick an Area'
+                    subTitle: (context.read<ListingsSearchRequirementsBloc>().state.locationItemId != null) ? getMapOptions.firstWhere((element) => element.locationItemId == context.read<ListingsSearchRequirementsBloc>().state.locationItemId).locationTitle : (context.read<ListingsSearchRequirementsBloc>().state.isSomeWhereNear ?? false) ? 'Somewhere Near Me' : (context.read<ListingsSearchRequirementsBloc>().state.locationCityFromMap != null) ? context.read<ListingsSearchRequirementsBloc>().state.locationCityFromMap! : 'Pick an Area'
                 ),
 
                 const SizedBox(height: 15),
@@ -102,16 +109,26 @@ class _SearchWhereWhenPopOverState extends State<SearchWhereWhenPopOver> with Ti
                       physics: const NeverScrollableScrollPhysics(),
                       children: [
                         /// search button
-                        useCurrentLocationButton(
-                            widget.model,
-                            didSelectButton: () {
-                              setState(() {
-
-                              });
-                            },
-                            iconItem: Icons.search_rounded,
-                            buttonTitle: 'Search Locations',
-                            isSelected: false,
+                        Hero(
+                          tag: 'search_location',
+                          child: searchSettingsButton(
+                              widget.model,
+                              didSelectButton: () {
+                                setState(() {
+                                  Navigator.push(context, HeroDialogRoute(
+                                      barrierLabelString: '',
+                                      builder: (context) {
+                                        return  SearchLocationsResults(
+                                            model: widget.model
+                                        );
+                                      }
+                                  ));
+                                });
+                              },
+                              iconItem: Icons.search_rounded,
+                              buttonTitle: 'Search Locations',
+                              isSelected: false,
+                          ),
                         ),
                         /// searchable maps
                         const SizedBox(height: 10),
@@ -120,7 +137,8 @@ class _SearchWhereWhenPopOverState extends State<SearchWhereWhenPopOver> with Ti
                             context.read<ListingsSearchRequirementsBloc>().state.locationItemId,
                             didSelectItem: (selectedItem) {
                             setState(() {
-                              context.read<ListingsSearchRequirementsBloc>().add(ListingsSearchRequirementsEvent.locationIsSomewhereNearChanged(null));
+                              context.read<ListingsSearchRequirementsBloc>().add(const ListingsSearchRequirementsEvent.locationIsSomewhereNearChanged(null));
+                              context.read<ListingsSearchRequirementsBloc>().add(const ListingsSearchRequirementsEvent.locationCotyFromMapChanged(null));
 
                               if (selectedItem.locationItemId == context.read<ListingsSearchRequirementsBloc>().state.locationItemId) {
                                 context.read<ListingsSearchRequirementsBloc>().add(ListingsSearchRequirementsEvent.locationItemIdRequiredChanged(null));
@@ -141,7 +159,7 @@ class _SearchWhereWhenPopOverState extends State<SearchWhereWhenPopOver> with Ti
                         ),
                         /// i'm flexible or near me...?
                         const SizedBox(height: 10),
-                        useCurrentLocationButton(
+                        searchSettingsButton(
                             widget.model,
                             didSelectButton: () async {
                               setState(() {
@@ -149,6 +167,8 @@ class _SearchWhereWhenPopOverState extends State<SearchWhereWhenPopOver> with Ti
                                   searchTab = SearchWhereWhenMarker.when;
                                 }
                                 context.read<ListingsSearchRequirementsBloc>().add(const ListingsSearchRequirementsEvent.locationItemIdRequiredChanged(null));
+                                context.read<ListingsSearchRequirementsBloc>().add(const ListingsSearchRequirementsEvent.locationCotyFromMapChanged(null));
+
                                 context.read<ListingsSearchRequirementsBloc>().add(ListingsSearchRequirementsEvent.locationIsSomewhereNearChanged(!(context.read<ListingsSearchRequirementsBloc>().state.isSomeWhereNear ?? false)));
                               });
 
@@ -164,7 +184,6 @@ class _SearchWhereWhenPopOverState extends State<SearchWhereWhenPopOver> with Ti
                                   )
                                 );
                               }
-
                             },
                             iconItem: Icons.location_on_outlined,
                             buttonTitle: 'Somewhere Near Me..',
@@ -189,7 +208,7 @@ class _SearchWhereWhenPopOverState extends State<SearchWhereWhenPopOver> with Ti
                     iconItem: Icons.calendar_today_outlined,
                     selectedTitle: 'When Will it Be?',
                     defaultTitle: 'Any Dates?',
-                    subTitle: (context.read<ListingsSearchRequirementsBloc>().state.dateRange != null) ? '${DateFormat.yMMMMd().format(context.read<ListingsSearchRequirementsBloc>().state.dateRange?.start ?? DateTime.now())} - ${DateFormat.yMMMMd().format(context.read<ListingsSearchRequirementsBloc>().state.dateRange?.end ?? DateTime.now().add(Duration(days: 1)))}' : 'Days You Need',
+                    subTitle: (context.read<ListingsSearchRequirementsBloc>().state.dateRange != null) ? '${DateFormat.yMMMMd().format(context.read<ListingsSearchRequirementsBloc>().state.dateRange?.start ?? DateTime.now())} - ${DateFormat.yMMMMd().format(context.read<ListingsSearchRequirementsBloc>().state.dateRange?.end ?? DateTime.now().add(Duration(days: 1)))}' : (context.read<ListingsSearchRequirementsBloc>().state.selectedReservationsSlots?.isNotEmpty ?? false) ? '${context.read<ListingsSearchRequirementsBloc>().state.selectedReservationsSlots?.length} Selected Slots' : 'Days You Need',
                 ),
                 if (searchTab == SearchWhereWhenMarker.when) const SizedBox(height: 15),
                 AnimatedContainer(
@@ -218,7 +237,7 @@ class _SearchWhereWhenPopOverState extends State<SearchWhereWhenPopOver> with Ti
                       ),
                       Expanded(
                         child: SizedBox(
-                          height: (searchTab == SearchWhereWhenMarker.when) ? 500 : 0,
+                          height: (searchTab == SearchWhereWhenMarker.when) ? 530 : 0,
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: TabBarView(
@@ -228,26 +247,173 @@ class _SearchWhereWhenPopOverState extends State<SearchWhereWhenPopOver> with Ti
                                     shrinkWrap: true,
                                     physics: const NeverScrollableScrollPhysics(),
                                     children: [
-                                      /// search button
-                                      sfCalendarDateRangePickerView(
-                                          widget.model,
-                                          dController,
-                                          context.read<ListingsSearchRequirementsBloc>().state.dateRange,
-                                          onSelectionChanged: (date) {
-                                            setState(() {
-                                              context.read<ListingsSearchRequirementsBloc>().add(ListingsSearchRequirementsEvent.datesRequiredChanged(date));
-                                            });
-                                          }
+                                      const SizedBox(height: 15),
+                                      if (context.read<ListingsSearchRequirementsBloc>().state.durationType == null || context.read<ListingsSearchRequirementsBloc>().state.durationType == 30) Hero(
+                                        tag: '30_slot',
+                                        child: searchSettingsButton(
+                                            widget.model,
+                                            didSelectButton: () {
+                                              setState(() {
+                                            Navigator.push(context, HeroDialogRoute(
+                                              barrierLabelString: '',
+                                              builder: (context) {
+                                                return SearchByTimeSlots(
+                                                    model: widget.model,
+                                                    heroTag: '30_slot',
+                                                    durationType: 30,
+                                                    buttonTitle: '30 Min Time Slots'
+                                                    );
+                                                  })
+                                                );
+                                              });
+                                            },
+                                          iconItem: Icons.navigate_next,
+                                          buttonTitle: '30 Min Time Slots',
+                                          isSelected: false
                                         ),
+                                      ),
+                                      const SizedBox(height: 15),
+                                      if (context.read<ListingsSearchRequirementsBloc>().state.durationType == 30 && (context.read<ListingsSearchRequirementsBloc>().state.selectedReservationsSlots?.isNotEmpty ?? false))
+                                      Container(
+                                        height: 270,
+                                        child: SingleChildScrollView(
+                                            child: viewListOfSelectedSlots(
+                                              context,
+                                              widget.model,
+                                              [],
+                                              getReservationSlotItemForSearch(
+                                                context,
+                                                context.read<ListingsSearchRequirementsBloc>().state.selectedReservationsSlots?.toList() ?? [],
+                                                  null,
+                                                  null,
+                                                  null,
+                                                  null
+                                              ),
+                                              [],
+                                              false,
+                                              AppLocalizations.of(context)!.profileFacilitySlotTime,
+                                              AppLocalizations.of(context)!.profileFacilitySlotBookingLocation,
+                                              AppLocalizations.of(context)!.profileFacilitySlotBookingDate,
+                                              null,
+                                              didSelectReservation: (e) {
+                                              },
+                                              didSelectCancelResSlot: (e, f) {
+                                                setState(() {});
+                                              },
+                                              didSelectRemoveResSlot: (e, f) {
+
+                                              },
+                                            )
+                                        ),
+                                      ),
+                                      if (context.read<ListingsSearchRequirementsBloc>().state.durationType == null || context.read<ListingsSearchRequirementsBloc>().state.durationType == 60) Hero(
+                                        tag: '60_slot',
+                                        child: searchSettingsButton(
+                                            widget.model,
+                                            didSelectButton: () {
+                                              setState(() {
+                                                Navigator.push(context, HeroDialogRoute(
+                                                barrierLabelString: '',
+                                                  builder: (context) {
+                                                    return SearchByTimeSlots(
+                                                        model: widget.model,
+                                                        heroTag: '60_slot',
+                                                        durationType: 60,
+                                                        buttonTitle: '60 Min Time Slots'
+                                                        );
+                                                      })
+                                                );
+                                              });
+                                            },
+                                            iconItem: Icons.navigate_next,
+                                            buttonTitle: '60 Min Time Slots',
+                                            isSelected: false
+                                        ),
+                                      ),
+                                      const SizedBox(height: 15),
+                                      if (context.read<ListingsSearchRequirementsBloc>().state.durationType == 60 && (context.read<ListingsSearchRequirementsBloc>().state.selectedReservationsSlots?.isNotEmpty ?? false))
+                                        Container(
+                                          height: 270,
+                                          child: SingleChildScrollView(
+                                            child: viewListOfSelectedSlots(
+                                              context,
+                                              widget.model,
+                                              [],
+                                              getReservationSlotItemForSearch(
+                                                context,
+                                                context.read<ListingsSearchRequirementsBloc>().state.selectedReservationsSlots?.toList() ?? [],
+                                                null,
+                                                null,
+                                                null,
+                                                null
+                                              ),
+                                              [],
+                                              false,
+                                              AppLocalizations.of(context)!.profileFacilitySlotTime,
+                                              AppLocalizations.of(context)!.profileFacilitySlotBookingLocation,
+                                              AppLocalizations.of(context)!.profileFacilitySlotBookingDate,
+                                              null,
+                                              didSelectReservation: (e) {
+                                              },
+                                              didSelectCancelResSlot: (e, f) {
+                                              setState(() {});
+                                              },
+                                              didSelectRemoveResSlot: (e, f) {
+
+                                              },
+                                            )
+                                          ),
+                                        ),
+                                      if (context.read<ListingsSearchRequirementsBloc>().state.durationType == null || context.read<ListingsSearchRequirementsBloc>().state.durationType == 1440) Hero(
+                                        tag: 'day_slot',
+                                        child: searchSettingsButton(
+                                            widget.model,
+                                            didSelectButton: () {
+                                              setState(() {
+                                                searchTab = SearchWhereWhenMarker.who;
+                                              });
+                                            },
+                                            iconItem: Icons.navigate_next,
+                                            buttonTitle: 'Search Day Slots',
+                                            isSelected: false
+                                        ),
+                                      ),
+
+
+                                      // SizedBox(
+                                      //   height: 360,
+                                      //   width: MediaQuery.of(context).size.width,
+                                      //   child: TabBarView(
+                                      //       controller: _tabControllerWhenTime,
+                                      //       children: [
+                                      //         /// day slot duration.
+                                      //         sfCalendarDateRangePickerView(
+                                      //             widget.model,
+                                      //             dController,
+                                      //             context.read<ListingsSearchRequirementsBloc>().state.dateRange,
+                                      //             onSelectionChanged: (date) {
+                                      //               setState(() {
+                                      //                 context.read<ListingsSearchRequirementsBloc>().add(ListingsSearchRequirementsEvent.datesRequiredChanged(date));
+                                      //               });
+                                      //             }
+                                      //         ),
+
+                                        //  ]
+                                        // ),
+                                      // ),
+
+                                        if (context.read<ListingsSearchRequirementsBloc>().state.selectedReservationsSlots?.isEmpty ?? false) const SizedBox(height: 145),
                                         Row(
                                           children: [
                                             Expanded(
-                                              child: useCurrentLocationButton(
+                                              child: searchSettingsButton(
                                                 widget.model,
                                                 didSelectButton: () {
                                                   setState(() {
                                                     dController.selectedRange = null;
-                                                    context.read<ListingsSearchRequirementsBloc>().add(ListingsSearchRequirementsEvent.datesRequiredChanged(null));
+                                                    context.read<ListingsSearchRequirementsBloc>().add(const ListingsSearchRequirementsEvent.datesRequiredChanged(null));
+                                                    context.read<ListingsSearchRequirementsBloc>().add(const ListingsSearchRequirementsEvent.selectedTimeSlotChanged([]));
+                                                    context.read<ListingsSearchRequirementsBloc>().add(const ListingsSearchRequirementsEvent.searchDurationTypeChanged(null));
                                                   });
                                                 },
                                                 iconItem: Icons.clear,
@@ -257,7 +423,7 @@ class _SearchWhereWhenPopOverState extends State<SearchWhereWhenPopOver> with Ti
                                             ),
                                             const SizedBox(width: 10),
                                             Expanded(
-                                              child: useCurrentLocationButton(
+                                              child: searchSettingsButton(
                                                   widget.model,
                                                   didSelectButton: () {
                                                     setState(() {
@@ -274,6 +440,7 @@ class _SearchWhereWhenPopOverState extends State<SearchWhereWhenPopOver> with Ti
                                         )
                                     ],
                                   ),
+
                                 Column(
                                   children: [
                                     getFlexibleDatesView(
@@ -294,6 +461,8 @@ class _SearchWhereWhenPopOverState extends State<SearchWhereWhenPopOver> with Ti
                                               context.read<ListingsSearchRequirementsBloc>().add(ListingsSearchRequirementsEvent.datesRequiredChanged(getListOfFlexibleDates().firstWhere((element) => element.dateTypeId == typeId).dateRange));
                                             }
 
+                                            context.read<ListingsSearchRequirementsBloc>().add(ListingsSearchRequirementsEvent.searchDurationTypeChanged(null));
+                                            context.read<ListingsSearchRequirementsBloc>().add(ListingsSearchRequirementsEvent.selectedTimeSlotChanged([]));
                                           });
                                         },
                                         didSelectByMonth: (monthId) {
@@ -307,14 +476,14 @@ class _SearchWhereWhenPopOverState extends State<SearchWhereWhenPopOver> with Ti
                                               context.read<ListingsSearchRequirementsBloc>().add(const ListingsSearchRequirementsEvent.flexibleTimeRangeIdChanged(null));
                                               context.read<ListingsSearchRequirementsBloc>().add(ListingsSearchRequirementsEvent.flexibleMonthIdChanged(monthId));
                                               context.read<ListingsSearchRequirementsBloc>().add(ListingsSearchRequirementsEvent.datesRequiredChanged(getListOfMonthDates(context).firstWhere((element) => element.dateTypeId == monthId).dateRange));
-
                                             }
-
+                                            context.read<ListingsSearchRequirementsBloc>().add(ListingsSearchRequirementsEvent.searchDurationTypeChanged(null));
+                                            context.read<ListingsSearchRequirementsBloc>().add(ListingsSearchRequirementsEvent.selectedTimeSlotChanged([]));
                                           });
                                         }
                                       ),
                                     const SizedBox(height: 15),
-                                    useCurrentLocationButton(
+                                    searchSettingsButton(
                                         widget.model,
                                         didSelectButton: () {
                                           setState(() {
@@ -436,6 +605,31 @@ class _SearchWhereWhenPopOverState extends State<SearchWhereWhenPopOver> with Ti
   }
 }
 
+List<ReservationSlotItem> getReservationSlotItemForSearch(
+    BuildContext context,
+    List<ReservationTimeFeeSlotItem> slots,
+    UniqueId? activityId,
+    UniqueId? spaceId,
+    UniqueId? sportSpaceId,
+    String? spaceTitle,
+    ) {
+
+  List<ReservationSlotItem> newItems = [];
+
+  newItems.addAll(slots.map(
+          (e) => DateTime(e.slotRange.start.year, e.slotRange.start.month, e.slotRange.start.day))
+      .toSet()
+      .toList().map(
+          (e) => ReservationSlotItem(
+              selectedActivityType: activityId ?? getActivityOptions(context)[0].activityId,
+              selectedSportSpaceId: sportSpaceId,
+              selectedSpaceId: spaceId ?? UniqueId(),
+              selectedDate: e,
+              selectedSideOption: spaceTitle,
+              selectedSlots: slots.where((element) => element.slotRange.start.year == e.year && element.slotRange.start.month == e.month && element.slotRange.start.day == e.day).toList())).toList());
+
+  return newItems;
+}
 
 Widget searchListItem(BuildContext context, DashboardModel model, {required bool isSelected, required bool isFinishedSelection, required String tagTitle, required Function() didSelectItem, required IconData iconItem, required String selectedTitle, required String defaultTitle, required String subTitle}) {
   return  Hero(
@@ -580,59 +774,11 @@ Widget listOfDefaultLocations(DashboardModel model, UniqueId? selectedItem, {req
   );
 }
 
-/// CURRENT LOCATION
-Widget useCurrentLocationButton(DashboardModel model, {required Function() didSelectButton, required IconData iconItem, required String buttonTitle, required bool isSelected}) {
-  return Container(
-    decoration: BoxDecoration(
-        color: (isSelected) ? model.paletteColor : model.accentColor,
-        borderRadius: BorderRadius.circular(30),
-        border: Border.all(color: model.disabledTextColor)
-    ),
-    child: InkWell(
-      onTap: () {
-        didSelectButton();
-      },
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const SizedBox(width: 1),
-            Container(
-                decoration: BoxDecoration(
-                  color: model.disabledTextColor.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(25),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Icon(iconItem, color: model.disabledTextColor),
-              )
-            ),
-            const SizedBox(width: 15),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(buttonTitle, style: TextStyle(color: (isSelected) ? model.accentColor : model.paletteColor, decoration: TextDecoration.none, fontSize: model.secondaryQuestionTitleFontSize), maxLines: 1,),
-                  ],
-                ),
-              ),
-            )
-          ],
-        ),
-      ),
-    ),
-  );
-}
 
 /// WHEN WIDGETS
 Widget sfCalendarDateRangePickerView(DashboardModel model, DateRangePickerController dController, DateTimeRange? initialDates, {required Function(DateTimeRange) onSelectionChanged}) {
   return SizedBox(
-    height: 360,
+    height: 320,
     child: SfDateRangePicker(
       initialSelectedRange: (initialDates != null) ? PickerDateRange(initialDates.start, initialDates.end) : null,
       navigationMode: DateRangePickerNavigationMode.snap,
@@ -675,7 +821,6 @@ Widget sfCalendarDateRangePickerView(DashboardModel model, DateRangePickerContro
       onSelectionChanged: (DateRangePickerSelectionChangedArgs args) {
           if (args.value is PickerDateRange) {
 
-
             final DateTime? rangeStartDate = args.value.startDate;
             final DateTime? rangeEndDate = args.value.endDate;
 
@@ -688,6 +833,7 @@ Widget sfCalendarDateRangePickerView(DashboardModel model, DateRangePickerContro
     ),
   );
 }
+
 
 Widget getFlexibleDatesView(
     BuildContext context,
@@ -979,7 +1125,7 @@ Widget getParticipantsBasedOnRange(DashboardModel model, RangeValues range, {req
         ],
       ),
       const SizedBox(height: 10),
-      useCurrentLocationButton(
+      searchSettingsButton(
         model,
         didSelectButton: () {
           clearItems();

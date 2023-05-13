@@ -36,13 +36,18 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   firebase_core: ^2.2.0
   firebase_storage: ^11.0.10
+  firebase_messaging: ^14.3.0
   cupertino_icons: ^1.0.2
   google_maps_flutter: ^2.2.1
   phone_form_field:
     git:
       url: https://github.com/stefanmiller1/phone_form_field.git
-  sliding_up_panel: ^2.0.0+1
+  geoflutterfire:
+    git: https://github.com/stefanmiller1/GeoFlutterFire
+  sliding_up_panel:
+    path: /Users/stefanmiller/AndroidStudioProjects/sliding_up_panel
   flutter_svg: ^1.1.6
+  flutter_local_notifications: ^13.0.0
   flutter_localizations:
     sdk: flutter
   intl: ^0.17.0
@@ -66,6 +71,19 @@ dependencies:
   image_picker: ^0.8.6
   webview_flutter: ^4.0.2
   flutter_switch: ^0.3.2
+  any_link_preview: ^3.0.0
+  avatar_stack: ^1.1.2
+  add_2_calendar: ^2.1.2
+  share_plus: ^6.3.1
+  flutter_contacts: ^1.1.6
+#  alphabet_list_scroll_view: ^2.0.0
+  firebase_dynamic_links: ^5.0.17
+  collection: ^1.16.0
+  badges: ^3.0.3
+  draggable_home: ^1.0.4
+  custom_marker: ^1.0.0
+  implicitly_animated_reorderable_list: ^0.4.0
+  material_floating_search_bar: ^0.3.4
   check_in_domain:
     path: /Users/stefanmiller/AndroidStudioProjects/check_in_domain
   check_in_presentation:
@@ -74,6 +92,8 @@ dependencies:
     path: /Users/stefanmiller/AndroidStudioProjects/check_in_application
   check_in_credentials:
     path: /Users/stefanmiller/AndroidStudioProjects/check_in_credentials
+  reservation_post:
+    path: /Users/stefanmiller/AndroidStudioProjects/reservation_post
 
 dev_dependencies:
 
@@ -140,6 +160,16 @@ flutter:
     - assets/payment_icons/unionpay.svg
     - assets/payment_icons/verve.svg
     - assets/payment_icons/visa.svg
+    - assets/profile-avatar.png
+
+    - assets/images/activity_creator/provider_options/provided_activity_options_Alcohol.png
+    - assets/images/activity_creator/provider_options/provided_activity_options_Equipment.png
+    - assets/images/activity_creator/provider_options/provided_activity_options_Food_Drinks.png
+    - assets/images/activity_creator/provider_options/provided_activity_options_Jersey_Gear.png
+    - assets/images/activity_creator/provider_options/provided_activity_options_Referee_Officiator.png
+    - assets/images/activity_creator/provider_options/provided_activity_options_Security.png
+    - assets/images/activity_creator/provider_options/provided_activity_options_Statistics.png
+
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

@@ -44,7 +44,8 @@ Widget getPaymentHistoryItemWidget(BuildContext context, DashboardModel model, P
                             ),
                           ),
                           if (listing.listingProfileService.spaceSetting.spaceTypes.getOrCrash().where((element) => element.quantity.where((element) => element.photoUri != null).isEmpty).isNotEmpty) getActivityTypeTabOption(
-                              context, model,
+                              context,
+                              model,
                               100,
                               false,
                               getActivityOptions(context).firstWhere((element) => element.activityId == reservationItem.reservationSlotItem.first.selectedActivityType)

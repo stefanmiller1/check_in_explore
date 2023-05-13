@@ -1,0 +1,217 @@
+import 'package:check_in_application/check_in_application.dart';
+import 'package:check_in_domain/check_in_domain.dart';
+import 'package:check_in_presentation/check_in_presentation.dart';
+import 'package:check_in_web_mobile_explore/presentation/core/account/login_signup_core.dart';
+import 'package:check_in_web_mobile_explore/presentation/core/components/reservation_card.dart';
+import 'package:check_in_web_mobile_explore/presentation/core/responsive/responsive.dart';
+import 'package:check_in_web_mobile_explore/presentation/screens/facility_preview/facility_preview_screen_helper.dart';
+import 'package:check_in_web_mobile_explore/presentation/screens/reservations/components/reservation_results_main.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:jumping_dot/jumping_dot.dart';
+
+class ReservationScreen extends StatelessWidget {
+
+  final DashboardModel model;
+
+  const ReservationScreen({
+    super.key,
+    required this.model,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Responsive(
+        mobile: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 18.0),
+          child: retrieveAuthenticationState(context),
+        ),
+        tablet: Container(),
+        desktop: Container()
+    );
+  }
+
+
+  Widget retrieveAuthenticationState(BuildContext context) {
+    return BlocProvider(create: (_) => getIt<UserProfileWatcherBloc>()..add(const UserProfileWatcherEvent.watchUserProfileStarted()),
+      child: BlocBuilder<UserProfileWatcherBloc, UserProfileWatcherState>(
+        builder: (context, authState) {
+          return authState.maybeMap(
+              loadInProgress: (_) => progressOverlay(model),
+              loadProfileFailure: (_) => GetLoginSignUpWidget(model: model),
+              loadUserProfileSuccess: (item) => SingleChildScrollView(child: Column(
+                children: [
+                  getInvitedToReservations(context, item.profile),
+                  getAllReservations(context, item.profile),
+                ],
+              )),
+              orElse: () {
+                return progressOverlay(model);
+            }
+          );
+        },
+      ),
+    );
+  }
+
+  Widget getInvitedToReservations(BuildContext context, UserProfileModel currentUser) {
+    return BlocProvider(create: (_) => getIt<ReservationManagerWatcherBloc>()..add(ReservationManagerWatcherEvent.watchCurrentUsersReservations(currentUser, true)),
+      child: BlocBuilder<ReservationManagerWatcherBloc, ReservationManagerWatcherState>(
+        builder: (context, state) {
+          return state.maybeMap(
+              loadCurrentUserReservationsSuccess: (e) {
+
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Invites', style: TextStyle(color: model.paletteColor, fontWeight: FontWeight.bold, fontSize: model.questionTitleFontSize)),
+                    ...e.item.map((e) => getReservationCard(
+                      context,
+                      false,
+                      e,
+                      currentUser,
+                      model,
+                      e.reservationState == ReservationSlotState.completed,
+                      didSelectReservation: (ListingManagerForm listing, ReservationItem reservation) {
+                        Navigator.push(context, MaterialPageRoute(
+                            builder: (_) {
+                              return ReservationResultMain(
+                                model: model,
+                                isReply: false,
+                                listing: listing,
+                                currentUser: currentUser,
+                                currentUserId: currentUser.userId.getOrCrash(),
+                                reservationId: reservation.reservationId.getOrCrash(),
+                              );
+                            }
+                          )
+                        );
+                      },
+                    )
+                    ).toList(),
+                  ],
+                );
+              },
+            orElse: () => Container()
+          );
+        })
+      );
+  }
+
+  Widget getAllReservations(BuildContext context, UserProfileModel currentUser) {
+      return BlocProvider(create: (_) => getIt<ReservationManagerWatcherBloc>()..add(ReservationManagerWatcherEvent.watchCurrentUsersReservations(currentUser, false)),
+        child: BlocBuilder<ReservationManagerWatcherBloc, ReservationManagerWatcherState>(
+          builder: (context, state) {
+            return state.maybeMap(
+              resLoadInProgress: (_) => JumpingDots(color: model.paletteColor, numberOfDots: 3),
+              loadCurrentUserReservationsSuccess: (e) {
+                return Column(
+                  children: [
+
+                  if (e.item.where((element) => getNumberOfSlotsToGo(element) != 0).isEmpty) noReservationsFound(
+                      model,
+                      Icons.calendar_today_outlined,
+                      'No Reservations Yet!',
+                      'Start a Pop-Up Shop in your backyard or Rent out a basement for your next underground Rave.',
+                      'Start Booking',
+                      didTapStartButton: () {
+                  }),
+
+                  if (e.item.where((element) => getNumberOfSlotsToGo(element) != 0).isNotEmpty) Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Coming-Up', style: TextStyle(color: model.paletteColor, fontWeight: FontWeight.bold, fontSize: model.questionTitleFontSize)),
+                      const SizedBox(height: 6),
+                      ...e.item.where((element) => getNumberOfSlotsToGo(element) != 0).map((e) => getReservationCard(
+                        context,
+                        false,
+                        e,
+                        currentUser,
+                        model,
+                        false,
+                        didSelectReservation: (ListingManagerForm listing, ReservationItem reservation) {
+                          Navigator.push(context, MaterialPageRoute(
+                              builder: (_) {
+                                return ReservationResultMain(
+                                  model: model,
+                                  isReply: false,
+                                  listing: listing,
+                                  currentUser: currentUser,
+                                  currentUserId: currentUser.userId.getOrCrash(),
+                                  reservationId: reservation.reservationId.getOrCrash(),
+
+                                  );
+                                }
+                              )
+                            );
+                          },
+                        )
+                      ).toList(),
+                    ],
+                  ),
+
+                  if (e.item.where((element) => getNumberOfSlotsToGo(element) == 0).isNotEmpty) Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                        Divider(color: model.disabledTextColor),
+                        const SizedBox(height: 8),
+                        Text('Where You Went', style: TextStyle(color: model.paletteColor, fontWeight: FontWeight.bold, fontSize: model.questionTitleFontSize)),
+                        const SizedBox(height: 6),
+                        ...e.item.where((element) => getNumberOfSlotsToGo(element) == 0).map((e) => getReservationCard(
+                          context,
+                          false,
+                          e,
+                          currentUser,
+                          model,
+                          true,
+                          didSelectReservation: (ListingManagerForm listing, ReservationItem reservation) {
+                            Navigator.push(context, MaterialPageRoute(
+                                builder: (_) {
+                                  return ReservationResultMain(
+                                    model: model,
+                                    isReply: false,
+                                    listing: listing,
+                                    currentUser: currentUser,
+                                    currentUserId: currentUser.userId.getOrCrash(),
+                                    reservationId: reservation.reservationId.getOrCrash(),
+                                    );
+                                  }
+                                )
+                              );
+                            },
+                          )
+                        ).toList(),
+                      ],
+                    )
+                  ]
+                );
+              },
+              loadCurrentUserReservationsFailure: (_) => noReservationsFound(
+                  model,
+                  Icons.calendar_today_outlined,
+                  'No Reservations Yet!',
+                  'Start a Pop-Up Shop in your backyard or Rent out a basement for your next underground Rave.',
+                  'Start Booking',
+                  didTapStartButton: () {
+                  }
+                ),
+              ///TODO: add failure of type empty
+              /// if network call cant be made you should not be allowed to make any new reservation
+              orElse: () => noReservationsFound(
+                  model,
+                  Icons.calendar_today_outlined,
+                  'No Reservations Yet!',
+                  'Start a Pop-Up Shop in your backyard or Rent out a basement for your next underground Rave.',
+                  'Start Booking',
+                  didTapStartButton: () {
+                  }
+                ),
+          );
+        },
+      )
+    );
+  }
+}

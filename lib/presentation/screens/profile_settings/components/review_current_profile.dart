@@ -43,7 +43,8 @@ class _ReviewCurrentProfileState extends State<ReviewCurrentProfile> {
             ),
             child: MultiBlocProvider(
               providers: [
-                BlocProvider(create: (_) => getIt<PublicListingWatcherBloc>()..add(PublicListingWatcherEvent.watchAllPublicListingsStarted('')))
+                BlocProvider(create: (_) => getIt<PublicListingWatcherBloc>()..add(const PublicListingWatcherEvent.watchAllPublicListingsStarted(['']))),
+                BlocProvider(create: (_) => getIt<ReservationManagerWatcherBloc>()..add(ReservationManagerWatcherEvent.watchCurrentUsersReservations(widget.currentUser, false)))
               ],
               child: BlocBuilder<PublicListingWatcherBloc, PublicListingWatcherState>(
                   builder: (context, state) {
@@ -66,7 +67,7 @@ class _ReviewCurrentProfileState extends State<ReviewCurrentProfile> {
           centerTitle: true,
           leading: IconButton(icon: Icon(Icons.arrow_back_ios, color: widget.model.paletteColor), onPressed: () => Navigator.of(context).pop(),),
         ),
-        body: BlocProvider(create: (_) => getIt<PublicListingWatcherBloc>()..add(PublicListingWatcherEvent.watchAllPublicListingsStarted('')),
+        body: BlocProvider(create: (_) => getIt<PublicListingWatcherBloc>()..add(PublicListingWatcherEvent.watchAllPublicListingsStarted([''])),
           child: BlocBuilder<PublicListingWatcherBloc, PublicListingWatcherState>(
               builder: (context, state) {
                 return state.maybeMap(
@@ -80,8 +81,7 @@ class _ReviewCurrentProfileState extends State<ReviewCurrentProfile> {
   }
 
   Widget getAllReservation(BuildContext context, List<ListingManagerForm> listings) {
-    return BlocProvider(create: (_) => getIt<ReservationManagerWatcherBloc>()..add(ReservationManagerWatcherEvent.watchCurrentUsersReservations(widget.currentUser.userId.getOrCrash())),
-      child: BlocBuilder<ReservationManagerWatcherBloc, ReservationManagerWatcherState>(
+    return BlocBuilder<ReservationManagerWatcherBloc, ReservationManagerWatcherState>(
       builder: (context, state) {
         return state.maybeMap(
             resLoadInProgress: (_) => progressOverlay(widget.model),
@@ -89,8 +89,7 @@ class _ReviewCurrentProfileState extends State<ReviewCurrentProfile> {
             orElse: () => getMainReviewProfile(context, widget.model, listings, [])
           );
         }
-      )
-    );
+      );
   }
 
   Widget getMainReviewProfile(BuildContext context, DashboardModel model, List<ListingManagerForm> listings, List<ReservationItem> reservations) {

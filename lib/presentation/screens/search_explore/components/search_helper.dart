@@ -12,7 +12,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class SearchHelper {
 
-  static late PageController? controller = null;
+  // static late PageController? controller = null;
   static late bool isPanelDraggable = true;
 
 }
@@ -40,52 +40,78 @@ Widget closedState(BuildContext context, DashboardModel model, bool isLoading, S
   );
 }
 
-Widget getActivityTypeTabOption(BuildContext context, DashboardModel model, double height, bool isSelected, ActivityOption activityOption) {
-  return Tab(
-      height: searchHeaderHeight(context),
-      iconMargin: EdgeInsets.zero,
-      icon: Container(
-          width: 100,
+Widget getActivityTabForReservation(BuildContext context, DashboardModel model, ActivityOption activityOption) {
+  return Container(
+
+    child: Column(
+      children: [
+        Container(
+          height: 120,
+          width: 120,
+          decoration: BoxDecoration(
+            color: model.accentColor,
+            border: Border.all(width: 4, color: model.disabledTextColor),
+            borderRadius: BorderRadius.circular(65)
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ClipRRect(
+                borderRadius: BorderRadius.circular(65),
+                child: Center(child: SvgPicture.asset(getActivityOptions(context).firstWhere((element) => element.activityId == activityOption.activityId).iconPath ?? '', fit: BoxFit.fill, color: model.paletteColor))),
+          )
+        ),
+        const SizedBox(height: 10),
+        Container(
+          decoration: BoxDecoration(
+            color: model.accentColor,
+            borderRadius: BorderRadius.circular(25)
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(getTitleForActivityOption(context, activityOption.activity) ?? 'Activity', style: TextStyle(color: model.paletteColor, fontSize: 14, fontWeight: FontWeight.bold, overflow: TextOverflow.ellipsis), maxLines: 1, softWrap: true),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+Widget getActivityOptionForSearch(BuildContext context, DashboardModel model, double selectedWidth, double unselectedWidth, double height, bool isSelected, ActivityOption activityOption) {
+  return AnimatedContainer(
+          duration: Duration(milliseconds: 300),
+          width: (isSelected) ? selectedWidth : unselectedWidth,
+          height: height,
           decoration: BoxDecoration(
             color: (isSelected) ? model.paletteColor : model.disabledTextColor.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(15),
+            borderRadius: BorderRadius.circular(50),
           ),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12.0),
             child: Padding(
               padding: const EdgeInsets.only(top: 8.0),
-              child: SvgPicture.asset(getActivityOptions(context).firstWhere((element) => element.activityId == activityOption.activityId).iconPath ?? '', fit: BoxFit.fitHeight, color: (isSelected) ? model.accentColor : model.paletteColor, height: MediaQuery.of(context).size.height * .08),
+              child: Row(
+                children: [
+                  Expanded(child: SvgPicture.asset(getActivityOptions(context).firstWhere((element) => element.activityId == activityOption.activityId).iconPath ?? '', fit: BoxFit.cover, color: (isSelected) ? model.accentColor : model.paletteColor, height: height)),
+                  if (isSelected) Expanded(child: Text(getTitleForActivityOption(context, activityOption.activity) ?? 'Activity', style: TextStyle(color: (isSelected) ? model.accentColor : model.paletteColor), overflow: TextOverflow.ellipsis, maxLines: 1, softWrap: true,)),
+              ],
             ),
-          )),
-    child: Padding(
-      padding: const EdgeInsets.only(top: 6.0),
-      child: Container(
-        width: 100,
-        decoration: BoxDecoration(
-          color: (isSelected) ? model.paletteColor : model.disabledTextColor.withOpacity(0.2),
-          borderRadius: BorderRadius.circular(15),
-        ),
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(4.0),
-            child: Text(getTitleForActivityOption(
-              activityOption.activity,
-              toRent: AppLocalizations.of(context)?.activityTypeRent,
-              camp: AppLocalizations.of(context)?.activityTypeCamp,
-              events: AppLocalizations.of(context)?.activityTypeEvent,
-              league: AppLocalizations.of(context)?.activityTypeLeagues ?? 'league',
-              teaching: AppLocalizations.of(context)?.activityTypeTeaching ?? 'teaching',
-              training: AppLocalizations.of(context)?.activityTypeTrainingState ?? 'training',
-              teamsRun: AppLocalizations.of(context)?.activityTypeRuns ?? 'teamsRun',
-              equipment: AppLocalizations.of(context)?.activityTypeEquipment ?? 'equipment',
-              tournament: AppLocalizations.of(context)?.activityTypeTournament ?? 'tournament',
-              coaching: AppLocalizations.of(context)?.activityTypeCoachingState ?? 'coaching',
-              informalGame: AppLocalizations.of(context)?.activityTypeInformalGame ?? 'informalGame',
-              oneOnOne: AppLocalizations.of(context)?.activityTypeOneOnOne ?? 'oneOnOne',
-            ) ?? 'Activity', style: TextStyle(color: (isSelected) ? model.accentColor : model.paletteColor), overflow: TextOverflow.ellipsis, maxLines: 1, softWrap: true,),
           ),
         ),
-      ),
-    )
+    // child: Padding(
+    //   padding: const EdgeInsets.only(top: 6.0),
+    //   child: Container(
+    //     width: 100,
+    //     decoration: BoxDecoration(
+    //       color: (isSelected) ? model.paletteColor : model.disabledTextColor.withOpacity(0.2),
+    //       borderRadius: BorderRadius.circular(15),
+    //     ),
+    //     child: Center(
+    //       child: Padding(
+    //         padding: const EdgeInsets.all(4.0),
+    //         child: Text(getTitleForActivityOption(context, activityOption.activity) ?? 'Activity', style: TextStyle(color: (isSelected) ? model.accentColor : model.paletteColor), overflow: TextOverflow.ellipsis, maxLines: 1, softWrap: true,),
+    //       ),
+    //     ),
+    //   ),
+    // )
   );
 }

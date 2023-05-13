@@ -1,18 +1,27 @@
+import 'package:badges/badges.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
+import 'package:check_in_web_mobile_explore/presentation/core/notifications/notification_core.dart';
 import 'package:check_in_web_mobile_explore/presentation/mobile_screens/main_mobile_helper.dart';
+import 'package:check_in_web_mobile_explore/presentation/screens/chat_inbox/components/direct_chat_archive_rooms_screen.dart';
+import 'package:check_in_web_mobile_explore/presentation/screens/chat_inbox/direct_chat_rooms_screen.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/profile_settings/profile_settings_screen.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/reservations_history/reservations_screen.dart';
+import 'package:check_in_web_mobile_explore/presentation/screens/reservations/reservations_screen.dart';
+import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/map_helper.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/search_explore_header.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/search_explore_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:check_in_facade/check_in_facade.dart';
+import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
+import 'package:check_in_facade/check_in_facade.dart' as facade;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 
 class MainMobileScreen extends StatefulWidget {
 
+  final DashboardModel model;
 
-  const MainMobileScreen({super.key});
+  const MainMobileScreen({super.key, required this.model});
 
   @override
   State<MainMobileScreen> createState() => _MainMobileScreenState();
@@ -27,25 +36,20 @@ class _MainMobileScreenState extends State<MainMobileScreen> {
   @override
   void initState() {
     dashboardModel = DashboardModel.instance;
+
     super.initState();
   }
 
+
   @override
   Widget build(BuildContext context) {
-
-    dashboardModel.systemTheme = Theme.of(context);
-    dashboardModel.currentThemeData = dashboardModel.systemTheme.brightness != Brightness.dark
-        ? ThemeData.light() : ThemeData.dark();
-    dashboardModel.changeTheme(dashboardModel.currentThemeData!);
-
-    final DashboardModel model = dashboardModel;
 
     final List<MainMobileScreenModel> mainMobileScreen = [
       MainMobileScreenModel(
           iconItem: Icons.public_rounded,
           mainTitle: 'discovery',
           mainWidgetItem: SearchExploreScreen(
-            model: model,
+            model: widget.model,
             slidePosition: (double pos) {
               setState(() {
                 isBottomNavVisible = pos;
@@ -53,11 +57,11 @@ class _MainMobileScreenState extends State<MainMobileScreen> {
             },
           ),
           appBarWidgetItem: AppBar(
-              backgroundColor: model.mobileBackgroundColor,
+              backgroundColor: widget.model.mobileBackgroundColor,
               elevation: 0,
                 bottom: PreferredSize(
                   preferredSize: const Size.fromHeight(64),
-                    child: SearchExploreHeader(model: model)
+                    child: SearchExploreHeader(model: widget.model)
             ),
           ),
         isSelected: false
@@ -66,35 +70,70 @@ class _MainMobileScreenState extends State<MainMobileScreen> {
           iconItem: Icons.calendar_today_outlined,
           mainTitle: 'reservations',
           mainWidgetItem: ReservationScreen(
-            model: model,
+            model: widget.model,
           ),
           appBarWidgetItem: AppBar(
-            backgroundColor: model.mobileBackgroundColor,
+            backgroundColor: widget.model.mobileBackgroundColor,
             elevation: 0,
             title: const Text('Reservations'),
-            titleTextStyle: TextStyle(color: model.paletteColor, fontWeight: FontWeight.bold),
+            titleTextStyle: TextStyle(color: widget.model.paletteColor, fontWeight: FontWeight.bold),
             centerTitle: true,
+            actions: [
+              IconButton(
+                onPressed: () {
+
+                },
+                icon: Icon(Icons.favorite_border, color: widget.model.paletteColor)
+              ),
+
+            ],
           ),
         isSelected: false
       ),
       MainMobileScreenModel(
           iconItem: Icons.messenger_outline,
           mainTitle: 'chat',
-          appBarWidgetItem: null,
-          mainWidgetItem: Container(),
+          mainWidgetItem: DirectChatRoomsScreen(model: widget.model),
+          appBarWidgetItem: AppBar(
+            backgroundColor: widget.model.mobileBackgroundColor,
+            elevation: 0,
+            title: const Text('Chat'),
+            titleTextStyle: TextStyle(color: widget.model.paletteColor, fontWeight: FontWeight.bold),
+            actions: [
+
+
+
+              //      Badge(
+              //       badgeContent: Text(NotificationCore.chatReceivedNotification.length.toString() ?? '', style: TextStyle(color: model.accentColor),),
+              //       position: BadgePosition.topEnd(end: 4, top: 2),
+              //       showBadge: (NotificationCore.chatReceivedNotification.isNotEmpty) ? true : false,
+                      IconButton(
+                        onPressed: () {
+                          Navigator.push(context, MaterialPageRoute(
+                              builder: (_) {
+                                return DirectChatArchiveRoomsScreen(
+                                  model: widget.model,
+                                );
+                              }));
+                        },
+                  icon: Icon(Icons.archive_outlined, color: widget.model.paletteColor)
+                ),
+              // ),
+            ],
+          ),
           isSelected: false
       ),
       MainMobileScreenModel(
           iconItem: Icons.perm_identity_rounded,
           mainTitle: 'profile',
           appBarWidgetItem:  AppBar(
-            backgroundColor: model.mobileBackgroundColor,
+            backgroundColor: widget.model.mobileBackgroundColor,
             toolbarHeight: 0,
             elevation: 0,
             centerTitle: true,
           ),
           mainWidgetItem: ProfileSettingsScreen(
-            model: model,
+            model: widget.model,
           ),
           isSelected: false
       ),
@@ -110,17 +149,20 @@ class _MainMobileScreenState extends State<MainMobileScreen> {
       debugShowCheckedModeBanner: false,
       home: Theme(
           data: ThemeData(
-            focusColor: model.accentColor,
-            backgroundColor: model.webBackgroundColor,
-            primaryColor: model.currentPrimaryColor,
+            focusColor: widget.model.accentColor,
+            backgroundColor: widget.model.webBackgroundColor,
+            primaryColor: widget.model.currentPrimaryColor,
             appBarTheme: AppBarTheme(
               iconTheme: IconThemeData(
-                color: model.paletteColor
+                color: widget.model.paletteColor
               )
             )
           ),
         child: Scaffold(
-              appBar: mainMobileScreen[_selectedIndex].appBarWidgetItem,
+              appBar: (FirebaseChatCore.instance.firebaseUser != null) ? mainMobileScreen[_selectedIndex].appBarWidgetItem : AppBar(
+                  backgroundColor: widget.model.webBackgroundColor,
+                  elevation: 0,
+              ),
               body: mainMobileScreen[_selectedIndex].mainWidgetItem,
               bottomNavigationBar: AnimatedContainer(
                     duration: const Duration(milliseconds: 350),
@@ -129,18 +171,27 @@ class _MainMobileScreenState extends State<MainMobileScreen> {
                     child: Wrap(
                       children: [
                         BottomNavigationBar(
-                          backgroundColor: model.mobileBackgroundColor,
+                          backgroundColor: widget.model.mobileBackgroundColor,
                           elevation: 0,
-                          onTap: (i) {
+                          onTap: (i) async {
+                            if (i == 0) {
+                              // MapHelper.listingStream = FirebaseMapFacade.instance.mapListings(latitude: MapHelper.lat, longitude: MapHelper.lng, selectedRadius: MapHelper.currentZoom);
+                              // // MapHelper.currentZoom = 12;
+                              //
+                              // final listing = await MapHelper.listingStream.first;
+                              // MapHelper.initMarkers(context, widget.model, listing);
+                            }
+
                             setState(() {
                               _selectedIndex = i;
                             });
+
                           },
                           enableFeedback: true,
                           currentIndex: _selectedIndex,
                           type: BottomNavigationBarType.fixed,
-                          selectedItemColor: model.paletteColor,
-                          unselectedItemColor: model.paletteColor.withOpacity(0.65),
+                          selectedItemColor: widget.model.paletteColor,
+                          unselectedItemColor: widget.model.paletteColor.withOpacity(0.65),
                           items: mainMobileScreen.map(
                             (e) => BottomNavigationBarItem(
                                 label: e.mainTitle,

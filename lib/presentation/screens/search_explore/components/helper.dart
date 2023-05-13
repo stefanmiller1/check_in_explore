@@ -8,13 +8,16 @@ enum SearchWhereWhenMarker {where, when, who}
 
 final double listingHeaderHeight = 15;
 double searchHeaderHeight(BuildContext context) => 120;
-double panelHeight(BuildContext context) => MediaQuery.of(context).size.height - searchHeaderHeight(context) - 65;
+// double panelHeight(BuildContext context) => MediaQuery.of(context).size.height - searchHeaderHeight(context) - 65;
+double panelHeight(BuildContext context) => MediaQuery.of(context).size.height - searchHeaderHeight(context);
+
 
 class MapMarker extends Clusterable {
 
   final String markerId;
   final LatLng position;
   String? markerTitle;
+  String? markerImageUrl;
   BitmapDescriptor? icon;
   Function()? onMarkerTap;
 
@@ -23,6 +26,7 @@ class MapMarker extends Clusterable {
     required this.position,
     this.icon,
     this.markerTitle,
+    this.markerImageUrl,
     this.onMarkerTap,
     isCluster = false,
     clusterId,

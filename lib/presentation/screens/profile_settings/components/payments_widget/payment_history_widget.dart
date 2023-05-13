@@ -17,7 +17,11 @@ class PaymentHistoryWidget extends StatefulWidget {
   final UserProfileModel profile;
   final DashboardModel model;
 
-  const PaymentHistoryWidget({super.key, required this.profile, required this.model});
+  const PaymentHistoryWidget({
+    super.key,
+    required this.profile,
+    required this.model,
+  });
 
   @override
   State<PaymentHistoryWidget> createState() => _PaymentHistoryWidgetState();
@@ -28,7 +32,6 @@ class _PaymentHistoryWidgetState extends State<PaymentHistoryWidget> {
   
   @override
   void initState() {
-
     super.initState();
   }
   
@@ -45,41 +48,57 @@ class _PaymentHistoryWidgetState extends State<PaymentHistoryWidget> {
             color: widget.model.paletteColor
         ),
       ),
-      body: BlocProvider(create: (_) => getIt<StripePaymentWatcherBloc>()..add(StripePaymentWatcherEvent.watchAllPaymentIntentHistory(widget.profile.stripeCustomerId ?? '')),
-        child: BlocBuilder<StripePaymentWatcherBloc, StripePaymentWatcherState>(
-          builder: (context, state) {
-
-            return state.maybeMap(
-                loadInProgress: (_) => JumpingDots(numberOfDots: 3, color: widget.model.paletteColor),
-                loadAllPaymentIntentsFailure: (_) => noReservationsFound(widget.model, didTapStartButton: () {  }),
-                loadAllPaymentIntentsSuccess: (items) => getAllReservations(context, items.paymentIntent),
-                orElse: () => noReservationsFound(widget.model, didTapStartButton: () {  })
-            );
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget getAllReservations(BuildContext context, List<PaymentIntent> paymentIntent) {
-    return BlocProvider(create: (_) => getIt<ReservationManagerWatcherBloc>()..add(const ReservationManagerWatcherEvent.watchCurrentUsersReservations(null)),
-        child: BlocBuilder<ReservationManagerWatcherBloc, ReservationManagerWatcherState>(
-          builder: (context, state) {
-
-            return state.maybeMap(
-                loadCurrentUserReservationsSuccess: (e) => getAllListings(context, e.item, paymentIntent),
-                loadCurrentUserReservationsFailure: (_) => getAllListings(context, [], paymentIntent),
-                ///TODO: add failure of type empty
-                /// if network call cant be made you should not be allowed to make any new reservation
-                orElse: () => getAllListings(context, [], paymentIntent)
-          );
-        },
+      body: BlocProvider(create: (_) => getIt<ReservationManagerWatcherBloc>()..add(ReservationManagerWatcherEvent.watchCurrentUsersReservations(widget.profile, false)),
+          child: BlocBuilder<ReservationManagerWatcherBloc, ReservationManagerWatcherState>(
+            builder: (context, state) {
+              return state.maybeMap(
+                  resLoadInProgress: (_) => JumpingDots(numberOfDots: 3, color: widget.model.paletteColor),
+                  loadCurrentUserReservationsSuccess: (e) => getAllPayments(context, e.item),
+                  loadCurrentUserReservationsFailure: (_) => getAllPayments(context, []),
+                  ///TODO: add failure of type empty
+                  /// if network call cant be made you should not be allowed to make any new reservation
+                  orElse: () => getAllPayments(context, [])
+              );
+            },
+          )
       )
     );
   }
 
+
+  Widget getAllPayments(BuildContext context, List<ReservationItem> reservation) {
+    return BlocProvider(create: (_) => getIt<StripePaymentWatcherBloc>()..add(StripePaymentWatcherEvent.watchAllPaymentIntentHistory(widget.profile.stripeCustomerId ?? '')),
+      child: BlocBuilder<StripePaymentWatcherBloc, StripePaymentWatcherState>(
+        builder: (context, state) {
+          return state.maybeMap(
+              loadInProgress: (_) => JumpingDots(numberOfDots: 3, color: widget.model.paletteColor),
+              loadAllPaymentIntentsFailure: (_) => noReservationsFound(
+                  widget.model,
+                  Icons.calendar_today_outlined,
+                  'No Reservations Yet!',
+                  'Start a Pop-Up Shop in your backyard or Rent out a basement for your next underground Rave.',
+                  'Start Booking',
+                  didTapStartButton: () {
+                  }
+                ),
+              loadAllPaymentIntentsSuccess: (items) => getAllListings(context, reservation, items.paymentIntent),
+              orElse: () => noReservationsFound(
+                  widget.model,
+                  Icons.calendar_today_outlined,
+                  'No Reservations Yet!',
+                  'Start a Pop-Up Shop in your backyard or Rent out a basement for your next underground Rave.',
+                  'Start Booking',
+                  didTapStartButton: () {
+                  }
+                )
+          );
+        },
+      ),
+    );
+  }
+
   Widget getAllListings(BuildContext context, List<ReservationItem> reservation, List<PaymentIntent> paymentIntent) {
-    return BlocProvider(create: (_) => getIt<PublicListingWatcherBloc>()..add(PublicListingWatcherEvent.watchAllPublicListingsStarted('')),
+    return BlocProvider(create: (_) => getIt<PublicListingWatcherBloc>()..add(PublicListingWatcherEvent.watchAllPublicListingsStarted(reservation.map((e) => e.instanceId.getOrCrash()).toSet().toList())),
       child: BlocBuilder<PublicListingWatcherBloc, PublicListingWatcherState>(
         builder: (context, state) {
           return state.maybeMap(

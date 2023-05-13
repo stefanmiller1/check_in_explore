@@ -40,7 +40,6 @@ class _EditCurrentProfileState extends State<EditCurrentProfile> {
    
     if (widget.profile.profileImage != null) {
       _currentNetworkSpaceImage  = Image(image: widget.profile.profileImage!.image, fit: BoxFit.cover, width: 500, height: 500);
-
     }
 
     super.initState();
@@ -358,7 +357,7 @@ class _EditCurrentProfileState extends State<EditCurrentProfile> {
 
 
                                   if (state.profileImagePath != null) {
-                                    context.read<UpdateUserProfileAccountBloc>().add(UpdateUserProfileAccountEvent.didSelectIsSubmitting(true));
+                                      context.read<UpdateUserProfileAccountBloc>().add(UpdateUserProfileAccountEvent.didSelectIsSubmitting(true));
 
                                       final UniqueId urlId = UniqueId();
                                       final File _image = File(state.profileImagePath!);
@@ -400,8 +399,8 @@ class _EditCurrentProfileState extends State<EditCurrentProfile> {
                               ),
                             ),
 
-                            if (state.isSubmitting) JumpingDots(numberOfDots: 3, color: widget.model.paletteColor, radius: 8)
-
+                            if (state.isSubmitting) JumpingDots(numberOfDots: 3, color: widget.model.paletteColor, radius: 8),
+                            const SizedBox(height: 20),
                           ],
                         ),
 

@@ -1,8 +1,11 @@
+import 'package:check_in_application/check_in_application.dart';
+import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/search_type_bar.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/search_where_when_bar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'helper.dart';
 
@@ -21,7 +24,9 @@ class _SearchExploreHeaderState extends State<SearchExploreHeader> with SingleTi
 
   @override
   void initState() {
-    _tabController = TabController(length: 2, vsync: this);
+    final int typeIndex = SearchListingType.values.indexWhere((element) => element == context.read<ListingsSearchRequirementsBloc>().state.searchType);
+    _tabController = TabController(initialIndex: typeIndex, length: 2, vsync: this);
+
     super.initState();
   }
 
@@ -45,13 +50,7 @@ class _SearchExploreHeaderState extends State<SearchExploreHeader> with SingleTi
           child: SizedBox(
             width: MediaQuery.of(context).size.width - 65,
             height: searchHeaderHeight(context),
-            child: TabBarView(
-                controller: _tabController,
-                children: [
-                  SearchWhereWhenBar(model: widget.model),
-                  SearchTypeBar(model: widget.model),
-                ]
-            ),
+            child: SearchWhereWhenBar(model: widget.model),
           ),
         ),
         Positioned(
@@ -68,8 +67,14 @@ class _SearchExploreHeaderState extends State<SearchExploreHeader> with SingleTi
               child: TabBar(
                   controller: _tabController,
                   onTap: (index) {
-                    setState(() {
-                    });
+                      context.read<ListingsSearchRequirementsBloc>().add(const ListingsSearchRequirementsEvent.selectedListingIdChanged(null));
+                      if (index == 0) {
+                        context.read<ListingsSearchRequirementsBloc>().add(const ListingsSearchRequirementsEvent.selectedSearchTypeChanged(SearchListingType.facilities));
+                      }
+                      if (index == 1) {
+                        context.read<ListingsSearchRequirementsBloc>().add(const ListingsSearchRequirementsEvent.selectedSearchTypeChanged(SearchListingType.activities));
+                      }
+
                   },
                   indicator: BoxDecoration(
                     borderRadius: BorderRadius.circular(25.0),
@@ -82,13 +87,15 @@ class _SearchExploreHeaderState extends State<SearchExploreHeader> with SingleTi
                       iconMargin: EdgeInsets.zero,
                       icon: RotatedBox(
                           quarterTurns: 3,
-                          child: Icon(Icons.room, size: 18)),
+                          child: Icon(Icons.house_rounded, size: 18)),
                     ),
                     Tab(
                       // iconMargin: EdgeInsets.only(right: 3),
                       icon: Padding(
                         padding: EdgeInsets.only(right: 8.0),
-                        child: Icon(Icons.details, size: 18),
+                        child: RotatedBox(
+                          quarterTurns: 3,
+                            child: Icon(Icons.accessibility_rounded, size: 18)),
                       )
                     )
                   ]

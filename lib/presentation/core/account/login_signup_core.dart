@@ -2,11 +2,9 @@ import 'package:auth_buttons/auth_buttons.dart';
 import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
-import 'package:check_in_web_mobile_explore/presentation/core/account/sign_in_loading_page.dart';
 import 'package:flutter/material.dart';
 import 'package:phone_form_field/phone_form_field.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:dartz/dartz.dart' as bloc;
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -105,6 +103,7 @@ Widget getLoginSignupWidget({required BuildContext context, required DashboardMo
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        const SizedBox(height: 12),
         Text('Log in or sign up below', style: TextStyle(color: model.paletteColor, fontSize: model.secondaryQuestionTitleFontSize, fontWeight: FontWeight.bold)),
         const SizedBox(height: 24),
         PhoneFieldView(

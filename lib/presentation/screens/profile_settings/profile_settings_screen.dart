@@ -39,7 +39,6 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
   }
 
   Widget retrieveAuthenticationState(BuildContext context) {
-
     return MultiBlocProvider(
         providers: [
           BlocProvider(create: (_) => getIt<AuthBloc>()..add(const AuthEvent.mobileAuthCheckRequested())),
@@ -87,8 +86,8 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
     );
   }
 
-  Widget getUserProfileSettings(BuildContext context, DashboardModel model, UserProfileModel profile) {
 
+  Widget getUserProfileSettings(BuildContext context, DashboardModel model, UserProfileModel profile) {
     if (!isLoggedIn) {
       return GetLoginSignUpWidget(model: widget.model);
     } else {
@@ -120,19 +119,21 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                         child: Icon(
                           Icons.event, color: model.accentColor, size: 32,),
                       ),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Start Hosting an Event or Space',
-                              style: TextStyle(color: model.accentColor,
-                                  fontSize: model
-                                      .secondaryQuestionTitleFontSize,
-                                  fontWeight: FontWeight.bold)),
-                          const SizedBox(height: 4),
-                          Text('Let everyone know what you are looking to do.',
-                              style: TextStyle(color: model.accentColor))
-                        ],
+                      Expanded(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Start Hosting an Event or Space',
+                                style: TextStyle(color: model.accentColor,
+                                    fontSize: model
+                                        .secondaryQuestionTitleFontSize,
+                                    fontWeight: FontWeight.bold)),
+                            const SizedBox(height: 4),
+                            Text('Let everyone know what you are looking to do.',
+                                style: TextStyle(color: model.accentColor))
+                          ],
+                        ),
                       )
                     ],
                   ),
@@ -161,8 +162,8 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                       if (profile.profileImage != null) ClipRRect(
                         borderRadius: BorderRadius.circular(50),
                         child: Container(
-                          height: 50,
-                          width: 50,
+                          height: 75,
+                          width: 75,
                           child: Image(image: profile.profileImage!.image, fit: BoxFit.cover),
                         ),
                       ),
@@ -215,9 +216,11 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                     (e) =>
                     profileSettingItemWidget(
                         model,
-                        e,
-                        didSelectItem: (f) {
-                          switch (f) {
+                        e.icon,
+                        e.title,
+                        false,
+                        didSelectItem: () {
+                          switch (e.marker) {
                             case ProfileSettingMarker.personalIno:
                               Navigator.of(context).push(MaterialPageRoute(builder: (_) {
                                 return PersonalInformationProfile(
@@ -260,9 +263,11 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                     (e) =>
                     profileSettingItemWidget(
                         model,
-                        e,
-                        didSelectItem: (f) {
-                          switch (f) {
+                        e.icon,
+                        e.title,
+                        false,
+                        didSelectItem: () {
+                          switch (e.marker) {
                             case ProfileSettingMarker.switchToHosting:
                             // TODO: Handle this case.
                               break;
@@ -291,9 +296,11 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                     (e) =>
                     profileSettingItemWidget(
                         model,
-                        e,
-                        didSelectItem: (f) {
-                          switch (f) {
+                        e.icon,
+                        e.title,
+                        false,
+                        didSelectItem: () {
+                          switch (e.marker) {
                             case ProfileSettingMarker.howWorks:
                             // TODO: Handle this case.
                               break;
@@ -325,9 +332,11 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                     (e) =>
                     profileSettingItemWidget(
                         model,
-                        e,
-                        didSelectItem: (f) {
-                          switch (f) {
+                        e.icon,
+                        e.title,
+                        false,
+                        didSelectItem: () {
+                          switch (e.marker) {
                             case ProfileSettingMarker.termsOfService:
                             // TODO: Handle this case.
                               break;

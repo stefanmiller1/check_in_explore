@@ -29,9 +29,9 @@ List<ProfileSettingListModel> accountSettingsList(BuildContext context) {
 List<ProfileSettingListModel> accountHostingList(BuildContext context) {
   return [
     ProfileSettingListModel(title: 'Switch to Hosting', icon: Icons.swap_calls_rounded, marker: ProfileSettingMarker.switchToHosting),
-    ProfileSettingListModel(title: 'List Your Space', icon: Icons.account_circle, marker: ProfileSettingMarker.listSpace),
-    ProfileSettingListModel(title: 'List Your Activity', icon: Icons.directions_run_rounded, marker: ProfileSettingMarker.listActivity),
-    ProfileSettingListModel(title: 'Manage Your Spaces', icon: Icons.perm_identity_rounded, marker: ProfileSettingMarker.manageSpace),
+    ProfileSettingListModel(title: 'List Your Space', icon: Icons.house_outlined, marker: ProfileSettingMarker.listSpace),
+    // ProfileSettingListModel(title: 'List Your Activity', icon: Icons.directions_run_rounded, marker: ProfileSettingMarker.listActivity),
+    ProfileSettingListModel(title: 'Manage Your Spaces', icon: Icons.add_business_outlined, marker: ProfileSettingMarker.manageSpace),
   ];
 }
 
@@ -51,14 +51,14 @@ List<ProfileSettingListModel> accountLegalList(BuildContext context) {
 }
 
 
-Widget profileSettingItemWidget(DashboardModel model, ProfileSettingListModel item,{ required Function(ProfileSettingMarker marker) didSelectItem}) {
+Widget profileSettingItemWidget(DashboardModel model, IconData icon, String title, bool isEnnd, {required Function() didSelectItem}) {
   return Column(
     mainAxisAlignment: MainAxisAlignment.start,
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       InkWell(
         onTap: () {
-          didSelectItem(item.marker);
+          didSelectItem();
         },
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 14.0),
@@ -69,9 +69,9 @@ Widget profileSettingItemWidget(DashboardModel model, ProfileSettingListModel it
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                 child: Row(
                   children: [
-                    Icon(item.icon, color: model.paletteColor),
+                    Icon(icon, color: model.paletteColor),
                     const SizedBox(width: 18.0),
-                    Text(item.title, style: TextStyle(color: model.paletteColor)),
+                    Text(title, style: TextStyle(color: model.paletteColor)),
                   ],
                 ),
               ),
@@ -80,7 +80,7 @@ Widget profileSettingItemWidget(DashboardModel model, ProfileSettingListModel it
           ),
         ),
       ),
-      Divider(color: model.disabledTextColor)
+      if (!isEnnd) Divider(color: model.disabledTextColor)
     ],
   );
 }

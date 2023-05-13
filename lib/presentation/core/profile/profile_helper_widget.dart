@@ -13,40 +13,14 @@ Widget profileHeaderContainer(UserProfileModel profile, DashboardModel model, bo
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          if (profile.profileImage != null) ClipRRect(
-            borderRadius: BorderRadius.circular(40),
-            child: SizedBox(
-              height: 80,
-              width: 80,
-              child: Image(image: profile.profileImage!.image, fit: BoxFit.cover),
-            ),
-          ),
-          if (profile.profileImage == null) Stack(
-            alignment: Alignment.centerRight,
-            children: [
-              Container(
-                height: 80,
-                width: 80,
-                decoration: BoxDecoration(
-                    color: model.accentColor,
-                    borderRadius: BorderRadius.circular(40)
-                ),
-                child: Center(child: Text(profile.legalName.getOrCrash()[0], style: TextStyle(color: model.paletteColor, fontSize: model.questionTitleFontSize))),
-              ),
-              if (profile.isEmailAuth) Positioned(
-                bottom: 0,
-                right: 0,
-                child: Container(
-                  height: 30,
-                  width: 30,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(15),
-                    color: model.webBackgroundColor
-                  ),
-                  child: Icon(Icons.verified, color: Colors.deepOrange, size: 20),
-                ),
-              )
-            ],
+          mobileUserProfileWidget(
+              model,
+              profile: profile,
+              showBadge: true,
+              radius: 80,
+              onTapUserProfile: (UserProfileModel profile) {
+
+            }
           ),
 
           Row(
@@ -204,14 +178,14 @@ Widget getHostingListings(BuildContext context, UserProfileModel profile, List<L
   );
 }
 
-Widget getUpComingReservations(BuildContext context, UserProfileModel profile, List<ReservationItem> reservations, DashboardModel model) {
+Widget getUpComingReservations(BuildContext context, UserProfileModel currentUser, List<ReservationItem> reservations, DashboardModel model) {
   return Container(
     height: 150,
     child: Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('${profile.legalName.getOrCrash()}\'s Reservations', style: TextStyle(color: model.paletteColor, fontWeight: FontWeight.bold, fontSize: model.secondaryQuestionTitleFontSize)),
+        Text('${currentUser.legalName.getOrCrash()}\'s Reservations', style: TextStyle(color: model.paletteColor, fontWeight: FontWeight.bold, fontSize: model.secondaryQuestionTitleFontSize)),
         const SizedBox(height: 18),
 
         if (reservations.isEmpty) Container(
@@ -232,6 +206,7 @@ Widget getUpComingReservations(BuildContext context, UserProfileModel profile, L
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Text('No Reservations Yet', style: TextStyle(color: model.paletteColor, fontWeight: FontWeight.bold, fontSize: model.secondaryQuestionTitleFontSize)),
                       const SizedBox(height: 8),
@@ -256,7 +231,9 @@ Widget getUpComingReservations(BuildContext context, UserProfileModel profile, L
                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
                   child: getReservationCard(
                     context,
+                    false,
                     reservation,
+                    currentUser,
                     model,
                     reservation.reservationSlotItem.map((e) => e.selectedDate).where((element) => element.isBefore(DateTime.now())).isNotEmpty,
                     didSelectReservation: (listing, reservation) {
@@ -272,7 +249,38 @@ Widget getUpComingReservations(BuildContext context, UserProfileModel profile, L
   );
 }
 
+Widget widgetForEmptyReturns(BuildContext context, DashboardModel model, ) {
+  return Container(
+    // height: 80,
+    width: MediaQuery.of(context).size.width,
+    decoration: BoxDecoration(
+      color: model.accentColor,
+      borderRadius: BorderRadius.circular(15),
+    ),
+    child: Padding(
+      padding: const EdgeInsets.all(12.0),
+      child: Row(
+        children: [
+          Icon(Icons.event, color: model.disabledTextColor),
+          const SizedBox(width: 14),
 
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('No Reservations Yet', style: TextStyle(color: model.paletteColor, fontWeight: FontWeight.bold, fontSize: model.secondaryQuestionTitleFontSize)),
+                const SizedBox(height: 8),
+                Text('Start a Pop-Up Shop in your backyard or rent out a studio space to work out of for the night', style: TextStyle(color: model.disabledTextColor)),
+              ],
+            ),
+          )
+        ],
+      ),
+    ),
+  );
+}
 // Widget getConversations(List<> profile, DashboardModel model) {
 //   return Column(
 //     children: [

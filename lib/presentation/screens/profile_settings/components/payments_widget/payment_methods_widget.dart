@@ -125,8 +125,6 @@ class _PaymentMethodsWidgetState extends State<PaymentMethodsWidget> {
 
   Widget retrievePaymentMethods(BuildContext context, List<CardItem> cards, PaymentServicesState state) {
 
-    print(widget.profile.defaultPaymentMethod);
-
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
@@ -186,7 +184,7 @@ class _PaymentMethodsWidgetState extends State<PaymentMethodsWidget> {
                       state.isEditing,
                       !cards.map((e) => e.paymentId).contains(widget.profile.defaultPaymentMethod) ? i == cards.length - 1 : widget.profile.defaultPaymentMethod == e.paymentId,
                       isSavingAsDefault,
-                      cancellations.contains(e.paymentId) ?? false,
+                      cancellations.contains(e.paymentId),
                       selectedCard: (card) {
                         setState(() {
                           isSavingAsDefault = false;

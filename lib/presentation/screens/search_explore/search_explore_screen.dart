@@ -3,6 +3,7 @@ import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/responsive/responsive.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/helper.dart';
+import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/map_helper.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/map_search_component.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/search_helper.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/listing_search_result.dart';
@@ -25,18 +26,20 @@ class SearchExploreScreen extends StatefulWidget {
 
 class _SearchExploreScreenState extends State<SearchExploreScreen> {
 
-  final double _initFabHeight = 75.0;
+  final double _initFabHeight = 0;
   bool _isOpened = false;
   double _fabHeight = 0;
   double _panelHeightOpen = 0;
-  final double _panelHeightClosed = 75.0;
+  double _panelHeightClosed(context) => 100;
   late PanelController _panelController;
+  late ScrollController _scrollController;
+
   @override
   void initState() {
     super.initState();
     _panelController = PanelController();
+    // _scrollController = ScrollController();
     _fabHeight = _initFabHeight;
-
   }
 
   @override
@@ -48,6 +51,7 @@ class _SearchExploreScreenState extends State<SearchExploreScreen> {
   @override
   Widget build(BuildContext context) {
     _panelHeightOpen = panelHeight(context);
+    SearchHelper.isPanelDraggable = context.read<ListingsSearchRequirementsBloc>().state.markers.isNotEmpty;
 
     return Responsive(
         mobile: Stack(
@@ -56,53 +60,52 @@ class _SearchExploreScreenState extends State<SearchExploreScreen> {
               color: widget.model.mobileBackgroundColor,
               controller: _panelController,
               maxHeight: _panelHeightOpen,
-              minHeight: _panelHeightClosed,
+              margin: const EdgeInsets.symmetric(horizontal: 8),
+              minHeight: _panelHeightClosed(context),
               parallaxEnabled: true,
-              parallaxOffset: 0.5,
-              backdropTapClosesPanel: false,
+              parallaxOffset: 0.23,
+              backdropTapClosesPanel: true,
+              backdropEnabled: true,
+              backdropOpacity: 0.15,
+              panelSnapping: true,
+              renderPanelSheet: false,
               isDraggable: SearchHelper.isPanelDraggable,
               body: MapSearchContainer(
                   model: widget.model,
                   selectedListing: (listingId) {
                     setState(() {
-                    });
+                  });
                 },
               ),
-              panelBuilder: (sc) {
-                return ListingSearchResult(
+              panelBuilder: (pc) {
+                  return ListingSearchResult(
                     model: widget.model,
                     isOpen: _isOpened,
+                    controller: pc,
+                    panelController: _panelController,
                     didUpdate: () {
-                        setState(() {
-                        });
-                  },
-                );
+                      setState(() {
+
+                      });
+                    },
+                  );
+
               },
               borderRadius: const BorderRadius.only(
                 topRight: Radius.circular(24),
                 topLeft: Radius.circular(24)
               ),
               onPanelSlide: (pos) {
-
                 setState(() {
                   widget.slidePosition(pos);
-                  _fabHeight = pos * (_panelHeightOpen - _panelHeightClosed) + _initFabHeight;
+                  _fabHeight = pos * (_panelHeightOpen - _panelHeightClosed(context)) + _initFabHeight;
                 });
               },
-              onPanelOpened: () {
-                setState(() {
-                  final int index = context.read<ListingsSearchRequirementsBloc>().state.markers.toList().map((e) => e.markerId).toList().indexWhere((element) => element.value == context.read<ListingsSearchRequirementsBloc>().state.selectedListingId?.getOrCrash());
-                  SearchHelper.controller = PageController(
-                      initialPage: index,
-                      keepPage: false
-                  );
+              onPanelOpened: (pc) {
                   _isOpened = true;
-                });
               },
-
-              onPanelClosed: () {
+              onPanelClosed: (pc) {
                 setState(() {
-
                   _isOpened = false;
                   SearchHelper.isPanelDraggable = true;
                 });
