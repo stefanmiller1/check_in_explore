@@ -621,7 +621,7 @@ List<ReservationSlotItem> getReservationSlotItemForSearch(
       .toSet()
       .toList().map(
           (e) => ReservationSlotItem(
-              selectedActivityType: activityId ?? getActivityOptions(context)[0].activityId,
+              selectedActivityType: activityId ?? getActivityOptions()[0].activityId,
               selectedSportSpaceId: sportSpaceId,
               selectedSpaceId: spaceId ?? UniqueId(),
               selectedDate: e,

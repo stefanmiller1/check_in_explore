@@ -6,90 +6,90 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class ActivityAvailabilitySelectDurationTypePreview extends StatelessWidget {
-
-  final DashboardModel model;
-
-  const ActivityAvailabilitySelectDurationTypePreview({super.key, required this.model});
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      onTap: () {
-        Navigator.push(context, MaterialPageRoute(
-            builder: (_) {
-              return ActivityDurationSelection(
-                model: model,
-                activityCreatorForm: context.read<UpdateActivityFormBloc>().state.activityCreatorForm,
-              );
-            })
-        );
-      },
-      title: const Text('The Calendar'),
-      subtitle: Column(
-        children: [
-
-        ],
-      ),
-    );
-  }
-}
-
-class ActivityAvailabilitySelectOperatingHours extends StatelessWidget {
-
-  final DashboardModel model;
-
-  const ActivityAvailabilitySelectOperatingHours({super.key, required this.model});
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      onTap: () {
-
-      },
-      title: Text(''),
-    );
-  }
-}
-
-class ActivityAvailabilitySelectSessionType extends StatelessWidget {
-
-  final DashboardModel model;
-
-  const ActivityAvailabilitySelectSessionType({super.key, required this.model});
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      onTap: () {
-
-      },
-      title: Text(''),
-    );
-  }
-}
-
-
-class ActivityAvailabilityReviewPreview extends StatelessWidget {
-
-  final DashboardModel model;
-  final ReservationItem reservation;
-
-  const ActivityAvailabilityReviewPreview({super.key, required this.model, required this.reservation});
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      onTap: () {
-
-      },
-      title: const Text('Review Dates'),
-      subtitle: Column(
-        children: [
-          Text('dates: '),
-
-        ],
-      ),
-    );
-  }
-}
+// class ActivityAvailabilitySelectDurationTypePreview extends StatelessWidget {
+//
+//   final DashboardModel model;
+//
+//   const ActivityAvailabilitySelectDurationTypePreview({super.key, required this.model});
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return ListTile(
+//       onTap: () {
+//         Navigator.push(context, MaterialPageRoute(
+//             builder: (_) {
+//               return ActivityDurationSelection(
+//                 model: model,
+//                 activityCreatorForm: context.read<UpdateActivityFormBloc>().state.activityManagerForm,
+//               );
+//             })
+//         );
+//       },
+//       title: const Text('The Calendar'),
+//       subtitle: Column(
+//         children: [
+//
+//         ],
+//       ),
+//     );
+//   }
+// }
+//
+// class ActivityAvailabilitySelectOperatingHours extends StatelessWidget {
+//
+//   final DashboardModel model;
+//
+//   const ActivityAvailabilitySelectOperatingHours({super.key, required this.model});
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return ListTile(
+//       onTap: () {
+//
+//       },
+//       title: Text(''),
+//     );
+//   }
+// }
+//
+// class ActivityAvailabilitySelectSessionType extends StatelessWidget {
+//
+//   final DashboardModel model;
+//
+//   const ActivityAvailabilitySelectSessionType({super.key, required this.model});
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return ListTile(
+//       onTap: () {
+//
+//       },
+//       title: Text(''),
+//     );
+//   }
+// }
+//
+//
+// class ActivityAvailabilityReviewPreview extends StatelessWidget {
+//
+//   final DashboardModel model;
+//   final ReservationItem reservation;
+//
+//   const ActivityAvailabilityReviewPreview({super.key, required this.model, required this.reservation});
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return ListTile(
+//       onTap: () {
+//
+//       },
+//       title: const Text('Review Dates'),
+//       subtitle: Column(
+//         children: [
+//           Text('dates: '),
+//
+//         ],
+//       ),
+//     );
+//   }
+// }

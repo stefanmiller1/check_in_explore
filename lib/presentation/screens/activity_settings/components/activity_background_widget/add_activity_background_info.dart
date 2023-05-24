@@ -1,3 +1,4 @@
+import 'package:check_in_application/auth/update_services/listing_update_create_services/settings_update_create_services/activity_settings/activity_settings_form_bloc.dart';
 import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
@@ -13,9 +14,10 @@ import 'package:check_in_presentation/check_in_presentation.dart';
 class ActivityAddBackgroundInfo extends StatefulWidget {
 
   final DashboardModel model;
-  final ActivityCreatorForm activityCreatorForm;
+  final ActivityManagerForm activityManagerForm;
+  final ReservationItem reservation;
 
-  const ActivityAddBackgroundInfo({super.key, required this.model, required this.activityCreatorForm});
+  const ActivityAddBackgroundInfo({super.key, required this.model, required this.activityManagerForm, required this.reservation});
 
   @override
   State<ActivityAddBackgroundInfo> createState() => _ActivityAddBackgroundInfoState();
@@ -65,13 +67,13 @@ class _ActivityAddBackgroundInfoState extends State<ActivityAddBackgroundInfo> {
     @override
     Widget build(BuildContext context) {
 
-      return BlocProvider(create: (context) => getIt<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.initializeActivityForm(dart.optionOf(widget.activityCreatorForm))),
+      return BlocProvider(create: (context) => getIt<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.initializeActivityForm(dart.optionOf(widget.activityManagerForm), dart.optionOf(widget.reservation))),
             child: BlocConsumer<UpdateActivityFormBloc, UpdateActivityFormState>(
-            listenWhen: (p, c) => p.authFailureOrSuccessOptionSaving != c.authFailureOrSuccessOptionSaving || p.authFailureOrSuccessOptionSubmitting != c.authFailureOrSuccessOptionSubmitting || p.authFailureOrSuccessOptionLocation != c.authFailureOrSuccessOptionLocation,
+            listenWhen: (p, c) => p.authFailureOrSuccessOptionSaving != c.authFailureOrSuccessOptionSaving || p.authFailureOrSuccessOptionSubmitting != c.authFailureOrSuccessOptionSubmitting,
               listener: (context, state) {
 
               },
-          buildWhen: (p, c) => p.authFailureOrSuccessOptionSaving != c.authFailureOrSuccessOptionSaving || p.authFailureOrSuccessOptionSubmitting != c.authFailureOrSuccessOptionSubmitting || p.activityCreatorForm != c.activityCreatorForm,
+          buildWhen: (p, c) => p.authFailureOrSuccessOptionSaving != c.authFailureOrSuccessOptionSaving || p.authFailureOrSuccessOptionSubmitting != c.authFailureOrSuccessOptionSubmitting || p.activitySettingsForm != c.activitySettingsForm,
           builder: (context, state) {
               return Scaffold(
                 appBar: AppBar(
@@ -99,17 +101,18 @@ class _ActivityAddBackgroundInfoState extends State<ActivityAddBackgroundInfo> {
                               activityTitleController!,
                               '',
                               1,
-                              context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityBackground.activityTitle.maxLength,
+                              context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityBackground.activityTitle.maxLength,
                               updateText: (value) {
                                 context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.activityTitleChanged(BackgroundInfoTitle(value)));
                             }
                           ),
 
-                          const SizedBox(height: 25),
+
                           Visibility(
-                            visible: context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityType.activityType == ProfileActivityTypeOption.classesLessons,
+                            visible: context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityType.activityType == ProfileActivityTypeOption.classesLessons,
                             child: Column(
                               children: [
+                                const SizedBox(height: 25),
                                 Text(AppLocalizations.of(context)!.activityClassesBackgroundTitle2, style: TextStyle(color: widget.model.paletteColor, fontWeight: FontWeight.bold, fontSize: widget.model.questionTitleFontSize)),
                                 Text(AppLocalizations.of(context)!.activityClassesBackgroundSubTitle2, style: TextStyle(color: widget.model.paletteColor)),
                               ],
@@ -117,9 +120,10 @@ class _ActivityAddBackgroundInfoState extends State<ActivityAddBackgroundInfo> {
                           ),
 
                           Visibility(
-                            visible: context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityType.activityType == ProfileActivityTypeOption.experiences,
+                            visible: context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityType.activity == ProfileActivityTypeOption.experiences,
                             child: Column(
                               children: [
+                                const SizedBox(height: 25),
                                 Text(AppLocalizations.of(context)!.activityExperienceBackgroundTitle2, style: TextStyle(color: widget.model.paletteColor, fontWeight: FontWeight.bold, fontSize: widget.model.questionTitleFontSize)),
                                 Text(AppLocalizations.of(context)!.activityExperienceBackgroundSubTitle2, style: TextStyle(color: widget.model.paletteColor)),
                               ],
@@ -127,23 +131,24 @@ class _ActivityAddBackgroundInfoState extends State<ActivityAddBackgroundInfo> {
                           ),
 
                           Visibility(
-                            visible: context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityType.activityType == ProfileActivityTypeOption.gameMatches,
+                            visible: context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityType.activityType == ProfileActivityTypeOption.gameMatches,
                             child: Column(
                               children: [
+                                const SizedBox(height: 25),
                                 Text(AppLocalizations.of(context)!.activityGameBackgroundTitle2, style: TextStyle(color: widget.model.paletteColor, fontWeight: FontWeight.bold, fontSize: widget.model.questionTitleFontSize)),
                                 Text(AppLocalizations.of(context)!.activityGameBackgroundSubTitle2, style: TextStyle(color: widget.model.paletteColor)),
                               ],
                             ),
                           ),
 
-                          const SizedBox(height: 10),
+                          const SizedBox(height: 25),
                           getDescriptionTextField(
                               context,
                               widget.model,
                               activityDescriptionController1!,
                               '',
                               6,
-                              context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityBackground.activityDescription1.maxLength,
+                              context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityBackground.activityDescription1.maxLength,
                               updateText: (value) {
                                 context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.activityDescriptionChanged(BackgroundInfoDescription(value)));
                       }

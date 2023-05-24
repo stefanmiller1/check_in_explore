@@ -1,3 +1,4 @@
+import 'package:check_in_application/auth/update_services/listing_update_create_services/settings_update_create_services/activity_settings/activity_settings_form_bloc.dart';
 import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
@@ -10,19 +11,20 @@ import 'package:dartz/dartz.dart' as dart;
 class ActivityAttendeeCreateTicket extends StatelessWidget {
 
   final DashboardModel model;
-  final ActivityCreatorForm activityCreatorForm;
+  final ActivityManagerForm activityManagerForm;
+  final ReservationItem reservation;
 
-  const ActivityAttendeeCreateTicket({Key? key, required this.model, required this.activityCreatorForm}) : super(key: key);
+  const ActivityAttendeeCreateTicket({Key? key, required this.model, required this.activityManagerForm, required this.reservation}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(create: (context) => getIt<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.initializeActivityForm(dart.optionOf(activityCreatorForm))),
+    return BlocProvider(create: (context) => getIt<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.initializeActivityForm(dart.optionOf(activityManagerForm), dart.optionOf(reservation))),
       child: BlocConsumer<UpdateActivityFormBloc, UpdateActivityFormState>(
-      listenWhen: (p, c) => p.authFailureOrSuccessOptionSaving != c.authFailureOrSuccessOptionSaving || p.authFailureOrSuccessOptionSubmitting != c.authFailureOrSuccessOptionSubmitting || p.authFailureOrSuccessOptionLocation != c.authFailureOrSuccessOptionLocation,
+      listenWhen: (p, c) => p.authFailureOrSuccessOptionSaving != c.authFailureOrSuccessOptionSaving || p.authFailureOrSuccessOptionSubmitting != c.authFailureOrSuccessOptionSubmitting,
       listener: (context, state) {
 
       },
-      buildWhen: (p, c) => p.authFailureOrSuccessOptionSaving != c.authFailureOrSuccessOptionSaving || p.authFailureOrSuccessOptionSubmitting != c.authFailureOrSuccessOptionSubmitting || p.activityCreatorForm != c.activityCreatorForm,
+      buildWhen: (p, c) => p.authFailureOrSuccessOptionSaving != c.authFailureOrSuccessOptionSaving || p.authFailureOrSuccessOptionSubmitting != c.authFailureOrSuccessOptionSubmitting || p.activitySettingsForm != c.activitySettingsForm,
       builder: (context, state) {
         return Scaffold(
           appBar: AppBar(
@@ -40,6 +42,8 @@ class ActivityAttendeeCreateTicket extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
 
+            /// TODO: TICKET MODEL TO INCLUDE PRICE, SLOT, OR ALL?
+
             Text('${AppLocalizations.of(context)!.activityAttendanceTypeGenerate} ${AppLocalizations.of(context)!.activityAttendanceTypeTickets}', style: TextStyle(
                 color: model.paletteColor,
                 fontWeight: FontWeight.bold,
@@ -54,7 +58,8 @@ class ActivityAttendeeCreateTicket extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Visibility(
-                  visible: context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAvailability.isDayBased ?? false,
+                  visible: true,
+                  // visible: context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAvailability.isDayBased ?? false,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -90,7 +95,7 @@ class ActivityAttendeeCreateTicket extends StatelessWidget {
                                       children: [
                                         Padding(
                                           padding: const EdgeInsets.only(left: 8.0),
-                                          child: Text('${context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAttendance.activityTickets?.ticketQuantity ?? 0} ${AppLocalizations.of(context)!.activityAttendanceTypeTickets}', style: TextStyle(color: model.paletteColor, fontWeight: FontWeight.bold, fontSize: model.secondaryQuestionTitleFontSize),),
+                                          child: Text('${context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.defaultActivityTickets?.ticketQuantity ?? 0} ${AppLocalizations.of(context)!.activityAttendanceTypeTickets}', style: TextStyle(color: model.paletteColor, fontWeight: FontWeight.bold, fontSize: model.secondaryQuestionTitleFontSize),),
                                         ),
                                         Padding(
                                           padding: const EdgeInsets.only(right: 8.0),
@@ -155,7 +160,7 @@ class ActivityAttendeeCreateTicket extends StatelessWidget {
                       ),
 
                       Visibility(
-                          visible: context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAvailability.isSixtyMinutesPer ?? false,
+                          // visible: context.read<UpdateActivityFormBloc>().state.activityManagerForm.activityAvailability.isSixtyMinutesPer ?? false,
                           child: Text('${AppLocalizations.of(context)!.activityAttendanceTypeTickets} ${AppLocalizations.of(context)!.activityAttendanceTypeQuantity} Per 60 ${AppLocalizations.of(context)!.facilityAvailableSlotMinutes} ${AppLocalizations.of(context)!.activityAvailabilitySessions}', style: TextStyle(
                             color: model.paletteColor,
                             fontWeight: FontWeight.bold,
@@ -163,7 +168,7 @@ class ActivityAttendeeCreateTicket extends StatelessWidget {
                       ),
 
                       Visibility(
-                        visible: context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAvailability.isTwoHoursPer ?? false,
+                        // visible: context.read<UpdateActivityFormBloc>().state.activityManagerForm.activityAvailability.isTwoHoursPer ?? false,
                         child: Text('${AppLocalizations.of(context)!.activityAttendanceTypeTickets} ${AppLocalizations.of(context)!.activityAttendanceTypeQuantity} Per 2 ${AppLocalizations.of(context)!.facilityAvailableSlotHours} ${AppLocalizations.of(context)!.activityAvailabilitySessions}', style: TextStyle(
                             color: model.paletteColor,
                             fontWeight: FontWeight.bold,
@@ -196,7 +201,7 @@ class ActivityAttendeeCreateTicket extends StatelessWidget {
                                       children: [
                                         Padding(
                                           padding: const EdgeInsets.only(left: 8.0),
-                                          child: Text('${context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAttendance.activityTickets?.ticketQuantity ?? 0} ${AppLocalizations.of(context)!.activityAttendanceTypeTickets}', style: TextStyle(color: model.paletteColor, fontWeight: FontWeight.bold, fontSize: model.secondaryQuestionTitleFontSize),),
+                                          child: Text('${context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.defaultActivityTickets?.ticketQuantity ?? 0} ${AppLocalizations.of(context)!.activityAttendanceTypeTickets}', style: TextStyle(color: model.paletteColor, fontWeight: FontWeight.bold, fontSize: model.secondaryQuestionTitleFontSize),),
                                         ),
                                         Padding(
                                           padding: const EdgeInsets.only(right: 8.0),

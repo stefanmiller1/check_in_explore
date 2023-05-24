@@ -1,3 +1,4 @@
+import 'package:check_in_application/auth/update_services/listing_update_create_services/settings_update_create_services/activity_settings/activity_settings_form_bloc.dart';
 import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
@@ -10,9 +11,10 @@ import 'package:dartz/dartz.dart' as dart;
 class ActivityAttendeeSelectType extends StatefulWidget {
 
   final DashboardModel model;
-  final ActivityCreatorForm activityCreatorForm;
+  final ActivityManagerForm activityManagerForm;
+  final ReservationItem reservation;
 
-  const ActivityAttendeeSelectType({Key? key, required this.model, required this.activityCreatorForm}) : super(key: key);
+  const ActivityAttendeeSelectType({Key? key, required this.model, required this.activityManagerForm, required this.reservation}) : super(key: key);
 
   @override
   State<ActivityAttendeeSelectType> createState() => _ActivityAttendeeSelectTypeState();
@@ -23,13 +25,13 @@ class _ActivityAttendeeSelectTypeState extends State<ActivityAttendeeSelectType>
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(create: (context) => getIt<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.initializeActivityForm(dart.optionOf(widget.activityCreatorForm))),
+    return BlocProvider(create: (context) => getIt<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.initializeActivityForm(dart.optionOf(widget.activityManagerForm), dart.optionOf(widget.reservation))),
     child: BlocConsumer<UpdateActivityFormBloc, UpdateActivityFormState>(
-    listenWhen: (p, c) => p.authFailureOrSuccessOptionSaving != c.authFailureOrSuccessOptionSaving || p.authFailureOrSuccessOptionSubmitting != c.authFailureOrSuccessOptionSubmitting || p.authFailureOrSuccessOptionLocation != c.authFailureOrSuccessOptionLocation,
+    listenWhen: (p, c) => p.authFailureOrSuccessOptionSaving != c.authFailureOrSuccessOptionSaving || p.authFailureOrSuccessOptionSubmitting != c.authFailureOrSuccessOptionSubmitting,
     listener: (context, state) {
 
     },
-    buildWhen: (p, c) => p.authFailureOrSuccessOptionSaving != c.authFailureOrSuccessOptionSaving || p.authFailureOrSuccessOptionSubmitting != c.authFailureOrSuccessOptionSubmitting || p.activityCreatorForm != c.activityCreatorForm,
+    buildWhen: (p, c) => p.authFailureOrSuccessOptionSaving != c.authFailureOrSuccessOptionSaving || p.authFailureOrSuccessOptionSubmitting != c.authFailureOrSuccessOptionSubmitting,
     builder: (context, state) {
         return Scaffold(
           appBar: AppBar(
@@ -84,7 +86,7 @@ class _ActivityAttendeeSelectTypeState extends State<ActivityAttendeeSelectType>
                                           if (states.contains(MaterialState.hovered)) {
                                             return widget.model.paletteColor.withOpacity(0.1);
                                           }
-                                          return (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAttendance.isLimitedAttendance ?? true) ? widget.model.accentColor.withOpacity(0.6) : widget.model.paletteColor; // Use the component's default.
+                                          return (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.isLimitedAttendance ?? true) ? widget.model.accentColor.withOpacity(0.6) : widget.model.paletteColor; // Use the component's default.
                                         },
                                       ),
                                       shape: MaterialStateProperty.all<RoundedRectangleBorder>(
@@ -96,7 +98,7 @@ class _ActivityAttendeeSelectTypeState extends State<ActivityAttendeeSelectType>
                                   onPressed: () {
 
                                     setState(() {
-                                      if (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAttendance.isLimitedAttendance ?? true) {
+                                      if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.isLimitedAttendance ?? true) {
                                         context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isLimitedAttendanceChanged(false));
                                         context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isTicketBasedAttendanceChanged(false));
                                         context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isPassBasedAttendanceChanged(false));
@@ -113,7 +115,7 @@ class _ActivityAttendeeSelectTypeState extends State<ActivityAttendeeSelectType>
                                       children: [
                                         Padding(
                                           padding: const EdgeInsets.all(15.0),
-                                          child: Icon(Icons.crop_free_outlined, size: 40, color: (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAttendance.isLimitedAttendance ?? true) ? widget.model.paletteColor : widget.model.accentColor),
+                                          child: Icon(Icons.crop_free_outlined, size: 40, color: (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.isLimitedAttendance ?? true) ? widget.model.paletteColor : widget.model.accentColor),
                                         ),
                                         SizedBox(width: 15),
                                         Expanded(
@@ -121,8 +123,8 @@ class _ActivityAttendeeSelectTypeState extends State<ActivityAttendeeSelectType>
                                             mainAxisAlignment: MainAxisAlignment.start,
                                             crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
-                                              Text(AppLocalizations.of(context)!.activityCreatorFormNavAttendanceNone, style: TextStyle(color: (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAttendance.isLimitedAttendance ?? true) ? widget.model.paletteColor :  widget.model.accentColor , fontSize: widget.model.secondaryQuestionTitleFontSize, fontWeight: FontWeight.bold)),
-                                              Text(AppLocalizations.of(context)!.activityCreatorFormNavAttendanceNoneDes, style: TextStyle(color: (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAttendance.isLimitedAttendance ?? true) ? widget.model.paletteColor : widget.model.accentColor)),
+                                              Text(AppLocalizations.of(context)!.activityCreatorFormNavAttendanceNone, style: TextStyle(color: (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.isLimitedAttendance ?? true) ? widget.model.paletteColor :  widget.model.accentColor , fontSize: widget.model.secondaryQuestionTitleFontSize, fontWeight: FontWeight.bold)),
+                                              Text(AppLocalizations.of(context)!.activityCreatorFormNavAttendanceNoneDes, style: TextStyle(color: (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.isLimitedAttendance ?? true) ? widget.model.paletteColor : widget.model.accentColor)),
                                             ],
                                           ),
                                         ),
@@ -133,7 +135,7 @@ class _ActivityAttendeeSelectTypeState extends State<ActivityAttendeeSelectType>
                               ),
 
                               Visibility(
-                                visible: !(context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAttendance.isLimitedAttendance ?? true),
+                                visible: !(context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.isLimitedAttendance ?? true),
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -164,7 +166,7 @@ class _ActivityAttendeeSelectTypeState extends State<ActivityAttendeeSelectType>
                                                     children: [
                                                       Padding(
                                                         padding: const EdgeInsets.only(left: 8.0),
-                                                        child: Text('${context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAttendance.attendanceLimit ?? 0} ${AppLocalizations.of(context)!.activityAttendanceTypeTitle}', style: TextStyle(color: widget.model.paletteColor, fontWeight: FontWeight.bold, fontSize: widget.model.secondaryQuestionTitleFontSize),),
+                                                        child: Text('${context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.attendanceLimit ?? 0} ${AppLocalizations.of(context)!.activityAttendanceTypeTitle}', style: TextStyle(color: widget.model.paletteColor, fontWeight: FontWeight.bold, fontSize: widget.model.secondaryQuestionTitleFontSize),),
                                                       ),
                                                       Padding(
                                                         padding: const EdgeInsets.only(right: 8.0),
@@ -212,7 +214,7 @@ class _ActivityAttendeeSelectTypeState extends State<ActivityAttendeeSelectType>
                               ),
 
                               Visibility(
-                                visible: context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAvailability.sessionType != ActivitySessionType.multiDay && (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAttendance.isLimitedAttendance ?? true),
+                                // visible: context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAvailability.sessionType != ActivitySessionType.multiDay && (context.read<UpdateActivityFormBloc>().state.activityManagerForm.activityAttendance.isLimitedAttendance ?? true),
                                 child: Padding(
                                   padding: const EdgeInsets.all(4.0),
                                   child: TextButton(
@@ -225,7 +227,7 @@ class _ActivityAttendeeSelectTypeState extends State<ActivityAttendeeSelectType>
                                             if (states.contains(MaterialState.hovered)) {
                                               return widget.model.paletteColor.withOpacity(0.1);
                                             }
-                                            return (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAttendance.isTicketBased ?? false) ? widget.model.paletteColor : widget.model.accentColor.withOpacity(0.6); // Use the component's default.
+                                            return (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.isTicketBased ?? false) ? widget.model.paletteColor : widget.model.accentColor.withOpacity(0.6); // Use the component's default.
                                           },
                                         ),
                                         shape: MaterialStateProperty.all<RoundedRectangleBorder>(
@@ -236,7 +238,7 @@ class _ActivityAttendeeSelectTypeState extends State<ActivityAttendeeSelectType>
                                     ),
                                     onPressed: () {
                                       setState(() {
-                                        if (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAttendance.isTicketBased ?? false) {
+                                        if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.isTicketBased ?? false) {
                                           context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isTicketBasedAttendanceChanged(false));
                                         } else {
                                           context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isTicketBasedAttendanceChanged(true));
@@ -251,7 +253,7 @@ class _ActivityAttendeeSelectTypeState extends State<ActivityAttendeeSelectType>
                                         children: [
                                           Padding(
                                             padding: const EdgeInsets.all(15.0),
-                                            child: Icon(Icons.airplane_ticket_rounded, color: (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAttendance.isTicketBased ?? false) ? widget.model.accentColor : widget.model.paletteColor, size: 40),
+                                            child: Icon(Icons.airplane_ticket_rounded, color: (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.isTicketBased ?? false) ? widget.model.accentColor : widget.model.paletteColor, size: 40),
                                           ),
                                           SizedBox(width: 15),
                                           Expanded(
@@ -259,8 +261,8 @@ class _ActivityAttendeeSelectTypeState extends State<ActivityAttendeeSelectType>
                                               crossAxisAlignment: CrossAxisAlignment.start,
                                               mainAxisAlignment: MainAxisAlignment.start,
                                               children: [
-                                                Text(AppLocalizations.of(context)!.activityCreatorFormNavAttendanceTicket1, style: TextStyle(color: (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAttendance.isTicketBased ?? false) ? widget.model.accentColor : widget.model.paletteColor, fontSize: widget.model.secondaryQuestionTitleFontSize, fontWeight: FontWeight.bold)),
-                                                Text(AppLocalizations.of(context)!.activityCreatorFormNavAttendanceTicketDes, style: TextStyle(color: (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAttendance.isTicketBased ?? false) ? widget.model.accentColor : widget.model.paletteColor)),
+                                                Text(AppLocalizations.of(context)!.activityCreatorFormNavAttendanceTicket1, style: TextStyle(color: (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.isTicketBased ?? false) ? widget.model.accentColor : widget.model.paletteColor, fontSize: widget.model.secondaryQuestionTitleFontSize, fontWeight: FontWeight.bold)),
+                                                Text(AppLocalizations.of(context)!.activityCreatorFormNavAttendanceTicketDes, style: TextStyle(color: (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.isTicketBased ?? false) ? widget.model.accentColor : widget.model.paletteColor)),
                                               ],
                                             ),
                                           ),
@@ -273,7 +275,7 @@ class _ActivityAttendeeSelectTypeState extends State<ActivityAttendeeSelectType>
 
 
                             Visibility(
-                              visible: context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAttendance.isLimitedAttendance ?? true,
+                              visible: context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.isLimitedAttendance ?? true,
                               child: Padding(
                                 padding: const EdgeInsets.all(4.0),
                                 child: TextButton(
@@ -286,7 +288,7 @@ class _ActivityAttendeeSelectTypeState extends State<ActivityAttendeeSelectType>
                                           if (states.contains(MaterialState.hovered)) {
                                             return widget.model.paletteColor.withOpacity(0.1);
                                           }
-                                          return (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAttendance.isPassBased ?? false) ? widget.model.paletteColor : widget.model.accentColor.withOpacity(0.6); // Use the component's default.
+                                          return (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.isPassBased ?? false) ? widget.model.paletteColor : widget.model.accentColor.withOpacity(0.6); // Use the component's default.
                                         },
                                       ),
                                       shape: MaterialStateProperty.all<RoundedRectangleBorder>(
@@ -298,7 +300,7 @@ class _ActivityAttendeeSelectTypeState extends State<ActivityAttendeeSelectType>
                                   onPressed: () {
 
                                     setState(() {
-                                      if (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAttendance.isPassBased ?? false) {
+                                      if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.isPassBased ?? false) {
                                         context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isPassBasedAttendanceChanged(false));
                                       } else {
                                         context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isPassBasedAttendanceChanged(true));
@@ -314,7 +316,7 @@ class _ActivityAttendeeSelectTypeState extends State<ActivityAttendeeSelectType>
                                       children: [
                                         Padding(
                                           padding: const EdgeInsets.all(15.0),
-                                          child: Icon(Icons.credit_card_rounded, color: (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAttendance.isPassBased ?? false) ? widget.model.accentColor : widget.model.paletteColor, size: 40),
+                                          child: Icon(Icons.credit_card_rounded, color: (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.isPassBased ?? false) ? widget.model.accentColor : widget.model.paletteColor, size: 40),
                                         ),
                                         const SizedBox(width: 15),
                                         Expanded(
@@ -322,8 +324,8 @@ class _ActivityAttendeeSelectTypeState extends State<ActivityAttendeeSelectType>
                                             crossAxisAlignment: CrossAxisAlignment.start,
                                             mainAxisAlignment: MainAxisAlignment.start,
                                             children: [
-                                              Text(AppLocalizations.of(context)!.activityCreatorFormNavAttendancePasses1, style: TextStyle(color: (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAttendance.isPassBased ?? false) ? widget.model.accentColor : widget.model.paletteColor, fontSize: widget.model.secondaryQuestionTitleFontSize, fontWeight: FontWeight.bold)),
-                                              Text(AppLocalizations.of(context)!.activityCreatorFormNavAttendancePassesDes, style: TextStyle(color: (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAttendance.isPassBased ?? false) ? widget.model.accentColor : widget.model.paletteColor)),
+                                              Text(AppLocalizations.of(context)!.activityCreatorFormNavAttendancePasses1, style: TextStyle(color: (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.isPassBased ?? false) ? widget.model.accentColor : widget.model.paletteColor, fontSize: widget.model.secondaryQuestionTitleFontSize, fontWeight: FontWeight.bold)),
+                                              Text(AppLocalizations.of(context)!.activityCreatorFormNavAttendancePassesDes, style: TextStyle(color: (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.isPassBased ?? false) ? widget.model.accentColor : widget.model.paletteColor)),
                                               ],
                                             ),
                                           ),

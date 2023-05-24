@@ -49,7 +49,7 @@ class _ActivityPreviewScreenState extends State<ActivityPreviewScreen> {
 
   Widget getMainContainerForActivityDetails(
       BuildContext context,
-      ActivityCreatorForm activityForm,
+      ActivityManagerForm activityForm,
       UserProfileModel activityOwner
       ) {
 
@@ -63,7 +63,7 @@ class _ActivityPreviewScreenState extends State<ActivityPreviewScreen> {
           children: [
 
 
-            if (activityForm.activityBackground.activityProfileImages != null && activityForm.activityBackground.activityProfileImages!.isNotEmpty) SizedBox(
+            if (activityForm.profileService.activityBackground.activityProfileImages != null && activityForm.profileService.activityBackground.activityProfileImages!.isNotEmpty) SizedBox(
               height: 400,
               width: MediaQuery.of(context).size.width,
               child: Stack(
@@ -71,26 +71,26 @@ class _ActivityPreviewScreenState extends State<ActivityPreviewScreen> {
                   children: [
                      PageView.builder(
                         controller: _pageController,
-                        itemCount: activityForm.activityBackground.activityProfileImages!.length,
+                        itemCount: activityForm.profileService.activityBackground.activityProfileImages!.length,
                         onPageChanged: (page) {
                           setState(() {
                             _currentPageIndex = page;
                           });
                         },
                         itemBuilder: (context, index) {
-                          final String activityImage = activityForm.activityBackground.activityProfileImages![index];
+                          final String activityImage = activityForm.profileService.activityBackground.activityProfileImages?[index].uriPath ?? '';
                           return Image.network(activityImage, fit: BoxFit.cover);
                       }
                     ),
-                    getImageItemSelectionTabWidget(context, widget.model, activityForm.activityBackground.activityProfileImages!.length, _currentPageIndex)
+                    getImageItemSelectionTabWidget(context, widget.model, activityForm.profileService.activityBackground.activityProfileImages!.length, _currentPageIndex)
                   ],
                 ),
               ),
-              if (activityForm.activityBackground.activityProfileImages == null || (activityForm.activityBackground.activityProfileImages?.isEmpty ?? false)) Container(
+              if (activityForm.profileService.activityBackground.activityProfileImages == null || (activityForm.profileService.activityBackground.activityProfileImages?.isEmpty ?? false)) Container(
                 height: 400,
                 width: MediaQuery.of(context).size.width,
                 color: widget.model.accentColor,
-                child: getIconForActivityType(
+                child: getActivityFromReservationId(
                   context,
                   widget.model,
                   30,
@@ -113,8 +113,8 @@ class _ActivityPreviewScreenState extends State<ActivityPreviewScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 2.0),
               child: ListTile(
-                title: Text(getTitleForActivityOption(context, activityForm.activityType.activity) ?? '', style: TextStyle(color: widget.model.paletteColor, fontWeight: FontWeight.bold)),
-                leading: getIconForActivityType(
+                title: Text(getTitleForActivityOption(context, activityForm.activityType.activityId) ?? '', style: TextStyle(color: widget.model.paletteColor, fontWeight: FontWeight.bold)),
+                leading: getActivityFromReservationId(
                     context,
                     widget.model,
                     25,
@@ -231,21 +231,21 @@ class _ActivityPreviewScreenState extends State<ActivityPreviewScreen> {
 
 
   Widget retrieveActivitySettings() {
-    return BlocProvider(create: (context) =>  getIt<ActivityManagerWatcherBloc>()..add(ActivityManagerWatcherEvent.watchActivityCreatorFormStarted(widget.reservation.reservationId.getOrCrash())),
+    return BlocProvider(create: (context) =>  getIt<ActivityManagerWatcherBloc>()..add(ActivityManagerWatcherEvent.watchActivityManagerFormStarted(widget.reservation.reservationId.getOrCrash())),
       child: BlocBuilder<ActivityManagerWatcherBloc, ActivityManagerWatcherState>(
         builder: (context, state) {
           return state.maybeMap(
               loadInProgress: (_) => JumpingDots(color: widget.model.paletteColor, numberOfDots: 3),
-              loadActivityCreatorFormFailure: (_) => retrieveActivityOwner(ActivityCreatorForm.empty()),
-              loadActivityCreatorFormSuccess: (item) => retrieveActivityOwner(item.item),
-              orElse: () => retrieveActivityOwner(ActivityCreatorForm.empty())
+              loadActivityManagerFormFailure: (_) => retrieveActivityOwner(ActivityManagerForm.empty()),
+              loadActivityManagerFormSuccess: (item) => retrieveActivityOwner(item.item),
+              orElse: () => retrieveActivityOwner(ActivityManagerForm.empty())
           );
         },
       ),
     );
   }
 
-  Widget retrieveActivityOwner(ActivityCreatorForm activityForm) {
+  Widget retrieveActivityOwner(ActivityManagerForm activityForm) {
     return BlocBuilder<UserProfileWatcherBloc, UserProfileWatcherState>(
         builder: (context, state) {
           return state.maybeMap(
@@ -325,7 +325,7 @@ class _ActivityPreviewScreenState extends State<ActivityPreviewScreen> {
   }
 
 
-  Widget retrieveMainContainerForAttendee(ActivityCreatorForm activityForm, UserProfileModel activityOwnerProfile) {
+  Widget retrieveMainContainerForAttendee(ActivityManagerForm activityForm, UserProfileModel activityOwnerProfile) {
     return BlocConsumer<AttendeeFormBloc, AttendeeFormState>(
       listenWhen: (p,c) => p.isSubmitting != c.isSubmitting,
       listener: (context, state) {

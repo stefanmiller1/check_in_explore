@@ -1,3 +1,4 @@
+import 'package:check_in_application/auth/update_services/listing_update_create_services/settings_update_create_services/activity_settings/activity_settings_form_bloc.dart';
 import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:flutter/material.dart';
@@ -12,9 +13,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class ActivityRulesToReview extends StatefulWidget {
 
   final DashboardModel model;
-  final ActivityCreatorForm activityCreatorForm;
+  final ActivityManagerForm activityManagerForm;
+  final ReservationItem reservation;
 
-  const ActivityRulesToReview({Key? key, required this.model, required this.activityCreatorForm}) : super(key: key);
+  const ActivityRulesToReview({Key? key, required this.model, required this.activityManagerForm, required this.reservation}) : super(key: key);
 
   @override
   State<ActivityRulesToReview> createState() => _ActivityRulesToReviewState();
@@ -25,13 +27,13 @@ class _ActivityRulesToReviewState extends State<ActivityRulesToReview> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(create: (context) => getIt<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.initializeActivityForm(dart.optionOf(widget.activityCreatorForm))),
+    return BlocProvider(create: (context) => getIt<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.initializeActivityForm(dart.optionOf(widget.activityManagerForm), dart.optionOf(widget.reservation))),
     child: BlocConsumer<UpdateActivityFormBloc, UpdateActivityFormState>(
-    listenWhen: (p, c) => p.authFailureOrSuccessOptionSaving != c.authFailureOrSuccessOptionSaving || p.authFailureOrSuccessOptionSubmitting != c.authFailureOrSuccessOptionSubmitting || p.authFailureOrSuccessOptionLocation != c.authFailureOrSuccessOptionLocation,
+    listenWhen: (p, c) => p.authFailureOrSuccessOptionSaving != c.authFailureOrSuccessOptionSaving || p.authFailureOrSuccessOptionSubmitting != c.authFailureOrSuccessOptionSubmitting,
     listener: (context, state) {
 
     },
-    buildWhen: (p, c) => p.authFailureOrSuccessOptionSaving != c.authFailureOrSuccessOptionSaving || p.authFailureOrSuccessOptionSubmitting != c.authFailureOrSuccessOptionSubmitting || p.activityCreatorForm != c.activityCreatorForm,
+    buildWhen: (p, c) => p.authFailureOrSuccessOptionSaving != c.authFailureOrSuccessOptionSaving || p.authFailureOrSuccessOptionSubmitting != c.authFailureOrSuccessOptionSubmitting || p.activitySettingsForm != c.activitySettingsForm,
     builder: (context, state) {
         return Scaffold(
           appBar: AppBar(
@@ -89,7 +91,7 @@ class _ActivityRulesToReviewState extends State<ActivityRulesToReview> {
                     Text(AppLocalizations.of(context)!.activityRuleCustomDetailsSubTitle, style: TextStyle(
                         color: widget.model.paletteColor)),
                     SizedBox(height: 25),
-                    _selectedRulesToInclude(context, widget.model, context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRules.ruleOption)
+                    _selectedRulesToInclude(context, widget.model, context.read<UpdateActivityFormBloc>().state.activitySettingsForm.rulesService.ruleOption)
                 ]
               )
             ),

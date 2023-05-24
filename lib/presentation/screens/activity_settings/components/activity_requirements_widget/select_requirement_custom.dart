@@ -1,3 +1,4 @@
+import 'package:check_in_application/auth/update_services/listing_update_create_services/settings_update_create_services/activity_settings/activity_settings_form_bloc.dart';
 import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:flutter/material.dart';
@@ -12,9 +13,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class ActivitySelectCustomRequirement extends StatefulWidget {
 
   final DashboardModel model;
-  final ActivityCreatorForm activityCreatorForm;
+  final ActivityManagerForm activityManagerForm;
+  final ReservationItem reservation;
 
-  const ActivitySelectCustomRequirement({Key? key, required this.model, required this.activityCreatorForm}) : super(key: key);
+  const ActivitySelectCustomRequirement({Key? key, required this.model, required this.activityManagerForm, required this.reservation}) : super(key: key);
 
   @override
   State<ActivitySelectCustomRequirement> createState() => _ActivitySelectCustomRequirementState();
@@ -26,13 +28,13 @@ class _ActivitySelectCustomRequirementState extends State<ActivitySelectCustomRe
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(create: (context) => getIt<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.initializeActivityForm(dart.optionOf(widget.activityCreatorForm))),
+    return BlocProvider(create: (context) => getIt<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.initializeActivityForm(dart.optionOf(widget.activityManagerForm), dart.optionOf(widget.reservation))),
       child: BlocConsumer<UpdateActivityFormBloc, UpdateActivityFormState>(
-        listenWhen: (p, c) => p.authFailureOrSuccessOptionSaving != c.authFailureOrSuccessOptionSaving || p.authFailureOrSuccessOptionSubmitting != c.authFailureOrSuccessOptionSubmitting || p.authFailureOrSuccessOptionLocation != c.authFailureOrSuccessOptionLocation,
+        listenWhen: (p, c) => p.authFailureOrSuccessOptionSaving != c.authFailureOrSuccessOptionSaving || p.authFailureOrSuccessOptionSubmitting != c.authFailureOrSuccessOptionSubmitting,
         listener: (context, state) {
 
         },
-        buildWhen: (p, c) => p.authFailureOrSuccessOptionSaving != c.authFailureOrSuccessOptionSaving || p.authFailureOrSuccessOptionSubmitting != c.authFailureOrSuccessOptionSubmitting || p.activityCreatorForm != c.activityCreatorForm,
+        buildWhen: (p, c) => p.authFailureOrSuccessOptionSaving != c.authFailureOrSuccessOptionSaving || p.authFailureOrSuccessOptionSubmitting != c.authFailureOrSuccessOptionSubmitting || p.activitySettingsForm != c.activitySettingsForm,
         builder: (context, state) {
         return Scaffold(
           appBar: AppBar(
@@ -110,13 +112,13 @@ class _ActivitySelectCustomRequirementState extends State<ActivitySelectCustomRe
                             height: 35,
                             width: 60,
                             child: Center(
-                              child: Text(context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.minimumAgeRequirement.toString(), style: TextStyle(color: widget.model.disabledTextColor)
+                              child: Text(context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.minimumAgeRequirement.toString(), style: TextStyle(color: widget.model.disabledTextColor)
                               ),
                             )
                         ),
                         QuantityButtons(
                             model: widget.model,
-                            initNumber: context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.minimumAgeRequirement,
+                            initNumber: context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.minimumAgeRequirement,
                             counterCallback: (int v) {
 
                               context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.minimumAgeChanged(v));
@@ -138,13 +140,13 @@ class _ActivitySelectCustomRequirementState extends State<ActivitySelectCustomRe
                     child: Text(AppLocalizations.of(context)!.activityRequirementPreferencesAdditional, style: TextStyle(fontWeight: FontWeight.bold, color: widget.model.paletteColor, fontSize: widget.model.questionTitleFontSize)),
                   ),
                   const SizedBox(height: 10),
-                  ...context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.customRequirementOption?.getOrCrash().asMap().map(
+                  ...context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.customRequirementOption?.getOrCrash().asMap().map(
                           (i, value) {
 
                         TextEditingController requirementTextController = TextEditingController();
 
                         if (requirementTextController.text.isEmpty) {
-                          requirementTextController.text = context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.customRequirementOption?.getOrCrash()[i].customDetail ?? '';
+                          requirementTextController.text = context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.customRequirementOption?.getOrCrash()[i].customDetail ?? '';
                         } else {
 
                         }
@@ -162,9 +164,9 @@ class _ActivitySelectCustomRequirementState extends State<ActivitySelectCustomRe
                                     1,
                                     32,
                                     updateText: (value) {
-                                      context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.customRequirementOption?.getOrCrash()[i] = context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.customRequirementOption!.getOrCrash()[i].copyWith(
+                                      context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.customRequirementOption?.getOrCrash()[i] = context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.customRequirementOption!.getOrCrash()[i].copyWith(
                                           customDetail: value);
-                                      context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.customRequirementChanged(context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.customRequirementOption ?? ListK([])));
+                                      // context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.customRequirementChanged(context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.customRequirementOption ?? ListK([])));
                                     }
                                 ),
                               ),
@@ -177,8 +179,8 @@ class _ActivitySelectCustomRequirementState extends State<ActivitySelectCustomRe
                                     icon: Icon(Icons.clear, size: 35, color: widget.model.paletteColor),
                                     onPressed: () {
                                       setState(() {
-                                        context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.customRequirementOption?.getOrCrash().removeAt(i);
-                                        context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.customRequirementChanged(context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.customRequirementOption ?? ListK([])));
+                                        context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.customRequirementOption?.getOrCrash().removeAt(i);
+                                        // context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.customRequirementChanged(context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.customRequirementOption ?? ListK([])));
                                       });
                                     },
                                   ),
@@ -191,7 +193,7 @@ class _ActivitySelectCustomRequirementState extends State<ActivitySelectCustomRe
                     }
                   ).values.toList() ?? [],
                     Visibility(
-                      visible: ((context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.customRequirementOption?.getOrCrash().length ?? 1) < 5),
+                      visible: ((context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.customRequirementOption?.getOrCrash().length ?? 1) < 5),
                       child: TextButton(
                         style: ButtonStyle(
                             backgroundColor: MaterialStateProperty.resolveWith<Color>(
@@ -213,8 +215,8 @@ class _ActivitySelectCustomRequirementState extends State<ActivitySelectCustomRe
                         ),
                         onPressed: () {
                           setState(() {
-                            context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.customRequirementOption?.getOrCrash().add(DetailCustomOption(uid: UniqueId(), customDetail: ''));
-                            context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.customRequirementChanged(context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.customRequirementOption ?? ListK([])));
+                            context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.customRequirementOption?.getOrCrash().add(DetailCustomOption(uid: UniqueId(), customDetail: ''));
+                            // context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.customRequirementChanged(context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.customRequirementOption ?? ListK([])));
                           });
                         },
                         child: Text(AppLocalizations.of(context)!.add, style: TextStyle(color: widget.model.accentColor, fontWeight: FontWeight.bold)),

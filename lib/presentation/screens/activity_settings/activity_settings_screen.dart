@@ -1,4 +1,5 @@
 import 'package:avatar_stack/avatar_stack.dart';
+import 'package:check_in_application/auth/update_services/listing_update_create_services/settings_update_create_services/activity_settings/activity_settings_form_bloc.dart';
 import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
@@ -69,30 +70,30 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
             /// present activity options offered by listing facility.
             ///  TODO: include commercial/retail activity
             ///  TODO: include co-working/office activity
-            return ListTile(
-              onTap: () {
-                Navigator.push(context, MaterialPageRoute(
-                    builder: (_) {
-                      return SelectActivityTypeWidget(
-                        model: widget.model,
-                        activityCreatorForm: context.read<UpdateActivityFormBloc>().state.activityCreatorForm,
-                    );
-                  })
-                );
-              },
-              title: Text('The Activity'),
-              subtitle: Text(getActivityTypeOptions(context).firstWhere((element) => element.activityType == context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityType.activityType).title ?? 'Select an Activity Type'),
-              leading: Icon(getActivityTypeOptions(context).firstWhere((element) => element.activityType == context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityType.activityType).icon ?? Icons.house_outlined, color: widget.model.paletteColor),
-              trailing: Icon(Icons.keyboard_arrow_right_rounded, color: widget.model.paletteColor),
-            );
+            // return ListTile(
+            //   onTap: () {
+            //     Navigator.push(context, MaterialPageRoute(
+            //         builder: (_) {
+            //           return SelectActivityTypeWidget(
+            //             model: widget.model,
+            //             activityManagerForm: context.read<UpdateActivityFormBloc>().state.activityManagerForm,
+            //         );
+            //       })
+            //     );
+            //   },
+            //   title: Text('The Activity'),
+            //   subtitle: Text(getActivityTypeOptions().firstWhere((element) => element.activityType == context.read<UpdateActivityFormBloc>().state.activityManagerForm.activityType.activityType).title ?? 'Select an Activity Type'),
+            //   leading: Icon(getActivityTypeOptions().firstWhere((element) => element.activityType == context.read<UpdateActivityFormBloc>().state.activityManagerForm.activityType.activityType).icon ?? Icons.house_outlined, color: widget.model.paletteColor),
+            //   trailing: Icon(Icons.keyboard_arrow_right_rounded, color: widget.model.paletteColor),
+            // );
           case ActivityTypeNav.selectActivity:
             return ListTile(
               onTap: () {
 
               },
               title: const Text('About the Activity'),
-              subtitle: Text(getActivityOptions(context).firstWhere((element) => element.activity == context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityType.activity).title ?? ''),
-              leading: Icon(getActivityOptions(context).firstWhere((element) => element.activity == context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityType.activity).icon ?? Icons.house_outlined, color: widget.model.paletteColor),
+              subtitle: Text(getTitleForActivityOption(context, context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityType.activityId) ?? ''),
+              leading:  Icon(getIconDataForActivity(context, context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityType.activityId), color: widget.model.paletteColor),
               trailing: Icon(Icons.keyboard_arrow_right_rounded, color: widget.model.paletteColor),
             );
         }
@@ -101,26 +102,26 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
 
           switch (currentNav.activityPreSetup) {
             case ActivityPreSetup.addFacilityActivityContactDetails:
-              return ActivityPresetContactDetails(
-                model: widget.model,
-              );
+              // return ActivityPresetContactDetails(
+              //   model: widget.model,
+              // );
             case ActivityPreSetup.addFacilityActivityOrganizationDetails:
               /// linking your community...
-              return ActivityPresetCommunityLinkToPreview(
-                model: widget.model,
-              );
+              // return ActivityPresetCommunityLinkToPreview(
+              //   model: widget.model,
+              // );
             case ActivityPreSetup.selectActivitySetupClass:
-              return ActivityPresetClassPreview(
-                model: widget.model,
-              );
+              // return ActivityPresetClassPreview(
+              //   model: widget.model,
+              // );
             case ActivityPreSetup.addClassPlayers:
-              return ActivityPresetClassPlayersPreview(
-                model: widget.model,
-              );
+              // return ActivityPresetClassPlayersPreview(
+              //   model: widget.model,
+              // );
             case ActivityPreSetup.selectActivityGameTeams:
-              return ActivityPresetGamePreview(
-                model: widget.model,
-              );
+              // return ActivityPresetGamePreview(
+              //   model: widget.model,
+              // );
           }
         break;
       // case ActivityCreatorFormNavSection.selectLocationType:
@@ -131,7 +132,7 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
       //   break;
       case ActivityCreatorFormNavSection.selectBookingDates:
 
-        if (!(context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAvailability.isActive)) {
+        // if (!(context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAvailability.isActive)) {
          return  viewListOfSelectedSlots(
             context,
             widget.model,
@@ -152,26 +153,26 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
 
             }
           );
-        } else {
-          switch (currentNav.activityAvailableDatesNav) {
-            case ActivityAvailableDatesNav.selectDurationType:
-              return ActivityAvailabilitySelectDurationTypePreview(
-                  model: widget.model
-              );
-            case ActivityAvailableDatesNav.selectOperatingHours:
-            // TODO: Handle this case.
-              break;
-            case ActivityAvailableDatesNav.selectSessionType:
-            // TODO: Handle this case.
-              break;
-            case ActivityAvailableDatesNav.selectPreBookingType:
-            // TODO: Handle this case.
-              break;
-            case ActivityAvailableDatesNav.reviewDateSetup:
-            // TODO: Handle this case.
-              break;
-          }
-        }
+        // } else {
+        //   switch (currentNav.activityAvailableDatesNav) {
+        //     case ActivityAvailableDatesNav.selectDurationType:
+        //       return ActivityAvailabilitySelectDurationTypePreview(
+        //           model: widget.model
+        //       );
+        //     case ActivityAvailableDatesNav.selectOperatingHours:
+        //     // TODO: Handle this case.
+        //       break;
+        //     case ActivityAvailableDatesNav.selectSessionType:
+        //     // TODO: Handle this case.
+        //       break;
+        //     case ActivityAvailableDatesNav.selectPreBookingType:
+        //     // TODO: Handle this case.
+        //       break;
+        //     case ActivityAvailableDatesNav.reviewDateSetup:
+        //     // TODO: Handle this case.
+        //       break;
+        //   }
+        // }
         break;
       case ActivityCreatorFormNavSection.selectBackground:
        switch (currentNav.activityBackgroundNav) {
@@ -180,26 +181,31 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
            /// are changes to profile image list also a form of uploading a new post?
            /// or is the profile image just a separate way of starting a new post and previewing your activity calls --- too confusing.
            /// the point here is can the profile images and posts be consolidated in some way?
-           return ActivityBackgroundPreview(model: widget.model);
+           return ActivityBackgroundPreview(
+               reservation: widget.reservationItem,
+               model: widget.model
+           );
          case ActivityBackgroundNav.addMoreActivityBackground:
            return ListTile(
                onTap: () {
                  Navigator.push(context, MaterialPageRoute(
                    builder: (_) {
                      return ActivityAddMoreBackgroundInfoWidget(
+                       reservation: widget.reservationItem,
                        model: widget.model,
-                       activityCreatorForm: context.read<UpdateActivityFormBloc>().state.activityCreatorForm,
+                       activityManagerForm: context.read<UpdateActivityFormBloc>().state.activitySettingsForm,
                      );
                    })
                 );
                },
                leading: Icon(Icons.more_horiz, color: widget.model.paletteColor),
                title: const Text('More to Know..'),
-               subtitle: (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityBackground.activityDescription2 != null) ? Text(context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityBackground.activityDescription2!.value.fold((l) => 'Add a Description', (r) => r)) : const Text('Add More'),
+               subtitle: (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityBackground.activityDescription2 != null) ? Text(context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityBackground.activityDescription2!.value.fold((l) => 'Add a Description', (r) => r)) : const Text('Add More'),
                trailing: Icon(Icons.keyboard_arrow_right_rounded, color: widget.model.paletteColor),
              );
          case ActivityBackgroundNav.addClassActivityBackground:
            return ActivityClassBackgroundPreview(
+             reservation: widget.reservationItem,
              model: widget.model,
          );
        }
@@ -213,8 +219,9 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
                 Navigator.push(context, MaterialPageRoute(
                     builder: (_) {
                       return ActivitySelectRequirementsBasics(
+                        reservation: widget.reservationItem,
                         model: widget.model,
-                        activityCreatorForm: context.read<UpdateActivityFormBloc>().state.activityCreatorForm,
+                        activityManagerForm: context.read<UpdateActivityFormBloc>().state.activitySettingsForm,
                       );
                   })
                 );
@@ -224,16 +231,16 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.isSeventeenAndUnder) Text('17 and Under'),
-                  if (!(context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.isSeventeenAndUnder)) Text('Minimum Age: ${context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.minimumAgeRequirement}'),
+                  if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.isSeventeenAndUnder) Text('17 and Under'),
+                  if (!(context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.isSeventeenAndUnder)) Text('Minimum Age: ${context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.minimumAgeRequirement}'),
 
-                  if (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.isMensOnly ?? false) Text('Mens Only'),
-                  if (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.isWomenOnly ?? false) Text('Womens Only'),
-                  if (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.isCoEdOnly ?? false) Text('Co-Ed'),
+                  if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.isMensOnly ?? false) Text('Mens Only'),
+                  if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.isWomenOnly ?? false) Text('Womens Only'),
+                  if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.isCoEdOnly ?? false) Text('Co-Ed'),
 
-                  if ((context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.skillLevelExpectation ?? []).isEmpty) Text('Add a Skill Level'),
-                  if ((context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.skillLevelExpectation ?? []).isNotEmpty) Text('Skill Style: '),
-                  if ((context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.skillLevelExpectation ?? []).isNotEmpty) ...context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.skillLevelExpectation?.map(
+                  if ((context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.skillLevelExpectation ?? []).isEmpty) Text('Add a Skill Level'),
+                  if ((context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.skillLevelExpectation ?? []).isNotEmpty) Text('Skill Style: '),
+                  if ((context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.skillLevelExpectation ?? []).isNotEmpty) ...context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.skillLevelExpectation?.map(
                           (e) => Text(e.name)
                   ).toList() ?? []
                 ],
@@ -248,8 +255,9 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
                 Navigator.push(context, MaterialPageRoute(
                     builder: (_) {
                       return ActivitySelectCustomRequirement(
+                        reservation: widget.reservationItem,
                         model: widget.model,
-                        activityCreatorForm: context.read<UpdateActivityFormBloc>().state.activityCreatorForm,
+                        activityManagerForm: context.read<UpdateActivityFormBloc>().state.activitySettingsForm,
                       );
                     })
                 );
@@ -260,7 +268,7 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('Add Special Requirements'),
-                  ...context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.customRequirementOption?.value.fold((l) => [], (r) => r.map(
+                  ...context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.customRequirementOption?.value.fold((l) => [], (r) => r.map(
                           (e) => Text(e.customDetail ?? '')
                     )
                   ) ?? []
@@ -275,8 +283,9 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
                 Navigator.push(context, MaterialPageRoute(
                     builder: (_) {
                       return ActivityRequirementProvided(
+                        reservation: widget.reservationItem,
                         model: widget.model,
-                        activityCreatorForm: context.read<UpdateActivityFormBloc>().state.activityCreatorForm,
+                        activityManagerForm: context.read<UpdateActivityFormBloc>().state.activitySettingsForm,
                       );
                     })
                 );
@@ -287,10 +296,10 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text('Add What You Will Provide'),
-                  if (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.isFacilityGear ?? false) const Text('Gear/Clothing Will Be Provided'),
-                  if (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.isEquipmentProvided ?? false) const Text('Equipment Will Be Provided'),
-                  if (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.isAnalyticsProvided ?? false) const Text('Analytics Will Be Provided'),
-                  if (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.isOfficiatorProvided ?? false) const Text('Officiators Will Be Provided'),
+                  if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.isFacilityGear ?? false) const Text('Gear/Clothing Will Be Provided'),
+                  if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.isEquipmentProvided ?? false) const Text('Equipment Will Be Provided'),
+                  if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.isAnalyticsProvided ?? false) const Text('Analytics Will Be Provided'),
+                  if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.isOfficiatorProvided ?? false) const Text('Officiators Will Be Provided'),
                 ],
               ),
               leading: Icon(Icons.front_hand_sharp, color: widget.model.paletteColor),
@@ -302,8 +311,9 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
                 Navigator.push(context, MaterialPageRoute(
                     builder: (_) {
                       return ActivityRequirementEventBasics(
+                        reservation: widget.reservationItem,
                         model: widget.model,
-                        activityCreatorForm: context.read<UpdateActivityFormBloc>().state.activityCreatorForm,
+                        activityManagerForm: context.read<UpdateActivityFormBloc>().state.activitySettingsForm,
                     );
                   })
                 );
@@ -327,8 +337,9 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
                 Navigator.push(context, MaterialPageRoute(
                     builder: (_) {
                       return ActivityRequirementEventSelling(
+                        reservation: widget.reservationItem,
                         model: widget.model,
-                        activityCreatorForm: context.read<UpdateActivityFormBloc>().state.activityCreatorForm,
+                        activityManagerForm: context.read<UpdateActivityFormBloc>().state.activitySettingsForm,
                     );
                   })
                 );
@@ -338,10 +349,10 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.eventActivityRulesRequirement == null || (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.eventActivityRulesRequirement?.listOfMerchants.isEmpty ?? false)) const Text('Add Vendors'),
-                  if (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.eventActivityRulesRequirement?.listOfMerchants.isNotEmpty ?? false) ...context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.eventActivityRulesRequirement?.listOfMerchants.map(
-                      (e) =>  Text(e.name.value.fold((l) => '', (r) => r))
-                  ).toList() ?? []
+                  // if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.eventActivityRulesRequirement == null || (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.eventActivityRulesRequirement?.listOfMerchants.isEmpty ?? false)) const Text('Add Vendors'),
+                  // if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.eventActivityRulesRequirement?.listOfMerchants.isNotEmpty ?? false) ...context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.eventActivityRulesRequirement?.listOfMerchants.map(
+                  //     (e) =>  Text(e.name.value.fold((l) => '', (r) => r))
+                  // ).toList() ?? []
                 ],
               ),
               leading: Icon(Icons.add_business, color: widget.model.paletteColor),
@@ -353,8 +364,9 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
                 Navigator.push(context, MaterialPageRoute(
                     builder: (_) {
                       return ActivityRequirementEventProvided(
+                        reservation: widget.reservationItem,
                         model: widget.model,
-                        activityCreatorForm: context.read<UpdateActivityFormBloc>().state.activityCreatorForm,
+                        activityManagerForm: context.read<UpdateActivityFormBloc>().state.activitySettingsForm,
                       );
                   })
                 );
@@ -366,10 +378,10 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                     const Text('Add What You Will Provide'),
-                    if (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.isEquipmentProvided ?? false) const Text('Equipment Will be Provided'),
-                    if (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.eventActivityRulesRequirement?.isAlcoholProvided ?? false) const Text('Alcohol Will be Provided'),
-                    if (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.eventActivityRulesRequirement?.isFoodProvided ?? false) const Text('Food Will be Provided'),
-                    if (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.eventActivityRulesRequirement?.isSecurityProvided ?? false) const Text('Security Will be Provided'),
+                    if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.isEquipmentProvided ?? false) const Text('Equipment Will be Provided'),
+                    if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.eventActivityRulesRequirement?.isAlcoholProvided ?? false) const Text('Alcohol Will be Provided'),
+                    if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.eventActivityRulesRequirement?.isFoodProvided ?? false) const Text('Food Will be Provided'),
+                    if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.eventActivityRulesRequirement?.isSecurityProvided ?? false) const Text('Security Will be Provided'),
                 ],
               ),
               leading: Icon(Icons.front_hand_sharp, color: widget.model.paletteColor),
@@ -387,8 +399,9 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
                 Navigator.push(context, MaterialPageRoute(
                     builder: (_) {
                       return ActivityRulesToReview(
+                        reservation: widget.reservationItem,
                         model: widget.model,
-                        activityCreatorForm: context.read<UpdateActivityFormBloc>().state.activityCreatorForm,
+                        activityManagerForm: context.read<UpdateActivityFormBloc>().state.activitySettingsForm,
                       );
                     })
                 );
@@ -400,7 +413,7 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('Review The Rules'),
-                  ...context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRules.ruleOption.value.fold((l) => [Text('Add Rules For Attendees')], (r) => r.map(
+                  ...context.read<UpdateActivityFormBloc>().state.activitySettingsForm.rulesService.ruleOption.value.fold((l) => [Text('Add Rules For Attendees')], (r) => r.map(
                           (e) => (e.active ?? false) ? Text(e.detail ?? '') : Container()).toList())
                 ],
               ),
@@ -413,8 +426,9 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
                 Navigator.push(context, MaterialPageRoute(
                     builder: (_) {
                       return ActivityRuleToCreate(
+                        reservation: widget.reservationItem,
                         model: widget.model,
-                        activityCreatorForm: context.read<UpdateActivityFormBloc>().state.activityCreatorForm,
+                        activityManagerForm: context.read<UpdateActivityFormBloc>().state.activitySettingsForm,
                     );
                   })
                 );
@@ -424,7 +438,7 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    ...context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRules.customRuleOption?.value.fold((l) => [const Text('Add Special Rules')], (r) => r.map(
+                    ...context.read<UpdateActivityFormBloc>().state.activitySettingsForm.rulesService.customRuleOption?.value.fold((l) => [const Text('Add Special Rules')], (r) => r.map(
                             (e) => Text(e.customDetail ?? ''))
                     ) ?? [],
                 ],
@@ -432,6 +446,33 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
               leading: Icon(Icons.rule_rounded, color: widget.model.paletteColor),
               trailing: Icon(Icons.keyboard_arrow_right_rounded, color: widget.model.paletteColor),
             );
+          case ActivityRulesNav.addCustomRules:
+            return ListTile(
+              onTap: () {
+
+              },
+              title: const Text('Custom Rules'),
+              subtitle: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Add Custom Rules'),
+
+                ],
+              ),
+              leading: Icon(Icons.checklist_rounded, color: widget.model.paletteColor),
+            );
+            break;
+          case ActivityRulesNav.addCheckInRules:
+            return ListTile(
+              onTap: () {
+
+              },
+              title: const Text('Check In Form'),
+              subtitle: Text('Add Check In Forms'),
+              leading: Icon(Icons.sticky_note_2_outlined, color: widget.model.paletteColor),
+            );
+            break;
           case ActivityRulesNav.addActivityRewardRules:
             // TODO: Handle this case.
             break;
@@ -441,8 +482,9 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
                 Navigator.push(context, MaterialPageRoute(
                     builder: (_) {
                       return ActivityRuleGameToCreate(
+                        reservation: widget.reservationItem,
                         model: widget.model,
-                        activityCreatorForm: context.read<UpdateActivityFormBloc>().state.activityCreatorForm,
+                        activityManagerForm: context.read<UpdateActivityFormBloc>().state.activitySettingsForm,
                       );
                     })
                 );
@@ -475,8 +517,9 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
                 Navigator.push(context, MaterialPageRoute(
                     builder: (_) {
                       return ActivityAttendeeSelectType(
+                        reservation: widget.reservationItem,
                         model: widget.model,
-                        activityCreatorForm: context.read<UpdateActivityFormBloc>().state.activityCreatorForm,
+                        activityManagerForm: context.read<UpdateActivityFormBloc>().state.activitySettingsForm,
                       );
                     })
                 );
@@ -486,10 +529,10 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAttendance.isLimitedAttendance == null) const Text('Add Attendance Limit'),
-                  if (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAttendance.isLimitedAttendance ?? false) Text('Attendance Limit: ${context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAttendance.attendanceLimit ?? 0}'),
-                  if (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAttendance.isTicketBased ?? false) const Text('Tickets Holders Only'),
-                  if (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAttendance.isPassBased ?? false) const Text('Pass Holders Only')
+                  if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.isLimitedAttendance == null) const Text('Add Attendance Limit'),
+                  if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.isLimitedAttendance ?? false) Text('Attendance Limit: ${context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.attendanceLimit ?? 0}'),
+                  if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.isTicketBased ?? false) const Text('Tickets Holders Only'),
+                  if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.isPassBased ?? false) const Text('Pass Holders Only')
                 ],
               ),
               leading: Icon(Icons.paste_rounded, color: widget.model.paletteColor),
@@ -501,8 +544,9 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
                 Navigator.push(context, MaterialPageRoute(
                     builder: (_) {
                       return ActivityAttendeeCreateTicket(
+                        reservation: widget.reservationItem,
                         model: widget.model,
-                        activityCreatorForm: context.read<UpdateActivityFormBloc>().state.activityCreatorForm,
+                        activityManagerForm: context.read<UpdateActivityFormBloc>().state.activitySettingsForm,
                       );
                     })
                 );
@@ -517,8 +561,9 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
                 Navigator.push(context, MaterialPageRoute(
                     builder: (_) {
                       return ActivityAttendeeCreatePasses(
+                        reservation: widget.reservationItem,
                         model: widget.model,
-                        activityCreatorForm: context.read<UpdateActivityFormBloc>().state.activityCreatorForm,
+                        activityManagerForm: context.read<UpdateActivityFormBloc>().state.activitySettingsForm,
                       );
                     })
                 );
@@ -533,8 +578,9 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
                Navigator.push(context, MaterialPageRoute(
                    builder: (_) {
                      return ActivityAttendeeOverviewReview(
+                       reservation: widget.reservationItem,
                        model: widget.model,
-                       activityCreatorForm: context.read<UpdateActivityFormBloc>().state.activityCreatorForm,
+                       activityManagerForm: context.read<UpdateActivityFormBloc>().state.activitySettingsForm,
                    );
                  })
                );
@@ -545,65 +591,8 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
            );
         }
         break;
-      case ActivityCreatorFormNavSection.selectPricing:
-        switch (currentNav.activityPricingNav) {
 
-          case ActivityPricingNav.reviewCostingBreakdown:
-            return ListTile(
-              onTap: () {
-                Navigator.push(context, MaterialPageRoute(
-                    builder: (_) {
-                      return ActivityReviewPricingBreakdown(
-                        model: widget.model,
-                      );
-                    })
-                );
 
-              },
-              title: Text('Pricing Overview'),
-              leading: Icon(Icons.info_outline, color: widget.model.paletteColor),
-              trailing: Icon(Icons.keyboard_arrow_right_rounded, color: widget.model.paletteColor),
-            );
-          case ActivityPricingNav.addDynamicBasedCosting:
-            return ListTile(
-              onTap: () {
-                Navigator.push(context, MaterialPageRoute(
-                    builder: (_) {
-                      return ActivityAddPricingRequirement(
-                        model: widget.model,
-                        activityCreatorForm: context.read<UpdateActivityFormBloc>().state.activityCreatorForm,
-                      );
-                    })
-                );
-              },
-              title: Text('Costs'),
-              leading: Icon(Icons.monetization_on_outlined, color: widget.model.paletteColor),
-              trailing: Icon(Icons.keyboard_arrow_right_rounded, color: widget.model.paletteColor),
-            );
-          case ActivityPricingNav.selectCancellationType:
-            return ListTile(
-              onTap: () {
-                Navigator.push(context, MaterialPageRoute(
-                    builder: (_) {
-                      return ActivitySelectPricingCancellation(
-                        model: widget.model,
-                        activityCreatorForm: context.read<UpdateActivityFormBloc>().state.activityCreatorForm,
-                      );
-                    })
-                );
-              },
-              title: Text('Refunds'),
-              leading: Icon(Icons.keyboard_return_rounded, color: widget.model.paletteColor),
-              trailing: Icon(Icons.keyboard_arrow_right_rounded, color: widget.model.paletteColor),
-            );
-            // ActivitySelectPricingCancellation
-            // TODO: Handle this case.
-            break;
-        }
-        break;
-      case ActivityCreatorFormNavSection.viewSummary:
-        // TODO: Handle this case.
-        break;
     }
 
     return ListTile(
@@ -626,28 +615,28 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
   }
 
   Widget getActivityFromReservation() {
-    return BlocProvider(create: (context) =>  getIt<ActivityManagerWatcherBloc>()..add(ActivityManagerWatcherEvent.watchAllActivityCreatorFormsStarted(true, widget.reservationItem.reservationId.getOrCrash())),
+    return BlocProvider(create: (context) =>  getIt<ActivityManagerWatcherBloc>()..add(ActivityManagerWatcherEvent.watchAllActivityManagerFormsStarted(true, widget.reservationItem.reservationId.getOrCrash())),
       child: BlocBuilder<ActivityManagerWatcherBloc, ActivityManagerWatcherState>(
         builder: (context, state) {
           return state.maybeMap(
               loadInProgress: (_) => JumpingDots(color: widget.model.paletteColor, numberOfDots: 3),
-              loadAllActivityCreatorFormsFailure: (_) => getMainContainer(ActivityCreatorForm.empty()),
-              loadAllActivityCreatorFormsSuccess: (item) => item.items.isNotEmpty ? getMainContainer(item.items.first) : getMainContainer(ActivityCreatorForm.empty()),
-              orElse: () => getMainContainer(ActivityCreatorForm.empty())
+              loadAllActivityManagerFormsFailure: (_) => getMainContainer(ActivityManagerForm.empty()),
+              loadAllActivityManagerFormsSuccess: (item) => item.items.isNotEmpty ? getMainContainer(item.items.first) : getMainContainer(ActivityManagerForm.empty()),
+              orElse: () => getMainContainer(ActivityManagerForm.empty())
           );
         },
       ),
     );
   }
   
-  Widget getMainContainer(ActivityCreatorForm activityForm) {
-    return BlocProvider(create: (context) => getIt<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.initializeActivityForm(dart.optionOf(activityForm))),
+  Widget getMainContainer(ActivityManagerForm activityForm) {
+    return BlocProvider(create: (context) => getIt<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.initializeActivityForm(dart.optionOf(activityForm), dart.optionOf(widget.reservationItem))),
         child: BlocConsumer<UpdateActivityFormBloc, UpdateActivityFormState>(
-          listenWhen: (p, c) => p.authFailureOrSuccessOptionSaving != c.authFailureOrSuccessOptionSaving || p.authFailureOrSuccessOptionSubmitting != c.authFailureOrSuccessOptionSubmitting || p.authFailureOrSuccessOptionLocation != c.authFailureOrSuccessOptionLocation,
+          listenWhen: (p, c) => p.authFailureOrSuccessOptionSaving != c.authFailureOrSuccessOptionSaving || p.authFailureOrSuccessOptionSubmitting != c.authFailureOrSuccessOptionSubmitting,
           listener: (context, state) {
 
       },
-      buildWhen: (p, c) => p.authFailureOrSuccessOptionSaving != c.authFailureOrSuccessOptionSaving || p.authFailureOrSuccessOptionSubmitting != c.authFailureOrSuccessOptionSubmitting || p.activityCreatorForm != c.activityCreatorForm,
+      buildWhen: (p, c) => p.authFailureOrSuccessOptionSaving != c.authFailureOrSuccessOptionSaving || p.authFailureOrSuccessOptionSubmitting != c.authFailureOrSuccessOptionSubmitting || p.activitySettingsForm != c.activitySettingsForm,
       builder: (context, state) {
 
         return SingleChildScrollView(

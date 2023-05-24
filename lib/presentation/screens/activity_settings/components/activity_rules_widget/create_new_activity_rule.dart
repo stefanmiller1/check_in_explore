@@ -1,3 +1,4 @@
+import 'package:check_in_application/auth/update_services/listing_update_create_services/settings_update_create_services/activity_settings/activity_settings_form_bloc.dart';
 import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:flutter/material.dart';
@@ -12,9 +13,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class ActivityRuleToCreate extends StatefulWidget {
 
   final DashboardModel model;
-  final ActivityCreatorForm activityCreatorForm;
+  final ActivityManagerForm activityManagerForm;
+  final ReservationItem reservation;
 
-  const ActivityRuleToCreate({Key? key, required this.model, required this.activityCreatorForm}) : super(key: key);
+  const ActivityRuleToCreate({Key? key, required this.model, required this.activityManagerForm, required this.reservation}) : super(key: key);
 
   @override
   State<ActivityRuleToCreate> createState() => _ActivityRuleToCreateState();
@@ -26,13 +28,13 @@ class _ActivityRuleToCreateState extends State<ActivityRuleToCreate> {
   
   @override
   Widget build(BuildContext context) {
-   return BlocProvider(create: (context) => getIt<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.initializeActivityForm(dart.optionOf(widget.activityCreatorForm))),
+   return BlocProvider(create: (context) => getIt<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.initializeActivityForm(dart.optionOf(widget.activityManagerForm), dart.optionOf(widget.reservation))),
     child: BlocConsumer<UpdateActivityFormBloc, UpdateActivityFormState>(
-    listenWhen: (p, c) => p.authFailureOrSuccessOptionSaving != c.authFailureOrSuccessOptionSaving || p.authFailureOrSuccessOptionSubmitting != c.authFailureOrSuccessOptionSubmitting || p.authFailureOrSuccessOptionLocation != c.authFailureOrSuccessOptionLocation,
+    listenWhen: (p, c) => p.authFailureOrSuccessOptionSaving != c.authFailureOrSuccessOptionSaving || p.authFailureOrSuccessOptionSubmitting != c.authFailureOrSuccessOptionSubmitting,
     listener: (context, state) {
 
     },
-    buildWhen: (p, c) => p.authFailureOrSuccessOptionSaving != c.authFailureOrSuccessOptionSaving || p.authFailureOrSuccessOptionSubmitting != c.authFailureOrSuccessOptionSubmitting || p.activityCreatorForm != c.activityCreatorForm,
+    buildWhen: (p, c) => p.authFailureOrSuccessOptionSaving != c.authFailureOrSuccessOptionSaving || p.authFailureOrSuccessOptionSubmitting != c.authFailureOrSuccessOptionSubmitting || p.activitySettingsForm != c.activitySettingsForm,
     builder: (context, state) {
          return Scaffold(
              appBar: AppBar(
@@ -72,11 +74,11 @@ class _ActivityRuleToCreateState extends State<ActivityRuleToCreate> {
                   ),
                 ),
                 SizedBox(height: 10),
-                _selectedCustomRulesToInclude(context, widget.model, context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRules.customRuleOption),
+                _selectedCustomRulesToInclude(context, widget.model, context.read<UpdateActivityFormBloc>().state.activitySettingsForm.rulesService.customRuleOption),
 
                 Visibility(
-                  visible: context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityType.activity == ProfileActivityOption.camp ||
-                      context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityType.activityType == ProfileActivityTypeOption.classesLessons,
+                  visible: context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityType.activity == ProfileActivityOption.camp ||
+                      context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityType.activityType == ProfileActivityTypeOption.classesLessons,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -128,9 +130,9 @@ class _ActivityRuleToCreateState extends State<ActivityRuleToCreate> {
                                               return widget.model.paletteColor.withOpacity(0.1);
                                             }
                                             if (states.contains(MaterialState.hovered)) {
-                                              return (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRules.skillLevelReached?.contains(e) ?? false) ? widget.model.paletteColor : widget.model.paletteColor.withOpacity(0.1);
+                                              return (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.rulesService.skillLevelReached?.contains(e) ?? false) ? widget.model.paletteColor : widget.model.paletteColor.withOpacity(0.1);
                                             }
-                                            return (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRules.skillLevelReached?.contains(e) ?? false) ? widget.model.paletteColor : Colors.transparent; // Use the component's default.
+                                            return (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.rulesService.skillLevelReached?.contains(e) ?? false) ? widget.model.paletteColor : Colors.transparent; // Use the component's default.
                                           },
                                         ),
                                         shape: MaterialStateProperty.all<RoundedRectangleBorder>(
@@ -142,15 +144,15 @@ class _ActivityRuleToCreateState extends State<ActivityRuleToCreate> {
                                       onPressed: () {
                                         setState(() {
 
-                                          if (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRules.skillLevelReached?.contains(e) ?? false) {
-                                            context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRules.skillLevelReached?.remove(e);
+                                          if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.rulesService.skillLevelReached?.contains(e) ?? false) {
+                                            context.read<UpdateActivityFormBloc>().state.activitySettingsForm.rulesService.skillLevelReached?.remove(e);
                                           } else {
-                                            context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRules.skillLevelReached?.add(e);
+                                            context.read<UpdateActivityFormBloc>().state.activitySettingsForm.rulesService.skillLevelReached?.add(e);
                                           }
-                                          context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.skillLevelToReachChanged(context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRules.skillLevelReached ?? []));
+                                          context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.skillLevelToReachChanged(context.read<UpdateActivityFormBloc>().state.activitySettingsForm.rulesService.skillLevelReached ?? []));
                                         });
                                       },
-                                  child: Text(getSkillTypeName(context, e), style: TextStyle(color: (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRules.skillLevelReached?.contains(e) ?? false) ? widget.model.accentColor : widget.model.paletteColor, fontWeight: (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRules.skillLevelReached?.contains(e) ?? false) ? FontWeight.bold : FontWeight.normal)),
+                                  child: Text(getSkillTypeName(context, e), style: TextStyle(color: (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.rulesService.skillLevelReached?.contains(e) ?? false) ? widget.model.accentColor : widget.model.paletteColor, fontWeight: (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.rulesService.skillLevelReached?.contains(e) ?? false) ? FontWeight.bold : FontWeight.normal)),
                                 )
                               ),
                             ),
@@ -202,8 +204,8 @@ class _ActivityRuleToCreateState extends State<ActivityRuleToCreate> {
                               60,
                               updateText: (value) {
 
-                                context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRules.customRuleOption?.getOrCrash()[i] = context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRules.customRuleOption!.getOrCrash()[i].copyWith(customDetail: value);
-                                context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.customRuleOptionChanged(context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRules.customRuleOption ?? ListK([])));
+                                context.read<UpdateActivityFormBloc>().state.activitySettingsForm.rulesService.customRuleOption?.getOrCrash()[i] = context.read<UpdateActivityFormBloc>().state.activitySettingsForm.rulesService.customRuleOption!.getOrCrash()[i].copyWith(customDetail: value);
+                                context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.customRuleOptionChanged(context.read<UpdateActivityFormBloc>().state.activitySettingsForm.rulesService.customRuleOption ?? ListK([])));
 
                               }
                           ),
@@ -216,8 +218,8 @@ class _ActivityRuleToCreateState extends State<ActivityRuleToCreate> {
                             child: TextButton(onPressed: () {
                               setState(() {
 
-                                context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRules.customRuleOption?.getOrCrash().removeAt(i);
-                                    context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.customRuleOptionChanged(context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRules.customRuleOption ?? ListK([])));
+                                context.read<UpdateActivityFormBloc>().state.activitySettingsForm.rulesService.customRuleOption?.getOrCrash().removeAt(i);
+                                    context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.customRuleOptionChanged(context.read<UpdateActivityFormBloc>().state.activitySettingsForm.rulesService.customRuleOption ?? ListK([])));
                                   
                                 
                               });
@@ -234,15 +236,15 @@ class _ActivityRuleToCreateState extends State<ActivityRuleToCreate> {
             ).values.toList() ?? [],
           SizedBox(height: 10),
           Visibility(
-            visible: (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRules.customRuleOption?.getOrCrash().length ?? 1) < 5,
+            visible: (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.rulesService.customRuleOption?.getOrCrash().length ?? 1) < 5,
             child: Center(
               child: IconButton(onPressed: () {
                 setState(() {
 
-                  if ((context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRules.customRuleOption?.getOrCrash().length ?? 1) < 5) {
+                  if ((context.read<UpdateActivityFormBloc>().state.activitySettingsForm.rulesService.customRuleOption?.getOrCrash().length ?? 1) < 5) {
 
                     customDetailOptionList?.getOrCrash().add(DetailCustomOption(uid: UniqueId(), customDetail: ''));
-                    context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.customRuleOptionChanged(context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRules.customRuleOption ?? ListK([])));
+                    context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.customRuleOptionChanged(context.read<UpdateActivityFormBloc>().state.activitySettingsForm.rulesService.customRuleOption ?? ListK([])));
                   }
 
                 });

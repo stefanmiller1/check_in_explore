@@ -35,14 +35,14 @@ class _SearchTypeBarState extends State<SearchTypeBar> with TickerProviderStateM
   void initState() {
     tabController = TabController(
       initialIndex: 0,
-      length: getActivityOptions(context).length,
+      length: getActivityOptions().length,
       vsync: this,
     );
 
     if (context.read<ListingsSearchRequirementsBloc>().state.activtityTypeId == null) {
-      currentActivityOption ??= getActivityOptions(context)[0];
+      currentActivityOption ??= getActivityOptions()[0];
     } else {
-      currentActivityOption = getActivityOptions(context).firstWhere((element) => element.activityId == context.read<ListingsSearchRequirementsBloc>().state.activtityTypeId);
+      currentActivityOption = getActivityOptions().firstWhere((element) => element.activityId == context.read<ListingsSearchRequirementsBloc>().state.activtityTypeId);
     }
 
     scrollController.addListener(() {
@@ -62,12 +62,12 @@ class _SearchTypeBarState extends State<SearchTypeBar> with TickerProviderStateM
         controller: scrollController,
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 4),
-        itemCount: getActivityOptions(context).length,
+        itemCount: getActivityOptions().length,
         itemBuilder: (context, index) {
-          final activityItem = getActivityOptions(context)[index];
+          final activityItem = getActivityOptions()[index];
 
-          double selectedWidth = 50 + ((getTitleForActivityOption(context, activityItem.activity)?.length ?? 1) * 13);
-          _aboveItems = (scrollController.offset)~/((MediaQuery.of(context).size.width + 35)/getActivityOptions(context).length);
+          double selectedWidth = 50 + ((getTitleForActivityOption(context, activityItem.activityId)?.length ?? 1) * 13);
+          _aboveItems = (scrollController.offset)~/((MediaQuery.of(context).size.width + 35)/getActivityOptions().length);
 
           _belowItems = _aboveItems;
           bool isFirstItem = index >= _aboveItems && index <= _belowItems;

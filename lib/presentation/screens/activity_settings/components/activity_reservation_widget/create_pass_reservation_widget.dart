@@ -1,3 +1,4 @@
+import 'package:check_in_application/auth/update_services/listing_update_create_services/settings_update_create_services/activity_settings/activity_settings_form_bloc.dart';
 import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
@@ -12,9 +13,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class ActivityAttendeeCreatePasses extends StatefulWidget {
 
   final DashboardModel model;
-  final ActivityCreatorForm activityCreatorForm;
+  final ActivityManagerForm activityManagerForm;
+  final ReservationItem reservation;
 
-  const ActivityAttendeeCreatePasses({Key? key, required this.model, required this.activityCreatorForm}) : super(key: key);
+  const ActivityAttendeeCreatePasses({Key? key, required this.model, required this.activityManagerForm, required this.reservation}) : super(key: key);
 
   @override
   State<ActivityAttendeeCreatePasses> createState() => _ActivityAttendeeCreatePassesState();
@@ -25,13 +27,13 @@ class _ActivityAttendeeCreatePassesState extends State<ActivityAttendeeCreatePas
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(create: (context) => getIt<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.initializeActivityForm(dart.optionOf(widget.activityCreatorForm))),
+    return BlocProvider(create: (context) => getIt<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.initializeActivityForm(dart.optionOf(widget.activityManagerForm), dart.optionOf(widget.reservation))),
       child: BlocConsumer<UpdateActivityFormBloc, UpdateActivityFormState>(
-      listenWhen: (p, c) => p.authFailureOrSuccessOptionSaving != c.authFailureOrSuccessOptionSaving || p.authFailureOrSuccessOptionSubmitting != c.authFailureOrSuccessOptionSubmitting || p.authFailureOrSuccessOptionLocation != c.authFailureOrSuccessOptionLocation,
+      listenWhen: (p, c) => p.authFailureOrSuccessOptionSaving != c.authFailureOrSuccessOptionSaving || p.authFailureOrSuccessOptionSubmitting != c.authFailureOrSuccessOptionSubmitting,
       listener: (context, state) {
 
       },
-        buildWhen: (p, c) => p.authFailureOrSuccessOptionSaving != c.authFailureOrSuccessOptionSaving || p.authFailureOrSuccessOptionSubmitting != c.authFailureOrSuccessOptionSubmitting || p.activityCreatorForm != c.activityCreatorForm,
+        buildWhen: (p, c) => p.authFailureOrSuccessOptionSaving != c.authFailureOrSuccessOptionSaving || p.authFailureOrSuccessOptionSubmitting != c.authFailureOrSuccessOptionSubmitting || p.activitySettingsForm != c.activitySettingsForm,
         builder: (context, state) {
         return Scaffold(
           appBar: AppBar(
@@ -68,10 +70,10 @@ class _ActivityAttendeeCreatePassesState extends State<ActivityAttendeeCreatePas
                         RadioListTile(
                           toggleable: true,
                           value: 'NotAllowed',
-                          groupValue: (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAttendance.activityPasses?.isAllowedGroupAttendance ?? true) ? 'NotAllowed' : null,
+                          groupValue: (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.activityPasses?.isAllowedGroupAttendance ?? true) ? 'NotAllowed' : null,
                           onChanged: (String? value) {
 
-                            if (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAttendance.activityPasses?.isAllowedGroupAttendance ?? true) {
+                            if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.activityPasses?.isAllowedGroupAttendance ?? true) {
                               context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.passesAttendanceIsAllowedGroups(false));
                             } else {
                               context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.passesAttendanceIsAllowedGroups(true));
@@ -118,7 +120,7 @@ class _ActivityAttendeeCreatePassesState extends State<ActivityAttendeeCreatePas
                                               children: [
                                                 Padding(
                                                   padding: const EdgeInsets.only(left: 8.0),
-                                                  child: Text('Groups of ${context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAttendance.activityPasses?.minimumGroupQuantity ?? 6}', style: TextStyle(color: widget.model.paletteColor, fontWeight: FontWeight.bold, fontSize: widget.model.secondaryQuestionTitleFontSize),),
+                                                  child: Text('Groups of ${context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.activityPasses?.minimumGroupQuantity ?? 6}', style: TextStyle(color: widget.model.paletteColor, fontWeight: FontWeight.bold, fontSize: widget.model.secondaryQuestionTitleFontSize),),
                                                 ),
                                                 Padding(
                                                   padding: const EdgeInsets.only(right: 8.0),
@@ -154,11 +156,11 @@ class _ActivityAttendeeCreatePassesState extends State<ActivityAttendeeCreatePas
 
                                                     context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.passesMinimumGroupQuantityChanged(e));
 
-                                                    if ((context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAttendance.activityPasses?.maximumGroupQuantity ?? 0) < e) {
+                                                    if ((context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.activityPasses?.maximumGroupQuantity ?? 0) < e) {
                                                       context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.passesMaximumGroupQuantityChanged(e + 1));
                                                     }
 
-                                                    if ((context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAttendance.activityPasses?.passQuantity ?? 0) < e) {
+                                                    if ((context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.activityPasses?.passQuantity ?? 0) < e) {
                                                       context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.passesQuantityChanged(e + 1));
                                                     }
 
@@ -201,7 +203,7 @@ class _ActivityAttendeeCreatePassesState extends State<ActivityAttendeeCreatePas
                                               children: [
                                                 Padding(
                                                   padding: const EdgeInsets.only(left: 8.0),
-                                                  child: Text('Groups of ${context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAttendance.activityPasses?.maximumGroupQuantity ?? 12}', style: TextStyle(color: widget.model.paletteColor, fontWeight: FontWeight.bold, fontSize: widget.model.secondaryQuestionTitleFontSize),),
+                                                  child: Text('Groups of ${context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.activityPasses?.maximumGroupQuantity ?? 12}', style: TextStyle(color: widget.model.paletteColor, fontWeight: FontWeight.bold, fontSize: widget.model.secondaryQuestionTitleFontSize),),
                                                 ),
                                                 Padding(
                                                   padding: const EdgeInsets.only(right: 8.0),
@@ -230,12 +232,12 @@ class _ActivityAttendeeCreatePassesState extends State<ActivityAttendeeCreatePas
                                         itemHeight: 50,
                                         // dropdownWidth: (widget.model.mainContentWidth)! - 100,
                                         focusColor: Colors.grey.shade100,
-                                        items: [for(var i=(context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAttendance.activityPasses?.minimumGroupQuantity ?? 0 + 1); i<100; i+=1) i].where((element) => element != 0).map(
+                                        items: [for(var i=(context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.activityPasses?.minimumGroupQuantity ?? 0 + 1); i<100; i+=1) i].where((element) => element != 0).map(
                                                 (e) => DropdownMenuItem<int>(
                                                 onTap: () {
                                                   context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.passesMaximumGroupQuantityChanged(e));
 
-                                                  if ((context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAttendance.activityPasses?.passQuantity ?? 0) < e) {
+                                                  if ((context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.activityPasses?.passQuantity ?? 0) < e) {
                                                     context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.passesQuantityChanged(e));
                                                   }
 
@@ -291,7 +293,7 @@ class _ActivityAttendeeCreatePassesState extends State<ActivityAttendeeCreatePas
                                     children: [
                                       Padding(
                                         padding: const EdgeInsets.only(left: 8.0),
-                                        child: Text('${context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAttendance.activityPasses?.passQuantity ?? 20} ${AppLocalizations.of(context)!.profileUserOverviewSlots}', style: TextStyle(color: widget.model.paletteColor, fontWeight: FontWeight.bold, fontSize: widget.model.secondaryQuestionTitleFontSize),),
+                                        child: Text('${context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.activityPasses?.passQuantity ?? 20} ${AppLocalizations.of(context)!.profileUserOverviewSlots}', style: TextStyle(color: widget.model.paletteColor, fontWeight: FontWeight.bold, fontSize: widget.model.secondaryQuestionTitleFontSize),),
                                       ),
                                       Padding(
                                         padding: const EdgeInsets.only(right: 8.0),
@@ -327,9 +329,9 @@ class _ActivityAttendeeCreatePassesState extends State<ActivityAttendeeCreatePas
                                         setState(() {
                                           context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.passesQuantityChanged(e));
 
-                                          if ((context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAttendance.activityPasses?.maximumGroupQuantity ?? 12) > e) {
+                                          if ((context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.activityPasses?.maximumGroupQuantity ?? 12) > e) {
                                             context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.passesMaximumGroupQuantityChanged(e));
-                                            if ((context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAttendance.activityPasses?.minimumGroupQuantity ?? 6) > e) {
+                                            if ((context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.activityPasses?.minimumGroupQuantity ?? 6) > e) {
                                               context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.passesMinimumGroupQuantityChanged(e - 1));
                                             }
                                           }
@@ -405,7 +407,7 @@ class _ActivityAttendeeCreatePassesState extends State<ActivityAttendeeCreatePas
                                         children: [
                                           Padding(
                                             padding: const EdgeInsets.only(left: 8.0),
-                                            child: Text('${context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAttendance.activityPasses?.passQuantity ?? 0} ${AppLocalizations.of(context)!.profileUserOverviewSlots}', style: TextStyle(color: widget.model.paletteColor, fontWeight: FontWeight.bold, fontSize: widget.model.secondaryQuestionTitleFontSize),),
+                                            child: Text('${context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.activityPasses?.passQuantity ?? 0} ${AppLocalizations.of(context)!.profileUserOverviewSlots}', style: TextStyle(color: widget.model.paletteColor, fontWeight: FontWeight.bold, fontSize: widget.model.secondaryQuestionTitleFontSize),),
                                           ),
                                           Padding(
                                             padding: const EdgeInsets.only(right: 8.0),
@@ -441,9 +443,9 @@ class _ActivityAttendeeCreatePassesState extends State<ActivityAttendeeCreatePas
                                             setState(() {
                                               context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.passesQuantityChanged(e));
 
-                                              if ((context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAttendance.activityPasses?.maximumGroupQuantity ?? 12) > e) {
+                                              if ((context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.activityPasses?.maximumGroupQuantity ?? 12) > e) {
                                                 context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.passesMaximumGroupQuantityChanged(e));
-                                                if ((context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAttendance.activityPasses?.minimumGroupQuantity ?? 6) > e) {
+                                                if ((context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.activityPasses?.minimumGroupQuantity ?? 6) > e) {
                                                   context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.passesMinimumGroupQuantityChanged(e - 1));
                                                 }
                                               }
@@ -464,7 +466,7 @@ class _ActivityAttendeeCreatePassesState extends State<ActivityAttendeeCreatePas
 
                         const SizedBox(height: 15),
                         Visibility(
-                          visible: !(context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAttendance.activityPasses?.isAllowedGroupAttendance ?? true),
+                          visible: !(context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.activityPasses?.isAllowedGroupAttendance ?? true),
                           child: Container(
                               width: 375,
                               decoration: BoxDecoration(
@@ -479,7 +481,7 @@ class _ActivityAttendeeCreatePassesState extends State<ActivityAttendeeCreatePas
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text('Also:', style: TextStyle(color: widget.model.paletteColor)),
-                                    Text('The Size of ${((context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAttendance.activityPasses?.passQuantity ?? 1).round() / (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAttendance.activityPasses?.maximumGroupQuantity ?? 1)).toStringAsFixed(0)} Groups', style: TextStyle(color: widget.model.paletteColor, fontWeight: FontWeight.bold, fontSize: widget.model.secondaryQuestionTitleFontSize))
+                                    Text('The Size of ${((context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.activityPasses?.passQuantity ?? 1).round() / (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.activityPasses?.maximumGroupQuantity ?? 1)).toStringAsFixed(0)} Groups', style: TextStyle(color: widget.model.paletteColor, fontWeight: FontWeight.bold, fontSize: widget.model.secondaryQuestionTitleFontSize))
                                   ],
                                 ),
                               )
@@ -487,44 +489,44 @@ class _ActivityAttendeeCreatePassesState extends State<ActivityAttendeeCreatePas
                         ),
 
 
+                        // Visibility(
+                        //   visible: context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAvailability.sessionType == ActivitySessionType.recurring,
+                        //   child: Column(
+                        //     mainAxisAlignment: MainAxisAlignment.start,
+                        //     crossAxisAlignment: CrossAxisAlignment.start,
+                        //     children: [
+                        //       SizedBox(height: 25),
+                        //       Text('Pass Coverage', style: TextStyle(
+                        //           color: widget.model.paletteColor,
+                        //           fontWeight: FontWeight.bold,
+                        //           fontSize: widget.model.secondaryQuestionTitleFontSize)),
+                        //       Text('How many sessions will a pass cover?', style: TextStyle(color: widget.model.paletteColor)),
+                        //       SizedBox(height: 10),
+                        //
+                        //       RadioListTile(
+                        //         toggleable: true,
+                        //         value: 'All',
+                        //         groupValue: (context.read<UpdateActivityFormBloc>().state.activityManagerForm.activityAttendance.activityPasses?.recurringPassAllSession ?? true) ? 'All' : null,
+                        //         onChanged: (String? value) {
+                        //
+                        //           if (context.read<UpdateActivityFormBloc>().state.activityManagerForm.activityAttendance.activityPasses?.recurringPassAllSession ?? true) {
+                        //             context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.passesCoverAllSessions(false));
+                        //           } else {
+                        //             context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.passesCoverAllSessions(true));
+                        //           }
+                        //
+                        //         },
+                        //         activeColor: widget.model.paletteColor,
+                        //         title: Text('All Session', style: TextStyle(color: widget.model.paletteColor, fontWeight: FontWeight.bold, fontSize: widget.model.secondaryQuestionTitleFontSize)),
+                        //       ),
+                        //     ],
+                        //   )
+                        // ),
+
+
+
                         Visibility(
-                          visible: context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAvailability.sessionType == ActivitySessionType.recurring,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              SizedBox(height: 25),
-                              Text('Pass Coverage', style: TextStyle(
-                                  color: widget.model.paletteColor,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: widget.model.secondaryQuestionTitleFontSize)),
-                              Text('How many sessions will a pass cover?', style: TextStyle(color: widget.model.paletteColor)),
-                              SizedBox(height: 10),
-
-                              RadioListTile(
-                                toggleable: true,
-                                value: 'All',
-                                groupValue: (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAttendance.activityPasses?.recurringPassAllSession ?? true) ? 'All' : null,
-                                onChanged: (String? value) {
-
-                                  if (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAttendance.activityPasses?.recurringPassAllSession ?? true) {
-                                    context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.passesCoverAllSessions(false));
-                                  } else {
-                                    context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.passesCoverAllSessions(true));
-                                  }
-
-                                },
-                                activeColor: widget.model.paletteColor,
-                                title: Text('All Session', style: TextStyle(color: widget.model.paletteColor, fontWeight: FontWeight.bold, fontSize: widget.model.secondaryQuestionTitleFontSize)),
-                              ),
-                            ],
-                          )
-                        ),
-
-
-
-                        Visibility(
-                          visible: !(context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAttendance.activityPasses?.recurringPassAllSession ?? true),
+                          visible: !(context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.activityPasses?.recurringPassAllSession ?? true),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -556,7 +558,7 @@ class _ActivityAttendeeCreatePassesState extends State<ActivityAttendeeCreatePas
                                               children: [
                                                 Padding(
                                                   padding: const EdgeInsets.only(left: 8.0),
-                                                  child: Text('${context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAttendance.activityPasses?.recurringNumberOfSessions ?? 0} ${AppLocalizations.of(context)!.activityAvailabilitySessions}', style: TextStyle(color: widget.model.paletteColor, fontWeight: FontWeight.bold, fontSize: widget.model.secondaryQuestionTitleFontSize),),
+                                                  child: Text('${context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.activityPasses?.recurringNumberOfSessions ?? 0} ${AppLocalizations.of(context)!.activityAvailabilitySessions}', style: TextStyle(color: widget.model.paletteColor, fontWeight: FontWeight.bold, fontSize: widget.model.secondaryQuestionTitleFontSize),),
                                                 ),
                                                 Padding(
                                                   padding: const EdgeInsets.only(right: 8.0),
@@ -590,7 +592,7 @@ class _ActivityAttendeeCreatePassesState extends State<ActivityAttendeeCreatePas
                                                 onTap: () {
                                                   context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.passesCoverLimitedSession(e));
 
-                                                  if ((context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAttendance.activityPasses?.maximumGroupQuantity ?? 0) > e) {
+                                                  if ((context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.activityPasses?.maximumGroupQuantity ?? 0) > e) {
                                                     context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.passesMaximumGroupQuantityChanged(e));
                                                   }
 

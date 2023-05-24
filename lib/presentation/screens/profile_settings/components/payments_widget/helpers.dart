@@ -48,7 +48,7 @@ Widget getPaymentHistoryItemWidget(BuildContext context, DashboardModel model, P
                               model,
                               100,
                               false,
-                              getActivityOptions(context).firstWhere((element) => element.activityId == reservationItem.reservationSlotItem.first.selectedActivityType)
+                              getActivityOptions().firstWhere((element) => element.activityId == reservationItem.reservationSlotItem.first.selectedActivityType)
                           ),
                           const SizedBox(width: 10),
                           if (paymentIntent.payment_method != null) Column(

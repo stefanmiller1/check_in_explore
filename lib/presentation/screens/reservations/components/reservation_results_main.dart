@@ -7,7 +7,7 @@ import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_domain/domain/auth/reservation_manager/post.dart';
 import 'package:check_in_domain/domain/auth/reservation_manager/reservation_post/image_post.dart';
-import 'package:check_in_web_mobile_explore/presentation/core/components/send_invitation_request.dart';
+import 'package:check_in_web_mobile_explore/presentation/core/components/invite_widgets/send_invitation_request.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/posts/post_helper.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/posts/post_widget_builder.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/profile_settings/components/review_current_profile.dart';
@@ -71,7 +71,7 @@ class _ReservationResultMainState extends State<ReservationResultMain> {
   final _pageController = PageController(initialPage: 0);
   double _offset = 0;
   late double _percentageOpen = 0;
-  // /// image picker for sending photo's, videos with post.
+  // image picker for sending photo's, videos with post.
   final ImagePicker _imagePicker = ImagePicker();
 
   /// selected photos for post.

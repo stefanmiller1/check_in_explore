@@ -47,7 +47,7 @@ Widget flexibleReservationProfileHeader(BuildContext context, DashboardModel mod
                             (e) => getActivityTabForReservation(
                                 context,
                                 model,
-                                getActivityOptions(context).firstWhere((element) => element.activityId == e
+                                getActivityOptions().firstWhere((element) => element.activityId == e
                         )
                       ),
                     ).toList()
@@ -213,7 +213,7 @@ Widget flexibleReservationProfileHeader(BuildContext context, DashboardModel mod
                 model,
                 200,
                 false,
-                getActivityOptions(context).firstWhere((element) => element.activityId == reservationItem.reservationSlotItem.first.selectedActivityType)
+                getActivityOptions().firstWhere((element) => element.activityId == reservationItem.reservationSlotItem.first.selectedActivityType)
             );
         }
       ),

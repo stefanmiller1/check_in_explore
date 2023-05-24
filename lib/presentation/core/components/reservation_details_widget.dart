@@ -6,7 +6,7 @@ import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_credentials/check_in_credentials.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
-import 'package:check_in_web_mobile_explore/presentation/core/components/send_invitation_request.dart';
+import 'package:check_in_web_mobile_explore/presentation/core/components/invite_widgets/send_invitation_request.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/components/webview_controller_widget.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/chat_inbox/direct_chat_screen.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/facility_preview/facility_preview_screen.dart';
@@ -126,7 +126,7 @@ class _ReservationDetailsWidgetState extends State<ReservationDetailsWidget> {
                                                   widget.model,
                                                   100,
                                                   false,
-                                                  getActivityOptions(context).firstWhere((element) => element.activityId == e)
+                                                  getActivityOptions().firstWhere((element) => element.activityId == e)
                                               ),
                                             ],
                                           ),

@@ -1,3 +1,4 @@
+import 'package:check_in_application/auth/update_services/listing_update_create_services/settings_update_create_services/activity_settings/activity_settings_form_bloc.dart';
 import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:flutter/material.dart';
@@ -12,9 +13,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class ActivitySelectRequirementsBasics extends StatefulWidget {
 
   final DashboardModel model;
-  final ActivityCreatorForm activityCreatorForm;
+  final ActivityManagerForm activityManagerForm;
+  final ReservationItem reservation;
 
-  const ActivitySelectRequirementsBasics({Key? key, required this.model, required this.activityCreatorForm}) : super(key: key);
+  const ActivitySelectRequirementsBasics({Key? key, required this.model, required this.activityManagerForm, required this.reservation}) : super(key: key);
 
   @override
   State<ActivitySelectRequirementsBasics> createState() => _ActivitySelectRequirementsBasicsState();
@@ -25,13 +27,13 @@ class _ActivitySelectRequirementsBasicsState extends State<ActivitySelectRequire
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(create: (context) => getIt<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.initializeActivityForm(dart.optionOf(widget.activityCreatorForm))),
+    return BlocProvider(create: (context) => getIt<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.initializeActivityForm(dart.optionOf(widget.activityManagerForm), dart.optionOf(widget.reservation))),
       child: BlocConsumer<UpdateActivityFormBloc, UpdateActivityFormState>(
-      listenWhen: (p, c) => p.authFailureOrSuccessOptionSaving != c.authFailureOrSuccessOptionSaving || p.authFailureOrSuccessOptionSubmitting != c.authFailureOrSuccessOptionSubmitting || p.authFailureOrSuccessOptionLocation != c.authFailureOrSuccessOptionLocation,
+      listenWhen: (p, c) => p.authFailureOrSuccessOptionSaving != c.authFailureOrSuccessOptionSaving || p.authFailureOrSuccessOptionSubmitting != c.authFailureOrSuccessOptionSubmitting,
       listener: (context, state) {
 
       },
-      buildWhen: (p, c) => p.authFailureOrSuccessOptionSaving != c.authFailureOrSuccessOptionSaving || p.authFailureOrSuccessOptionSubmitting != c.authFailureOrSuccessOptionSubmitting || p.activityCreatorForm != c.activityCreatorForm,
+      buildWhen: (p, c) => p.authFailureOrSuccessOptionSaving != c.authFailureOrSuccessOptionSaving || p.authFailureOrSuccessOptionSubmitting != c.authFailureOrSuccessOptionSubmitting || p.activitySettingsForm != c.activitySettingsForm,
       builder: (context, state) {
         return Scaffold(
           appBar: AppBar(
@@ -63,10 +65,10 @@ class _ActivitySelectRequirementsBasicsState extends State<ActivitySelectRequire
                   RadioListTile(
                     toggleable: true,
                     value: 'Under18',
-                    groupValue: context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.isSeventeenAndUnder ? 'Under18' : null,
+                    groupValue: context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.isSeventeenAndUnder ? 'Under18' : null,
                     onChanged: (String? value) {
 
-                      if (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.isSeventeenAndUnder) {
+                      if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.isSeventeenAndUnder) {
                         context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isSeventeenAndUnderChanged(false));
                       } else {
                         context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isSeventeenAndUnderChanged(true));
@@ -79,7 +81,7 @@ class _ActivitySelectRequirementsBasicsState extends State<ActivitySelectRequire
 
 
                   Visibility(
-                    visible: !context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.isSeventeenAndUnder,
+                    visible: !context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.isSeventeenAndUnder,
                     child: Row(
                       children: [
                         Container(
@@ -90,13 +92,13 @@ class _ActivitySelectRequirementsBasicsState extends State<ActivitySelectRequire
                             height: 35,
                             width: 60,
                             child: Center(
-                              child: Text(context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.minimumAgeRequirement.toString(), style: TextStyle(color: widget.model.disabledTextColor)
+                              child: Text(context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.minimumAgeRequirement.toString(), style: TextStyle(color: widget.model.disabledTextColor)
                             ),
                           )
                         ),
                         QuantityButtons(
                             model: widget.model,
-                            initNumber: context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.minimumAgeRequirement,
+                            initNumber: context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.minimumAgeRequirement,
                             counterCallback: (int v) {
 
                               context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.minimumAgeChanged(v));
@@ -122,7 +124,7 @@ class _ActivitySelectRequirementsBasicsState extends State<ActivitySelectRequire
 
 
                   Visibility(
-                      visible: (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityType.activity != ProfileActivityOption.events),
+                      visible: (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityType.activity != ProfileActivityOption.events),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -140,10 +142,10 @@ class _ActivitySelectRequirementsBasicsState extends State<ActivitySelectRequire
                           RadioListTile(
                             toggleable: true,
                             value: 'MenOnly',
-                            groupValue: (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.isMensOnly ?? false) ? 'MenOnly' : null,
+                            groupValue: (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.isMensOnly ?? false) ? 'MenOnly' : null,
                             onChanged: (String? value) {
 
-                              if (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.isMensOnly ?? false) {
+                              if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.isMensOnly ?? false) {
                                 context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isMenOnlyChanged(false));
                                 context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isWomenOnlyChanged(false));
                                 context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isCoEdOnlyChanged(false));
@@ -162,10 +164,10 @@ class _ActivitySelectRequirementsBasicsState extends State<ActivitySelectRequire
                           RadioListTile(
                             toggleable: true,
                             value: 'WomenOnly',
-                            groupValue: (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.isWomenOnly ?? false) ? 'WomenOnly' : null,
+                            groupValue: (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.isWomenOnly ?? false) ? 'WomenOnly' : null,
                             onChanged: (String? value) {
 
-                              if (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.isWomenOnly ?? false) {
+                              if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.isWomenOnly ?? false) {
                                 context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isMenOnlyChanged(false));
                                 context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isWomenOnlyChanged(false));
                                 context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isCoEdOnlyChanged(false));
@@ -184,10 +186,10 @@ class _ActivitySelectRequirementsBasicsState extends State<ActivitySelectRequire
                           RadioListTile(
                             toggleable: true,
                             value: 'CoedOnly',
-                            groupValue: (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.isCoEdOnly ?? false) ? 'CoedOnly' : null,
+                            groupValue: (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.isCoEdOnly ?? false) ? 'CoedOnly' : null,
                             onChanged: (String? value) {
 
-                              if (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.isCoEdOnly ?? false) {
+                              if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.isCoEdOnly ?? false) {
                                 context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isMenOnlyChanged(false));
                                 context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isWomenOnlyChanged(false));
                                 context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isCoEdOnlyChanged(false));
@@ -248,9 +250,9 @@ class _ActivitySelectRequirementsBasicsState extends State<ActivitySelectRequire
                                                   return widget.model.paletteColor.withOpacity(0.1);
                                                 }
                                                 if (states.contains(MaterialState.hovered)) {
-                                                  return (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.skillLevelExpectation?.contains(e) ?? false) ? widget.model.paletteColor : widget.model.paletteColor.withOpacity(0.1);
+                                                  return (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.skillLevelExpectation?.contains(e) ?? false) ? widget.model.paletteColor : widget.model.paletteColor.withOpacity(0.1);
                                                 }
-                                                return (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.skillLevelExpectation?.contains(e) ?? false) ? widget.model.paletteColor : Colors.transparent; // Use the component's default.
+                                                return (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.skillLevelExpectation?.contains(e) ?? false) ? widget.model.paletteColor : Colors.transparent; // Use the component's default.
                                               },
                                             ),
                                             shape: MaterialStateProperty.all<RoundedRectangleBorder>(
@@ -262,16 +264,16 @@ class _ActivitySelectRequirementsBasicsState extends State<ActivitySelectRequire
                                           onPressed: () {
                                             setState(() {
 
-                                              if (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.skillLevelExpectation?.contains(e) ?? false) {
-                                                context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.skillLevelExpectation?.remove(e);
+                                              if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.skillLevelExpectation?.contains(e) ?? false) {
+                                                context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.skillLevelExpectation?.remove(e);
                                               } else {
-                                                context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.skillLevelExpectation?.add(e);
+                                                context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.skillLevelExpectation?.add(e);
                                               }
 
-                                              context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.skillLevelExpectationChanged(context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.skillLevelExpectation ?? []));
+                                              context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.skillLevelExpectationChanged(context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.skillLevelExpectation ?? []));
                                             });
                                           },
-                                          child: Text(getSkillTypeName(context, e), style: TextStyle(color: (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.skillLevelExpectation?.contains(e) ?? false) ? widget.model.accentColor : widget.model.paletteColor, fontWeight: (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.skillLevelExpectation?.contains(e) ?? false) ? FontWeight.bold : FontWeight.normal)),
+                                          child: Text(getSkillTypeName(context, e), style: TextStyle(color: (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.skillLevelExpectation?.contains(e) ?? false) ? widget.model.accentColor : widget.model.paletteColor, fontWeight: (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.skillLevelExpectation?.contains(e) ?? false) ? FontWeight.bold : FontWeight.normal)),
                                     )
                                   ),
                                 ),

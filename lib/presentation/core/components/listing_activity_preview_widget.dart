@@ -52,7 +52,7 @@ Widget getListingActivityPreviewWidget(BuildContext context, DashboardModel mode
                 borderRadius: BorderRadius.circular(30)
               ),
             ),
-            BlocProvider(create: (context) =>  getIt<ActivityManagerWatcherBloc>()..add(ActivityManagerWatcherEvent.watchActivityCreatorFormStarted(reservationItem.reservationId.getOrCrash())),
+            BlocProvider(create: (context) =>  getIt<ActivityManagerWatcherBloc>()..add(ActivityManagerWatcherEvent.watchActivityManagerFormStarted(reservationItem.reservationId.getOrCrash())),
               child: BlocBuilder<ActivityManagerWatcherBloc, ActivityManagerWatcherState>(
                 builder: (context, state) {
                   return state.maybeMap(
@@ -67,12 +67,12 @@ Widget getListingActivityPreviewWidget(BuildContext context, DashboardModel mode
                           ),
                         ),
                       ),
-                      loadActivityCreatorFormFailure: (_) => getIconForActivityType(context, model, 25, reservationItem),
-                      loadActivityCreatorFormSuccess: (item) => (item.item.activityBackground.activityProfileImages != null && (item.item.activityBackground.activityProfileImages?.isNotEmpty ?? false)) ? CircleAvatar(
+                      loadActivityManagerFormFailure: (_) => getActivityFromReservationId(context, model, 25, reservationItem),
+                      loadActivityManagerFormSuccess: (item) => (item.item.profileService.activityBackground.activityProfileImages != null && (item.item.profileService.activityBackground.activityProfileImages?.isNotEmpty ?? false)) ? CircleAvatar(
                         backgroundColor: model.accentColor,
-                        backgroundImage: Image.network(item.item.activityBackground.activityProfileImages!.first, fit: BoxFit.cover).image,
-                      ) : getIconForActivityType(context, model, 25, reservationItem),
-                      orElse: () => getIconForActivityType(context, model, 25, reservationItem)
+                        backgroundImage: Image.network(item.item.profileService.activityBackground.activityProfileImages!.first.uriPath ?? '', fit: BoxFit.cover).image,
+                      ) : getActivityFromReservationId(context, model, 25, reservationItem),
+                      orElse: () => getActivityFromReservationId(context, model, 25, reservationItem)
                   );
                 },
               ),
@@ -87,16 +87,6 @@ Widget getListingActivityPreviewWidget(BuildContext context, DashboardModel mode
         )
       ],
     ),
-  );
-}
-
-Widget getIconForActivityType(BuildContext context, DashboardModel model, double radius, ReservationItem reservation) {
-  return CircleAvatar(
-    radius: radius,
-    backgroundColor: model.accentColor,
-    child: ClipRRect(
-        borderRadius: BorderRadius.circular(25),
-        child: SvgPicture.asset(getActivityOptions(context).firstWhere((element) => element.activityId == reservation.reservationSlotItem.first.selectedActivityType).iconPath ?? '')),
   );
 }
 

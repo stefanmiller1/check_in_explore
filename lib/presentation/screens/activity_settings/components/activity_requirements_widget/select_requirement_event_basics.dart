@@ -1,3 +1,4 @@
+import 'package:check_in_application/auth/update_services/listing_update_create_services/settings_update_create_services/activity_settings/activity_settings_form_bloc.dart';
 import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:flutter/material.dart';
@@ -11,22 +12,23 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class ActivityRequirementEventBasics extends StatelessWidget {
 
   final DashboardModel model;
-  final ActivityCreatorForm activityCreatorForm;
+  final ActivityManagerForm activityManagerForm;
+  final ReservationItem reservation;
 
-  const ActivityRequirementEventBasics({Key? key, required this.model, required this.activityCreatorForm}) : super(key: key);
+  const ActivityRequirementEventBasics({Key? key, required this.model, required this.activityManagerForm, required this.reservation}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
 
-    return BlocProvider(create: (context) => getIt<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.initializeActivityForm(dart.optionOf(activityCreatorForm))),
+    return BlocProvider(create: (context) => getIt<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.initializeActivityForm(dart.optionOf(activityManagerForm), dart.optionOf(reservation))),
       child: BlocConsumer<UpdateActivityFormBloc, UpdateActivityFormState>(
-        listenWhen: (p, c) => p.authFailureOrSuccessOptionSaving != c.authFailureOrSuccessOptionSaving || p.authFailureOrSuccessOptionSubmitting != c.authFailureOrSuccessOptionSubmitting || p.authFailureOrSuccessOptionLocation != c.authFailureOrSuccessOptionLocation,
+        listenWhen: (p, c) => p.authFailureOrSuccessOptionSaving != c.authFailureOrSuccessOptionSaving || p.authFailureOrSuccessOptionSubmitting != c.authFailureOrSuccessOptionSubmitting,
           listener: (context, state) {
 
           },
-          buildWhen: (p, c) => p.authFailureOrSuccessOptionSaving != c.authFailureOrSuccessOptionSaving || p.authFailureOrSuccessOptionSubmitting != c.authFailureOrSuccessOptionSubmitting || p.activityCreatorForm != c.activityCreatorForm,
+          buildWhen: (p, c) => p.authFailureOrSuccessOptionSaving != c.authFailureOrSuccessOptionSaving || p.authFailureOrSuccessOptionSubmitting != c.authFailureOrSuccessOptionSubmitting || p.activitySettingsForm != c.activitySettingsForm,
           builder: (context, state) {
-            bool activityAgeSetting = context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.minimumAgeRequirement >= 18 && !context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.isSeventeenAndUnder;
+            bool activityAgeSetting = context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.minimumAgeRequirement >= 18 && !context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.isSeventeenAndUnder;
 
             return Scaffold(
           appBar: AppBar(
@@ -62,10 +64,10 @@ class ActivityRequirementEventBasics extends StatelessWidget {
                       child: RadioListTile(
                         toggleable: true,
                         value: 'Yes',
-                        groupValue: (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.eventActivityRulesRequirement?.isAlcoholForSale ?? false) ? 'Yes' : null,
+                        groupValue: (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.eventActivityRulesRequirement?.isAlcoholForSale ?? false) ? 'Yes' : null,
                         onChanged: (String? value) {
 
-                          if (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.eventActivityRulesRequirement?.isAlcoholForSale ?? false) {
+                          if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.eventActivityRulesRequirement?.isAlcoholForSale ?? false) {
                             context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isAlcoholForSaleChanged(false));
                           } else {
                             context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isAlcoholForSaleChanged(true));
@@ -82,7 +84,7 @@ class ActivityRequirementEventBasics extends StatelessWidget {
                       child: RadioListTile(
                         toggleable: true,
                         value: 'No',
-                        groupValue: !(context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.eventActivityRulesRequirement?.isAlcoholForSale ?? false) ? 'No' : null,
+                        groupValue: !(context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.eventActivityRulesRequirement?.isAlcoholForSale ?? false) ? 'No' : null,
                         onChanged: (String? value) {
 
                           context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isAlcoholForSaleChanged(false));
@@ -102,10 +104,10 @@ class ActivityRequirementEventBasics extends StatelessWidget {
                     RadioListTile(
                       toggleable: true,
                       value: 'Yes',
-                      groupValue: (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.eventActivityRulesRequirement?.isFoodForSale ?? false) ? 'Yes' : null,
+                      groupValue: (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.eventActivityRulesRequirement?.isFoodForSale ?? false) ? 'Yes' : null,
                       onChanged: (String? value) {
 
-                        if (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.eventActivityRulesRequirement?.isFoodForSale ?? false) {
+                        if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.eventActivityRulesRequirement?.isFoodForSale ?? false) {
                           context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isFoodForSaleChanged(false));
                         } else {
                           context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isFoodForSaleChanged(true));
@@ -118,7 +120,7 @@ class ActivityRequirementEventBasics extends StatelessWidget {
                     RadioListTile(
                       toggleable: true,
                       value: 'No',
-                      groupValue: !(context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRequirement.eventActivityRulesRequirement?.isFoodForSale ?? false) ? 'No' : null,
+                      groupValue: !(context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.eventActivityRulesRequirement?.isFoodForSale ?? false) ? 'No' : null,
                       onChanged: (String? value) {
 
                         context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isFoodForSaleChanged(false));

@@ -1,3 +1,4 @@
+import 'package:check_in_application/auth/update_services/listing_update_create_services/settings_update_create_services/activity_settings/activity_settings_form_bloc.dart';
 import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -9,9 +10,9 @@ import 'package:check_in_presentation/check_in_presentation.dart';
 class ActivityAttendeeHintHelper extends StatefulWidget {
 
   final DashboardModel model;
-  final ActivityCreatorForm activityCreatorForm;
+  final ActivityManagerForm activityManagerForm;
 
-  const ActivityAttendeeHintHelper({Key? key, required this.model, required this.activityCreatorForm}) : super(key: key);
+  const ActivityAttendeeHintHelper({Key? key, required this.model, required this.activityManagerForm}) : super(key: key);
 
   @override
   State<ActivityAttendeeHintHelper> createState() => _ActivityAttendeeHintHelperState();
@@ -50,13 +51,13 @@ class _ActivityAttendeeHintHelperState extends State<ActivityAttendeeHintHelper>
                   fontWeight: FontWeight.bold)),
               SizedBox(height: 10),
 
-              Text('${AppLocalizations.of(context)!.facilityAvailableBookingsStarting} ${DateFormat.yMMMMd().format(context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAvailability.fromStarting)}', style: TextStyle(color: widget.model.accentColor, fontWeight: FontWeight.bold, fontSize: widget.model.questionTitleFontSize)),
+              // Text('${AppLocalizations.of(context)!.facilityAvailableBookingsStarting} ${DateFormat.yMMMMd().format(context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAvailability.fromStarting)}', style: TextStyle(color: widget.model.accentColor, fontWeight: FontWeight.bold, fontSize: widget.model.questionTitleFontSize)),
 
               SizedBox(height: 10),
               Text('Quick Preview', style: TextStyle(color: widget.model.accentColor)),
 
               Visibility(
-                visible: context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAvailability.isDayBased ?? false,
+                // visible: context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAvailability.isDayBased ?? false,
                 child: Container(
                     width: 300,
                     decoration: BoxDecoration(
@@ -99,7 +100,7 @@ class _ActivityAttendeeHintHelperState extends State<ActivityAttendeeHintHelper>
               ),
 
               Visibility(
-                visible: !(context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAvailability.isDayBased ?? true),
+                // visible: !(context.read<UpdateActivityFormBloc>().state.activityManagerForm.activityAvailability.isDayBased ?? true),
                 child: Container(
                   width: 300,
                   decoration: BoxDecoration(
@@ -216,7 +217,7 @@ class _ActivityAttendeePassHelperState extends State<ActivityAttendeePassHelper>
                 fontWeight: FontWeight.bold)),
             SizedBox(height: 10),
 
-            Text('${AppLocalizations.of(context)!.facilityAvailableBookingsStarting} ${DateFormat.yMMMMd().format(context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAvailability.fromStarting)}', style: TextStyle(color: widget.model.accentColor, fontWeight: FontWeight.bold, fontSize: widget.model.questionTitleFontSize)),
+            // Text('${AppLocalizations.of(context)!.facilityAvailableBookingsStarting} ${DateFormat.yMMMMd().format(context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAvailability.fromStarting)}', style: TextStyle(color: widget.model.accentColor, fontWeight: FontWeight.bold, fontSize: widget.model.questionTitleFontSize)),
 
 
         ]

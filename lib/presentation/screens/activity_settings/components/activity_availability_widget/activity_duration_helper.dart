@@ -1,3 +1,4 @@
+import 'package:check_in_application/auth/update_services/listing_update_create_services/settings_update_create_services/activity_settings/activity_settings_form_bloc.dart';
 import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +11,7 @@ Widget customCalendarType(BuildContext context, DashboardModel model, DateRangeP
     height: 500,
     width: 500,
     child: SfDateRangePicker(
-      initialSelectedRange: PickerDateRange(context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAvailability.fromStarting, context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityAvailability.fromEnding),
+      // initialSelectedRange: PickerDateRange(context.read<UpdateActivityFormBloc>().state.activityManagerForm.activityAvailability.fromStarting, context.read<UpdateActivityFormBloc>().state.activityManagerForm.activityAvailability.fromEnding),
       navigationMode: DateRangePickerNavigationMode.snap,
       controller: dController,
       view: DateRangePickerView.month,

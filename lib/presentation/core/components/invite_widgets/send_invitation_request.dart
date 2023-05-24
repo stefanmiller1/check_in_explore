@@ -222,6 +222,8 @@ class _SendInvitationRequestState extends State<SendInvitationRequest> {
                       ),
                     ),
 
+
+
                     /// ------------------ ///
                     Container(
                       height: 10,
@@ -273,6 +275,46 @@ class _SendInvitationRequestState extends State<SendInvitationRequest> {
                       width: MediaQuery.of(context).size.width,
                       color: widget.model.accentColor,
                     ),
+
+                    /// TODO: IMPLEMENT INVITE ONLY - LIMITED TO ONCE EVERY 2 WEEKS
+                    /// will need limiting if invite only is  set in place
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: InkWell(
+                          onTap: () {
+
+                          },
+                          child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 14.0),
+                              child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                      child: Row(
+                                        children: [
+                                          Icon(Icons.people_alt_outlined, color: widget.model.paletteColor),
+                                          const SizedBox(width: 18.0),
+                                          Column(
+                                            mainAxisAlignment: MainAxisAlignment.start,
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text('Invite New Contact', style: TextStyle(color: widget.model.paletteColor)),
+                                              Text('Send an E-mail Invite to Friends', style: TextStyle(color: widget.model.disabledTextColor))
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+
+                                    Icon(Icons.alternate_email, color: widget.model.paletteColor)
+                                  ]
+                              )
+                          )
+                      ),
+                    ),
+
+
                   ],
                 ),
 

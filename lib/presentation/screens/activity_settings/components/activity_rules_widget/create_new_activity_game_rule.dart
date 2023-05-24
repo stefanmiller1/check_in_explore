@@ -1,3 +1,4 @@
+import 'package:check_in_application/auth/update_services/listing_update_create_services/settings_update_create_services/activity_settings/activity_settings_form_bloc.dart';
 import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
@@ -12,9 +13,10 @@ import 'package:dartz/dartz.dart' as dart;
 class ActivityRuleGameToCreate extends StatefulWidget {
 
   final DashboardModel model;
-  final ActivityCreatorForm activityCreatorForm;
+  final ActivityManagerForm activityManagerForm;
+  final ReservationItem reservation;
 
-  const ActivityRuleGameToCreate({Key? key, required this.model, required this.activityCreatorForm}) : super(key: key);
+  const ActivityRuleGameToCreate({Key? key, required this.model, required this.activityManagerForm, required this.reservation}) : super(key: key);
 
   @override
   State<ActivityRuleGameToCreate> createState() => _ActivityRuleGameToCreateState();
@@ -25,13 +27,13 @@ class _ActivityRuleGameToCreateState extends State<ActivityRuleGameToCreate> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(create: (context) => getIt<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.initializeActivityForm(dart.optionOf(widget.activityCreatorForm))),
+    return BlocProvider(create: (context) => getIt<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.initializeActivityForm(dart.optionOf(widget.activityManagerForm), dart.optionOf(widget.reservation))),
       child: BlocConsumer<UpdateActivityFormBloc, UpdateActivityFormState>(
-      listenWhen: (p, c) => p.authFailureOrSuccessOptionSaving != c.authFailureOrSuccessOptionSaving || p.authFailureOrSuccessOptionSubmitting != c.authFailureOrSuccessOptionSubmitting || p.authFailureOrSuccessOptionLocation != c.authFailureOrSuccessOptionLocation,
+      listenWhen: (p, c) => p.authFailureOrSuccessOptionSaving != c.authFailureOrSuccessOptionSaving || p.authFailureOrSuccessOptionSubmitting != c.authFailureOrSuccessOptionSubmitting,
       listener: (context, state) {
 
       },
-      buildWhen: (p, c) => p.authFailureOrSuccessOptionSaving != c.authFailureOrSuccessOptionSaving || p.authFailureOrSuccessOptionSubmitting != c.authFailureOrSuccessOptionSubmitting || p.activityCreatorForm != c.activityCreatorForm,
+      buildWhen: (p, c) => p.authFailureOrSuccessOptionSaving != c.authFailureOrSuccessOptionSaving || p.authFailureOrSuccessOptionSubmitting != c.authFailureOrSuccessOptionSubmitting || p.activitySettingsForm != c.activitySettingsForm,
       builder: (context, state) {
         return Scaffold(
           appBar: AppBar(
@@ -59,7 +61,7 @@ class _ActivityRuleGameToCreateState extends State<ActivityRuleGameToCreate> {
                         fontSize: widget.model.secondaryQuestionTitleFontSize)),
                     Text(AppLocalizations.of(context)!.activityRuleGameExpectationCompetitionAddSub, style: TextStyle(
                         color: widget.model.paletteColor)),
-                    ...context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRules.gameActivityRules?.allowedDonationTypes?.asMap().map((i, e)
+                    ...context.read<UpdateActivityFormBloc>().state.activitySettingsForm.rulesService.gameActivityRules?.allowedDonationTypes?.asMap().map((i, e)
                            => MapEntry(i, Row(
                              children: [
                                Expanded(
@@ -86,7 +88,7 @@ class _ActivityRuleGameToCreateState extends State<ActivityRuleGameToCreate> {
                                                     children: [
                                                       Padding(
                                                         padding: const EdgeInsets.only(left: 8.0),
-                                                        child: Text(getDonationName(context, context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRules.gameActivityRules?.allowedDonationTypes?[i] ?? DonationType.cash), style: TextStyle(color: widget.model.paletteColor, fontWeight:  FontWeight.normal, fontSize: 13.5 ),),
+                                                        child: Text(getDonationName(context, context.read<UpdateActivityFormBloc>().state.activitySettingsForm.rulesService.gameActivityRules?.allowedDonationTypes?[i] ?? DonationType.cash), style: TextStyle(color: widget.model.paletteColor, fontWeight:  FontWeight.normal, fontSize: 13.5 ),),
                                                       ),
                                                       Padding(
                                                         padding: const EdgeInsets.only(right: 8.0),
@@ -119,8 +121,8 @@ class _ActivityRuleGameToCreateState extends State<ActivityRuleGameToCreate> {
                                                       (e) => DropdownMenuItem<DonationType>(
                                                       onTap: () {
                                                         setState(() {
-                                                          context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRules.gameActivityRules?.allowedDonationTypes?[i] = e;
-                                                          context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.allowedDonationTypesChanged(context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRules.gameActivityRules?.allowedDonationTypes ?? []));
+                                                          context.read<UpdateActivityFormBloc>().state.activitySettingsForm.rulesService.gameActivityRules?.allowedDonationTypes?[i] = e;
+                                                          context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.allowedDonationTypesChanged(context.read<UpdateActivityFormBloc>().state.activitySettingsForm.rulesService.gameActivityRules?.allowedDonationTypes ?? []));
                                                         });
                                                       },
                                                       value: e,
@@ -140,8 +142,8 @@ class _ActivityRuleGameToCreateState extends State<ActivityRuleGameToCreate> {
                                child: TextButton(onPressed: () {
                                  setState(() {
 
-                                   context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRules.gameActivityRules?.allowedDonationTypes?.removeAt(i);
-                                   context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.allowedDonationTypesChanged(context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRules.gameActivityRules?.allowedDonationTypes ?? []));
+                                   context.read<UpdateActivityFormBloc>().state.activitySettingsForm.rulesService.gameActivityRules?.allowedDonationTypes?.removeAt(i);
+                                   context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.allowedDonationTypesChanged(context.read<UpdateActivityFormBloc>().state.activitySettingsForm.rulesService.gameActivityRules?.allowedDonationTypes ?? []));
 
 
                                  });
@@ -155,15 +157,15 @@ class _ActivityRuleGameToCreateState extends State<ActivityRuleGameToCreate> {
                     ).values.toList() ?? [],
                     SizedBox(height: 10),
                     Visibility(
-                      visible: (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRules.gameActivityRules?.allowedDonationTypes?.length ?? 1) < 5,
+                      visible: (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.rulesService.gameActivityRules?.allowedDonationTypes?.length ?? 1) < 5,
                       child: Center(
                         child: IconButton(onPressed: () {
                           setState(() {
 
-                            if ((context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRules.gameActivityRules?.allowedDonationTypes?.length ?? 1) < 5) {
+                            if ((context.read<UpdateActivityFormBloc>().state.activitySettingsForm.rulesService.gameActivityRules?.allowedDonationTypes?.length ?? 1) < 5) {
 
-                              context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRules.gameActivityRules?.allowedDonationTypes?.add(DonationType.cash);
-                              context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.allowedDonationTypesChanged(context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRules.gameActivityRules?.allowedDonationTypes ?? []));
+                              context.read<UpdateActivityFormBloc>().state.activitySettingsForm.rulesService.gameActivityRules?.allowedDonationTypes?.add(DonationType.cash);
+                              context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.allowedDonationTypesChanged(context.read<UpdateActivityFormBloc>().state.activitySettingsForm.rulesService.gameActivityRules?.allowedDonationTypes ?? []));
                             }
 
                           });
@@ -181,10 +183,10 @@ class _ActivityRuleGameToCreateState extends State<ActivityRuleGameToCreate> {
                     RadioListTile(
                       toggleable: true,
                       value: 'Yes',
-                      groupValue: (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRules.gameActivityRules?.isAllowedExternalContributions ?? false) ? 'Yes' : null,
+                      groupValue: (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.rulesService.gameActivityRules?.isAllowedExternalContributions ?? false) ? 'Yes' : null,
                       onChanged: (String? value) {
 
-                        if (context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRules.gameActivityRules?.isAllowedExternalContributions ?? false) {
+                        if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.rulesService.gameActivityRules?.isAllowedExternalContributions ?? false) {
                           context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isAllowedExternalContributions(false));
                         } else {
                           context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isAllowedExternalContributions(true));
@@ -197,7 +199,7 @@ class _ActivityRuleGameToCreateState extends State<ActivityRuleGameToCreate> {
                     RadioListTile(
                       toggleable: true,
                       value: 'No',
-                      groupValue: !(context.read<UpdateActivityFormBloc>().state.activityCreatorForm.activityRules.gameActivityRules?.isAllowedExternalContributions ?? false) ? 'No' : null,
+                      groupValue: !(context.read<UpdateActivityFormBloc>().state.activitySettingsForm.rulesService.gameActivityRules?.isAllowedExternalContributions ?? false) ? 'No' : null,
                       onChanged: (String? value) {
 
                         context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isAllowedExternalContributions(false));

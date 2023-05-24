@@ -134,7 +134,7 @@ Widget getMessengerReservationHeader(BuildContext context, ListingManagerForm li
                         context, model,
                         55,
                         false,
-                        getActivityOptions(context).firstWhere((element) => element.activityId == reservationItem.reservationSlotItem.first.selectedActivityType)
+                        getActivityOptions().firstWhere((element) => element.activityId == reservationItem.reservationSlotItem.first.selectedActivityType)
                     );
                   },
                   fit: BoxFit.cover
@@ -145,7 +145,7 @@ Widget getMessengerReservationHeader(BuildContext context, ListingManagerForm li
               context, model,
               40,
               false,
-              getActivityOptions(context).firstWhere((element) => element.activityId == reservationItem.reservationSlotItem.first.selectedActivityType)
+              getActivityOptions().firstWhere((element) => element.activityId == reservationItem.reservationSlotItem.first.selectedActivityType)
           ),
           const SizedBox(width: 15),
           Expanded(
@@ -275,7 +275,7 @@ Widget getReservationCardItem(BuildContext context, ListingManagerForm listing, 
                             model,
                             100,
                             false,
-                            getActivityOptions(context).firstWhere((element) => element.activityId == reservationItem.reservationSlotItem.first.selectedActivityType)
+                            getActivityOptions().firstWhere((element) => element.activityId == reservationItem.reservationSlotItem.first.selectedActivityType)
                         );
                       },
                       fit: BoxFit.cover
@@ -286,7 +286,7 @@ Widget getReservationCardItem(BuildContext context, ListingManagerForm listing, 
                   context, model,
                   100,
                   false,
-                  getActivityOptions(context).firstWhere((element) => element.activityId == reservationItem.reservationSlotItem.first.selectedActivityType)
+                  getActivityOptions().firstWhere((element) => element.activityId == reservationItem.reservationSlotItem.first.selectedActivityType)
               ),
               const SizedBox(width: 10),
               Expanded(
