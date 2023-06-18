@@ -101,7 +101,14 @@ class _ActivityPreviewScreenState extends State<ActivityPreviewScreen> {
               /// background info of activity ///
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 18.0),
-                child: getActivityBackgroundColumn(context, widget.model, activityForm, activityOwner),
+                child: getActivityBackgroundColumn(
+                    context,
+                    widget.model,
+                    activityForm,
+                    activityOwner,
+                    getPartnerAttendees(widget.model, activityForm, didSelectAttendee: (attendee) {}),
+                    getInstructorAttendees(widget.model, activityForm, didSelectAttendee: (attendee) {})
+                ),
               ),
               const SizedBox(height: 8),
 
@@ -121,6 +128,21 @@ class _ActivityPreviewScreenState extends State<ActivityPreviewScreen> {
                     widget.reservation
                 )
               ),
+            ),
+
+            /// activity requirements ///
+            getActivityRequirementsColumn(
+                context,
+                widget.model,
+                activityOwner,
+                activityForm,
+                getVendorAttendees(
+                  widget.model,
+                  activityForm,
+                  didSelectAttendee: (attendee) {
+
+                  }
+                ),
             ),
 
             /// reservation dates ///

@@ -66,7 +66,7 @@ class _SearchTypeBarState extends State<SearchTypeBar> with TickerProviderStateM
         itemBuilder: (context, index) {
           final activityItem = getActivityOptions()[index];
 
-          double selectedWidth = 50 + ((getTitleForActivityOption(context, activityItem.activityId)?.length ?? 1) * 13);
+          double selectedWidth = 50 + 6 + ((getTitleForActivityOption(context, activityItem.activityId)?.length ?? 1) * 13);
           _aboveItems = (scrollController.offset)~/((MediaQuery.of(context).size.width + 35)/getActivityOptions().length);
 
           _belowItems = _aboveItems;
@@ -78,15 +78,24 @@ class _SearchTypeBarState extends State<SearchTypeBar> with TickerProviderStateM
             HapticFeedback.lightImpact();
           }
 
-          return getActivityOptionForSearch(
-                context,
-                widget.model,
-                selectedWidth,
-                60,
-                50,
-                (context.read<ListingsSearchRequirementsBloc>().state.activtityTypeId == activityItem.activityId),
-                activityItem
-              );
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 3.0),
+            child: getActivityOptionForSearch(
+                  context,
+                  widget.model,
+                  selectedWidth,
+                  60,
+                  50,
+                  (context.read<ListingsSearchRequirementsBloc>().state.activtityTypeId == activityItem.activityId),
+                  activityItem,
+                  didTapActivity: (activity) {
+
+                   HapticFeedback.lightImpact();
+                   scrollController.animateTo(index * 47, duration: Duration(milliseconds: 250), curve: Curves.easeInOut);
+
+                  }
+                ),
+          );
 
         },
       ),

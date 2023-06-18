@@ -39,7 +39,7 @@ class _PaymentMethodsWidgetState extends State<PaymentMethodsWidget> {
           builder: (context, state) {
             return state.maybeMap(
                 loadInProgress: (_) => Scaffold(
-                resizeToAvoidBottomInset: false,
+                resizeToAvoidBottomInset: true,
                   appBar: AppBar(
                     backgroundColor: Colors.transparent,
                     titleTextStyle: TextStyle(color: widget.model.paletteColor, fontSize: widget.model.secondaryQuestionTitleFontSize, fontWeight: FontWeight.bold),
@@ -126,7 +126,7 @@ class _PaymentMethodsWidgetState extends State<PaymentMethodsWidget> {
   Widget retrievePaymentMethods(BuildContext context, List<CardItem> cards, PaymentServicesState state) {
 
     return Scaffold(
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         automaticallyImplyLeading: !state.isSaving,
         backgroundColor: Colors.transparent,

@@ -149,6 +149,9 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                   return ReviewCurrentProfile(
                     model: model,
                     currentUser: profile,
+                    didSelectEditProfile: (profile) {
+
+                        },
                       );
                     }
                   )

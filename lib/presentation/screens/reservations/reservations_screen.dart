@@ -3,9 +3,11 @@ import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/account/login_signup_core.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/components/reservation_card.dart';
+import 'package:check_in_web_mobile_explore/presentation/core/loading_containers/loading_widgets.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/responsive/responsive.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/facility_preview/facility_preview_screen_helper.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/reservations/components/reservation_results_main.dart';
+import 'package:check_in_web_mobile_explore/presentation/web_screens/main_container_widgets/reservations_widget/reservation_helper_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jumping_dot/jumping_dot.dart';
@@ -13,10 +15,12 @@ import 'package:jumping_dot/jumping_dot.dart';
 class ReservationScreen extends StatelessWidget {
 
   final DashboardModel model;
+  final Function(ListingManagerForm listing, ReservationItem res, UserProfileModel profile, ActivityManagerForm activityManagerForm) didSelectReservation;
 
   const ReservationScreen({
     super.key,
     required this.model,
+    required this.didSelectReservation,
   });
 
   @override
@@ -24,21 +28,21 @@ class ReservationScreen extends StatelessWidget {
     return Responsive(
         mobile: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 18.0),
-          child: retrieveAuthenticationState(context),
+          child: retrieveAuthenticationState(context, Responsive.isMobile(context)),
         ),
-        tablet: Container(),
-        desktop: Container()
+        tablet: retrieveAuthenticationState(context, !Responsive.isMobile(context)),
+        desktop: retrieveAuthenticationState(context, !Responsive.isMobile(context)),
     );
   }
 
 
-  Widget retrieveAuthenticationState(BuildContext context) {
+  Widget retrieveAuthenticationState(BuildContext context, bool isBrowser) {
     return BlocProvider(create: (_) => getIt<UserProfileWatcherBloc>()..add(const UserProfileWatcherEvent.watchUserProfileStarted()),
       child: BlocBuilder<UserProfileWatcherBloc, UserProfileWatcherState>(
         builder: (context, authState) {
           return authState.maybeMap(
-              loadInProgress: (_) => progressOverlay(model),
-              loadProfileFailure: (_) => GetLoginSignUpWidget(model: model),
+              loadInProgress: (_) => emptyLoadingListView(context, isBrowser),
+              loadProfileFailure: (_) => (isBrowser) ? GetLoginSignUpWidget(model: model) : emptyLoadingListView(context, true),
               loadUserProfileSuccess: (item) => SingleChildScrollView(child: Column(
                 children: [
                   getInvitedToReservations(context, item.profile),
@@ -46,7 +50,7 @@ class ReservationScreen extends StatelessWidget {
                 ],
               )),
               orElse: () {
-                return progressOverlay(model);
+                return emptyLoadingListView(context, isBrowser);
             }
           );
         },
@@ -73,20 +77,9 @@ class ReservationScreen extends StatelessWidget {
                       currentUser,
                       model,
                       e.reservationState == ReservationSlotState.completed,
-                      didSelectReservation: (ListingManagerForm listing, ReservationItem reservation) {
-                        Navigator.push(context, MaterialPageRoute(
-                            builder: (_) {
-                              return ReservationResultMain(
-                                model: model,
-                                isReply: false,
-                                listing: listing,
-                                currentUser: currentUser,
-                                currentUserId: currentUser.userId.getOrCrash(),
-                                reservationId: reservation.reservationId.getOrCrash(),
-                              );
-                            }
-                          )
-                        );
+                      ReservationHelperCore.selectedReservationItem == e,
+                      didSelectReservation: (ListingManagerForm listing, ReservationItem reservation, ActivityManagerForm activity) {
+                        didSelectReservation(listing, reservation, currentUser, activity);
                       },
                     )
                     ).toList(),
@@ -131,21 +124,9 @@ class ReservationScreen extends StatelessWidget {
                         currentUser,
                         model,
                         false,
-                        didSelectReservation: (ListingManagerForm listing, ReservationItem reservation) {
-                          Navigator.push(context, MaterialPageRoute(
-                              builder: (_) {
-                                return ReservationResultMain(
-                                  model: model,
-                                  isReply: false,
-                                  listing: listing,
-                                  currentUser: currentUser,
-                                  currentUserId: currentUser.userId.getOrCrash(),
-                                  reservationId: reservation.reservationId.getOrCrash(),
-
-                                  );
-                                }
-                              )
-                            );
+                        ReservationHelperCore.selectedReservationItem == e,
+                        didSelectReservation: (ListingManagerForm listing, ReservationItem reservation, ActivityManagerForm activity) {
+                            didSelectReservation(listing, reservation, currentUser, activity);
                           },
                         )
                       ).toList(),
@@ -167,20 +148,12 @@ class ReservationScreen extends StatelessWidget {
                           currentUser,
                           model,
                           true,
-                          didSelectReservation: (ListingManagerForm listing, ReservationItem reservation) {
-                            Navigator.push(context, MaterialPageRoute(
-                                builder: (_) {
-                                  return ReservationResultMain(
-                                    model: model,
-                                    isReply: false,
-                                    listing: listing,
-                                    currentUser: currentUser,
-                                    currentUserId: currentUser.userId.getOrCrash(),
-                                    reservationId: reservation.reservationId.getOrCrash(),
-                                    );
-                                  }
-                                )
-                              );
+                          ReservationHelperCore.selectedReservationItem == e,
+                          didSelectReservation: (
+                              ListingManagerForm listing,
+                              ReservationItem reservation,
+                              ActivityManagerForm activity) {
+                                didSelectReservation(listing, reservation, currentUser, activity);
                             },
                           )
                         ).toList(),

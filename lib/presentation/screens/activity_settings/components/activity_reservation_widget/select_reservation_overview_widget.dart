@@ -64,7 +64,7 @@ class _ActivityAttendeeSelectTypeState extends State<ActivityAttendeeSelectType>
                 ),
               ),
 
-                     const SizedBox(height: 15),
+                      const SizedBox(height: 15),
                       Container(
                         decoration: BoxDecoration(
                           color: widget.model.accentColor.withOpacity(0.15),

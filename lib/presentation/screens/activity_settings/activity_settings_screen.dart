@@ -268,10 +268,10 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('Add Special Requirements'),
-                  ...context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.customRequirementOption?.value.fold((l) => [], (r) => r.map(
-                          (e) => Text(e.customDetail ?? '')
-                    )
-                  ) ?? []
+                  // ...context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.customRequirementOption?.value.fold((l) => [], (r) => r.map(
+                  //         (e) => Text(e.customDetail ?? '')
+                  //   )
+                  // ) ?? []
                 ],
               ),
               leading: Icon(Icons.more_horiz_rounded, color: widget.model.paletteColor),

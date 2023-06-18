@@ -127,7 +127,7 @@ class ActivityAttendeeCreateTicket extends StatelessWidget {
                                 items: [for(var i=0; i<100; i+=1) i].where((element) => element != 0).map(
                                         (e) => DropdownMenuItem<int>(
                                         onTap: () {
-                                          context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.ticketQuantityChanged(e));
+                                          // context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.ticketQuantityChanged(e));
                                         },
                                         value: e,
                                         child: Text('$e ${AppLocalizations.of(context)!.activityAttendanceTypeTickets}', style: TextStyle(color: model.disabledTextColor)
@@ -233,7 +233,7 @@ class ActivityAttendeeCreateTicket extends StatelessWidget {
                                 items: [for(var i=0; i<100; i+=1) i].where((element) => element != 0).map(
                                         (e) => DropdownMenuItem<int>(
                                         onTap: () {
-                                          context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.ticketQuantityChanged(e));
+                                          // context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.ticketQuantityChanged(e));
                                         },
                                         value: e,
                                         child: Text('$e ${AppLocalizations.of(context)!.activityAttendanceTypeTickets}', style: TextStyle(color: model.disabledTextColor)

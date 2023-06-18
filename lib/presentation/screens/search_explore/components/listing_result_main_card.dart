@@ -1,7 +1,6 @@
 import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
-import 'package:check_in_web_mobile_explore/presentation/core/components/profile_user_widget.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/core_helper.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/facility_preview/facility_preview_screen.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/listing_helper.dart';

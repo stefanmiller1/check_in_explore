@@ -22,7 +22,7 @@ class PayoutHistoryWidget extends StatelessWidget {
         builder: (context, state) {
           return state.maybeMap(
               loadInProgress: (_) => Scaffold(
-                  resizeToAvoidBottomInset: false,
+                  resizeToAvoidBottomInset: true,
                   appBar: AppBar(
                     backgroundColor: Colors.transparent,
                     titleTextStyle: TextStyle(color: model.paletteColor, fontSize: model.secondaryQuestionTitleFontSize, fontWeight: FontWeight.bold),

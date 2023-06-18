@@ -1,6 +1,8 @@
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/components/reservation_card.dart';
+import 'package:check_in_web_mobile_explore/presentation/core/responsive/responsive.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -178,14 +180,14 @@ Widget getHostingListings(BuildContext context, UserProfileModel profile, List<L
   );
 }
 
-Widget getUpComingReservations(BuildContext context, UserProfileModel currentUser, List<ReservationItem> reservations, DashboardModel model) {
+Widget getUpComingReservations(BuildContext context, UserProfileModel currentUser,  PageController pageController, List<ReservationItem> reservations, DashboardModel model, {required Function(ListingManagerForm listing, ReservationItem res) didSelectReservation}) {
   return Container(
     height: 150,
     child: Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('${currentUser.legalName.getOrCrash()}\'s Reservations', style: TextStyle(color: model.paletteColor, fontWeight: FontWeight.bold, fontSize: model.secondaryQuestionTitleFontSize)),
+        Text('${currentUser.legalName.getOrCrash()}\'s Reservations', style: TextStyle(color: model.paletteColor, fontWeight: FontWeight.bold, fontSize: model.secondaryQuestionTitleFontSize, overflow: TextOverflow.ellipsis), maxLines: 1,),
         const SizedBox(height: 18),
 
         if (reservations.isEmpty) Container(
@@ -220,30 +222,33 @@ Widget getUpComingReservations(BuildContext context, UserProfileModel currentUse
           ),
         ),
 
-        if (reservations.isNotEmpty) Expanded(
-          child: PageView.builder(
-              itemCount: reservations.length,
-              scrollDirection: Axis.horizontal,
-              allowImplicitScrolling: true,
-              itemBuilder: (_, index) {
-                final ReservationItem reservation = reservations[index];
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: getReservationCard(
-                    context,
-                    false,
-                    reservation,
-                    currentUser,
-                    model,
-                    reservation.reservationSlotItem.map((e) => e.selectedDate).where((element) => element.isBefore(DateTime.now())).isNotEmpty,
-                    didSelectReservation: (listing, reservation) {
-
+        if (reservations.isNotEmpty)
+            Expanded(
+              child: PageView.builder(
+                  controller: pageController,
+                  itemCount: reservations.length,
+                  scrollDirection: Axis.horizontal,
+                  allowImplicitScrolling: true,
+                  itemBuilder: (_, index) {
+                    final ReservationItem reservation = reservations[index];
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: getReservationCard(
+                          context,
+                          false,
+                          reservation,
+                          currentUser,
+                          model,
+                          false,
+                          reservation.reservationSlotItem.map((e) => e.selectedDate).where((element) => element.isBefore(DateTime.now())).isNotEmpty,
+                          didSelectReservation: (listing, reservation, activity) {
+                            didSelectReservation(listing, reservation);
+                        }
+                      ),
+                    );
                   }
-                ),
-              );
-            }
-          ),
-        )
+              ),
+            )
       ],
     ),
   );

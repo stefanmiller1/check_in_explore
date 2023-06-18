@@ -2,6 +2,7 @@ import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_credentials/check_in_credentials.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -28,14 +29,16 @@ Future<void> main() async {
   configureInjection(prodEnv);
   configureInjectionFacade(prodEnvFacade);
   configureInjectionApp(prodEnvFacade);
-  Stripe.publishableKey = STRIPE_PUBLISH_KEY;
-  Stripe.merchantIdentifier = STRIPE_MERCHANT_ID;
-  await Stripe.instance.applySettings();
   await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform
   );
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-  await LocalNotificationCore.setupFlutterNotifications(isFlutterLocalNotificationsInitialized);
+  if (!kIsWeb) {
+    Stripe.publishableKey = STRIPE_PUBLISH_KEY;
+    Stripe.merchantIdentifier = STRIPE_MERCHANT_ID;
+    await Stripe.instance.applySettings();
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+    await LocalNotificationCore.setupFlutterNotifications(isFlutterLocalNotificationsInitialized);
+  }
   runApp(const MyApp());
 }
 

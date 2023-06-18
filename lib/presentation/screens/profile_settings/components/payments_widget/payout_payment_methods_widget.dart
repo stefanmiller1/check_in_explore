@@ -83,7 +83,7 @@ class PayoutPaymentMethod extends StatelessWidget {
 
   Widget updatePayoutMethodWidget(BuildContext context, PaymentServicesState state) {
     return Scaffold(
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: true,
         appBar: AppBar(
           automaticallyImplyLeading: !state.isSaving,
           backgroundColor: Colors.transparent,

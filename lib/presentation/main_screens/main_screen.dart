@@ -4,6 +4,7 @@ import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/map_helper.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:check_in_facade/check_in_facade.dart' as facade;
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -48,7 +49,7 @@ class _MainScreenState extends State<MainScreen> {
         child: BlocConsumer<ListingsSearchRequirementsBloc, ListingsSearchRequirementsState>(
           listenWhen: (p,c) => p.selectedListingId != c.selectedListingId || p.isMarkersLoading != c.isMarkersLoading,
           listener: (context, state) {
-            print('isLoading');
+
 ;          },
           buildWhen: (p,c) =>
               p.selectedListingId != c.selectedListingId ||
@@ -68,10 +69,10 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Widget retrieveMainResponsiveScreen({required DashboardModel model}) {
-    return Responsive(
-      mobile: MainMobileScreen(model: model),
-      tablet: const MainTabletScreen(),
-      desktop: const MainDesktopScreen(),
-    );
+    if (kIsWeb) {
+      return MainWebScreen(model: model);
+    }
+    return MainMobileScreen(model: model);
+
   }
 }

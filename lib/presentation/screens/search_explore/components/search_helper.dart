@@ -76,7 +76,7 @@ Widget getActivityTabForReservation(BuildContext context, DashboardModel model, 
   );
 }
 
-Widget getActivityOptionForSearch(BuildContext context, DashboardModel model, double selectedWidth, double unselectedWidth, double height, bool isSelected, ActivityOption activityOption) {
+Widget getActivityOptionForSearch(BuildContext context, DashboardModel model, double selectedWidth, double unselectedWidth, double height, bool isSelected, ActivityOption activityOption, {required Function(ActivityOption) didTapActivity}) {
   return AnimatedContainer(
           duration: Duration(milliseconds: 300),
           width: (isSelected) ? selectedWidth : unselectedWidth,
@@ -85,18 +85,23 @@ Widget getActivityOptionForSearch(BuildContext context, DashboardModel model, do
             color: (isSelected) ? model.paletteColor : model.disabledTextColor.withOpacity(0.2),
             borderRadius: BorderRadius.circular(50),
           ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+          child: GestureDetector(
+            onTap: () {
+              didTapActivity(activityOption);
+            },
             child: Padding(
-              padding: const EdgeInsets.only(top: 8.0),
-              child: Row(
-                children: [
-                  Expanded(child: SvgPicture.asset(getIconPathForActivity(context, activityOption.activityId), fit: BoxFit.cover, color: (isSelected) ? model.accentColor : model.paletteColor, height: height)),
-                  if (isSelected) Expanded(child: Text(getTitleForActivityOption(context, activityOption.activityId) ?? 'Activity', style: TextStyle(color: (isSelected) ? model.accentColor : model.paletteColor), overflow: TextOverflow.ellipsis, maxLines: 1, softWrap: true,)),
-              ],
+              padding: const EdgeInsets.symmetric(horizontal: 12.0),
+              child: Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: Row(
+                  children: [
+                    Expanded(child: SvgPicture.asset(getIconPathForActivity(context, activityOption.activityId), fit: BoxFit.cover, color: (isSelected) ? model.accentColor : model.paletteColor, height: height)),
+                    if (isSelected) Expanded(child: Text(getTitleForActivityOption(context, activityOption.activityId) ?? 'Activity', style: TextStyle(color: (isSelected) ? model.accentColor : model.paletteColor), overflow: TextOverflow.ellipsis, maxLines: 1, softWrap: true,)),
+                ],
+              ),
             ),
-          ),
         ),
+          ),
     // child: Padding(
     //   padding: const EdgeInsets.only(top: 6.0),
     //   child: Container(

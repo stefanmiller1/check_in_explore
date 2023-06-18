@@ -76,7 +76,6 @@ dependencies:
   add_2_calendar: ^2.1.2
   share_plus: ^6.3.1
   flutter_contacts: ^1.1.6
-#  alphabet_list_scroll_view: ^2.0.0
   firebase_dynamic_links: ^5.0.17
   collection: ^1.16.0
   badges: ^3.0.3
@@ -84,6 +83,8 @@ dependencies:
   custom_marker: ^1.0.0
   implicitly_animated_reorderable_list: ^0.4.0
   material_floating_search_bar: ^0.3.4
+  timeago: ^3.2.2
+  image_picker_web: ^3.0.0+1
   check_in_domain:
     path: /Users/stefanmiller/AndroidStudioProjects/check_in_domain
   check_in_presentation:

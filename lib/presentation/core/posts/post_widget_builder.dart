@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:check_in_application/auth/update_services/booked_reservation_services/booked_reservation_form_bloc.dart';
 import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_domain/check_in_domain.dart';
@@ -5,11 +7,14 @@ import 'package:check_in_domain/domain/auth/reservation_manager/post.dart';
 import 'package:check_in_domain/domain/auth/reservation_manager/reservation_post/system_post.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/posts/post_helper.dart';
+import 'package:check_in_web_mobile_explore/presentation/screens/profile_settings/components/edit_selected_profile.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/profile_settings/components/review_current_profile.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/reservations/components/reservation_helper.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/reservations/components/reservation_results_main.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:reservation_post/reservation_post.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
@@ -25,7 +30,8 @@ class PostWidgetBuilder extends StatefulWidget {
     required this.isReply,
     required this.userProfiles,
     this.onEndReached,
-    this.scrollController,
+    this.autoScrollController,
+    this.headerWidget,
   });
 
   /// see all post users
@@ -55,9 +61,12 @@ class PostWidgetBuilder extends StatefulWidget {
   /// see [ReservationPostList.onEndReached].
   final Future<void> Function()? onEndReached;
 
-  /// See [PostList.scrollController].
+  /// See [PostList.autoScrollController].
   /// If provided, you cannot use the scroll to message functionality.
-  final AutoScrollController? scrollController;
+  final AutoScrollController? autoScrollController;
+
+  /// scroll controller
+  final Widget? headerWidget;
 
   @override
   State<PostWidgetBuilder> createState() => _PostWidgetBuilderState();
@@ -81,24 +90,11 @@ class _PostWidgetBuilderState extends State<PostWidgetBuilder> {
           child: widget.emptyPostView
       );
     }
-    return Container(
-      height: MediaQuery.of(context).size.height,
-      width: MediaQuery.of(context).size.width,
-      child: Column(
-        children: [
-          Flexible(
-            child: GestureDetector(
-              onTap: () {
-                FocusManager.instance.primaryFocus?.unfocus();
-              },
-              child: reservationMainContainer(context, widget.userProfiles, widget.postList),
-            ),
-          ),
-          SizedBox(
-            height: (widget.isReply) ? 385 : 65,
-          ),
-        ],
-      ),
+    return GestureDetector(
+      onTap: () {
+        FocusManager.instance.primaryFocus?.unfocus();
+      },
+      child: reservationMainContainer(context, widget.userProfiles, widget.postList),
     );
   }
 
@@ -117,23 +113,58 @@ class _PostWidgetBuilderState extends State<PostWidgetBuilder> {
     return ReservationPost(
       posts: posts,
       profiles: users,
+
       model: widget.model,
       onSubmitPressed: () {
 
       },
       isReplyPost: widget.isReply,
       user: widget.currentUser,
+      headerWidget: widget.headerWidget,
       onAvatarTap: (userProfile) {
         Navigator.of(context).push(MaterialPageRoute(builder: (_) {
           return ReviewCurrentProfile(
             model: widget.model,
             currentUser: userProfile,
+            didSelectEditProfile: (profile) {
+
+              if (!kIsWeb && Platform.isIOS) {
+                CupertinoScaffold.showCupertinoModalBottomSheet(
+                    context: context,
+                    expand: true,
+                    builder: (contexts) {
+                      return EditCurrentProfile(
+                        profile: widget.currentUser,
+                        model: widget.model,
+                        didFinishSaving: (profile) {
+                          setState(() {
+                            Navigator.of(context).pop();
+                          });
+                        },
+                      );
+                    });
+                } else {
+                  Navigator.push(context, MaterialPageRoute(
+                    builder: (_) {
+                        return EditCurrentProfile(
+                          profile: widget.currentUser,
+                          model: widget.model,
+                          didFinishSaving: (profile) {
+                            setState(() {
+                              Navigator.of(context).pop();
+                          });
+                        },
+                      );
+                    })
+                  );
+                }
+              },
             );
           })
         );
       },
       onEndReached: widget.onEndReached,
-      scrollController: widget.scrollController,
+      scrollController: widget.autoScrollController,
       onPostDoubleTap: (context, post) {
 
       },

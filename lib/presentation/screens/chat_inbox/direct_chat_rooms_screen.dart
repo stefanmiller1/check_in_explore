@@ -4,9 +4,11 @@ import 'package:check_in_presentation/check_in_presentation.dart';
 import 'package:check_in_facade/check_in_facade.dart' as facade;
 import 'package:check_in_web_mobile_explore/presentation/core/account/login_signup_core.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/components/reservation_card.dart';
+import 'package:check_in_web_mobile_explore/presentation/core/loading_containers/loading_widgets.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/responsive/responsive.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/chat_inbox/components/direct_chat_archive_rooms_screen.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/chat_inbox/direct_chat_screen.dart';
+import 'package:check_in_web_mobile_explore/presentation/web_screens/main_container_widgets/chat_widget/chat_helper_core.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -14,8 +16,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class DirectChatRoomsScreen extends StatefulWidget {
 
   final DashboardModel model;
+  final bool isArchive;
+  final Function() didSelectArchive;
+  final Function() didSelectChats;
+  final Function(types.Room room, UserProfileModel user) didSelectRoom;
 
-  const DirectChatRoomsScreen({super.key, required this.model});
+  const DirectChatRoomsScreen({super.key, required this.model, required this.isArchive, required this.didSelectArchive, required this.didSelectChats, required this.didSelectRoom});
 
   @override
   State<DirectChatRoomsScreen> createState() => _DirectChatRoomsScreenState();
@@ -24,48 +30,51 @@ class DirectChatRoomsScreen extends StatefulWidget {
 class _DirectChatRoomsScreenState extends State<DirectChatRoomsScreen> {
 
   late ScrollController? _scrollController;
+  late List<types.Room> rooms = [];
 
   @override
   void initState() {
     _scrollController = ScrollController();
+    rooms.clear();
     super.initState();
   }
 
   @override
   void dispose() {
     _scrollController?.dispose();
+    rooms.clear();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-
     return Responsive(
         mobile: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 18.0),
-          child: retrieveAuthenticationState(context),
+          child: retrieveAuthenticationState(context, Responsive.isMobile(context)),
         ),
-        tablet: Container(),
-        desktop: Container()
+        tablet: retrieveAuthenticationState(context, !Responsive.isMobile(context)),
+        desktop: retrieveAuthenticationState(context, !Responsive.isMobile(context))
     );
   }
 
-  Widget retrieveAuthenticationState(BuildContext context) {
+  Widget retrieveAuthenticationState(BuildContext context, bool isBrowser) {
     return BlocProvider(create: (_) => getIt<UserProfileWatcherBloc>()..add(const UserProfileWatcherEvent.watchUserProfileStarted()),
       child: BlocBuilder<UserProfileWatcherBloc, UserProfileWatcherState>(
         builder: (context, authState) {
           return authState.maybeMap(
-              loadInProgress: (_) => progressOverlay(widget.model),
-              loadProfileFailure: (_) => GetLoginSignUpWidget(model: widget.model),
+              loadInProgress: (_) => emptyLoadingListView(context, isBrowser),
+              loadProfileFailure: (_) => (isBrowser) ? GetLoginSignUpWidget(model: widget.model) : emptyLoadingListView(context, true),
               loadUserProfileSuccess: (item) => getChatRooms(context, item.profile),
               orElse: () {
-                return progressOverlay(widget.model);
+                return emptyLoadingListView(context, isBrowser);
             }
           );
         },
       ),
     );
   }
+
 
   Widget getChatRooms(BuildContext context, UserProfileModel profile) {
     return SingleChildScrollView(
@@ -74,10 +83,41 @@ class _DirectChatRoomsScreenState extends State<DirectChatRoomsScreen> {
         mainAxisSize: MainAxisSize.min,
         children: [
           StreamBuilder<List<types.Room>>(
-              stream: facade.FirebaseChatCore.instance.rooms(orderByUpdatedAt: true, isArchived: false),
+              stream: facade.FirebaseChatCore.instance.rooms(orderByUpdatedAt: true, isArchived: widget.isArchive),
               builder: (context, snapshot) {
 
-                if (snapshot.connectionState == ConnectionState.waiting) {
+
+                if (!snapshot.hasData || (snapshot.data?.isEmpty ?? false) == true || snapshot.data == null) {
+                  if (widget.isArchive) {
+                    noReservationsFound(
+                        widget.model,
+                        Icons.archive_outlined,
+                        'No Chats Have been Archived Yet!',
+                        'When You book a new reservation - a chat with just you and the listing owner will appear here.',
+                        'Open Chats',
+                        didTapStartButton: () {
+                          setState(() {
+                            widget.didSelectChats();
+                          });
+                        }
+                    );
+                  } else {
+                    return noReservationsFound(
+                        widget.model,
+                        Icons.chat_outlined,
+                        'No Chats Yet!',
+                        'When You book a new reservation - a chat with just you and the listing owner will appear here.',
+                        'Open Archive',
+                        didTapStartButton: () {
+                          setState(() {
+                            widget.didSelectArchive();
+                          });
+                        }
+                    );
+                  }
+                }
+
+                if (snapshot.connectionState == ConnectionState.waiting && rooms.isEmpty) {
                   return Container(
                     height: MediaQuery.of(context).size.height - 170,
                     width: MediaQuery.of(context).size.width,
@@ -87,30 +127,21 @@ class _DirectChatRoomsScreenState extends State<DirectChatRoomsScreen> {
                           return Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8.0),
                             child: loadingRoomItem(context),
-                          );
-                        }),
+                      );
+                    }),
                   );
                 }
 
-                if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return noReservationsFound(
-                      widget.model,
-                      Icons.chat_outlined,
-                      'No Chats Yet!',
-                      'When You book a new reservation - a chat with just you and the listing owner will appear here.',
-                      'Open Archive',
-                      didTapStartButton: () {
-                        setState(() {
-                          Navigator.push(context, MaterialPageRoute(
-                              builder: (_) {
-                                return DirectChatArchiveRoomsScreen(
-                                  model: widget.model,
-                                );
-                              }));
-                        });
-                    }
-                  );
+                if (rooms.isEmpty) {
+                  rooms.addAll(snapshot.data ?? []);
                 }
+
+                // if (snapshot.data != null) {
+                //   if (snapshot.data!.length != rooms.length) {
+                //     rooms.clear();
+                //     rooms.addAll(snapshot.data ?? []);
+                //   }
+                // }
 
 
                   return Container(
@@ -118,9 +149,9 @@ class _DirectChatRoomsScreenState extends State<DirectChatRoomsScreen> {
                     width: MediaQuery.of(context).size.width,
                     child: ListView.builder(
                       shrinkWrap: true,
-                        itemCount: snapshot.data!.length,
+                        itemCount: rooms.length,
                         itemBuilder: (context, index) {
-                          final room = snapshot.data![index];
+                          final room = rooms[index];
 
                           late List dateSlotsData = [];
                           if (room.metadata?['reservationSlot'] != null) {
@@ -129,42 +160,27 @@ class _DirectChatRoomsScreenState extends State<DirectChatRoomsScreen> {
 
                           final List<ReservationSlotItem> dates = dateSlotsData.isNotEmpty ? dateSlotsData.map((e) => ReservationSlotItemDto.fromJson(e).toDomain()).toList() : [];
 
-                          if (snapshot.connectionState == ConnectionState.waiting) {
-                            return loadingRoomItem(context);
-                          }
-
                           return StreamBuilder<List<types.Message>>(
                             stream: facade.FirebaseChatCore.instance.messages(room, limit: 3),
                             builder: (context, messageSnapshot) {
 
                               final bool hasReadLastMessages = messageSnapshot.data?.where((element) => element.author.id != facade.FirebaseChatCore.instance.firebaseUser?.uid && element.status != types.Status.seen).isNotEmpty ?? false;
 
+
                                 return Padding(
                                     padding: const EdgeInsets.symmetric(
-                                        horizontal: 4),
+                                        horizontal: 4, vertical: 8),
                                     child: getRoomListTile(
                                         widget.model,
                                         room,
-                                        false,
+                                        ChatHelperCore.selectedRoom == room,
                                         hasReadLastMessages,
                                         false,
                                         messageSnapshot.data ?? [],
                                         dates,
                                         didSelectRoom: (e) {
-                                          setState(() {
-
-                                            Navigator.push(context, MaterialPageRoute(
-                                                builder: (_) {
-                                                  return DirectChatScreen(
-                                                    model: widget.model,
-                                                    room: e,
-                                                    currentUser: profile,
-                                                    reservationItem: null,
-                                                    isFromReservation: false,
-                                                  );
-                                                }));
-                                          });
-                                        }
+                                            widget.didSelectRoom(e, profile);
+                                      }
                                     )
                                 );
                               }

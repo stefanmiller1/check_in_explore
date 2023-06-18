@@ -1,9 +1,11 @@
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
+import 'package:check_in_web_mobile_explore/presentation/screens/profile_settings/components/edit_selected_profile.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/profile_settings/components/review_current_profile.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 Widget getSingleUserCard() {
   return Container();
@@ -115,9 +117,12 @@ Widget getHostColumn(BuildContext context, UserProfileModel hostProfile, Dashboa
           Navigator.of(context).push(MaterialPageRoute(builder: (_) {
             return ReviewCurrentProfile(
                 currentUser: hostProfile,
-                model: model
-            );
-          })
+                model: model,
+                didSelectEditProfile: (profile) {
+
+                },
+              );
+            })
           );
         },
         child: Container(

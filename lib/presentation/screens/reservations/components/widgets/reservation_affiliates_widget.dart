@@ -50,7 +50,7 @@ class _ReservationAffiliatesWidgetState extends State<ReservationAffiliatesWidge
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.transparent,
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: true,
       body: MultiBlocProvider(
         providers: [
           BlocProvider(create: (_) => getIt<ReservationManagerWatcherBloc>()..add(ReservationManagerWatcherEvent.watchReservationItem(widget.reservationId))),

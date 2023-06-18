@@ -5,11 +5,14 @@ import 'package:check_in_web_mobile_explore/presentation/core/notifications/noti
 import 'package:check_in_web_mobile_explore/presentation/mobile_screens/main_mobile_helper.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/chat_inbox/components/direct_chat_archive_rooms_screen.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/chat_inbox/direct_chat_rooms_screen.dart';
+import 'package:check_in_web_mobile_explore/presentation/screens/chat_inbox/direct_chat_screen.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/profile_settings/profile_settings_screen.dart';
+import 'package:check_in_web_mobile_explore/presentation/screens/reservations/components/reservation_results_main.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/reservations/reservations_screen.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/map_helper.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/search_explore_header.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/search_explore_screen.dart';
+import 'package:check_in_web_mobile_explore/presentation/web_screens/main_container_widgets/chat_widget/chat_helper_core.dart';
 import 'package:flutter/material.dart';
 import 'package:check_in_facade/check_in_facade.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
@@ -71,6 +74,21 @@ class _MainMobileScreenState extends State<MainMobileScreen> {
           mainTitle: 'reservations',
           mainWidgetItem: ReservationScreen(
             model: widget.model,
+            didSelectReservation: (listing, reservation, currentUser, activity) {
+              Navigator.push(context, MaterialPageRoute(
+                  builder: (_) {
+                    return ReservationResultMain(
+                      model: widget.model,
+                      isReply: false,
+                      listing: listing,
+                      currentUser: currentUser,
+                      currentUserId: currentUser.userId.getOrCrash(),
+                      reservationId: reservation.reservationId.getOrCrash(),
+                    );
+                  }
+              )
+              );
+            },
           ),
           appBarWidgetItem: AppBar(
             backgroundColor: widget.model.mobileBackgroundColor,
@@ -93,7 +111,34 @@ class _MainMobileScreenState extends State<MainMobileScreen> {
       MainMobileScreenModel(
           iconItem: Icons.messenger_outline,
           mainTitle: 'chat',
-          mainWidgetItem: DirectChatRoomsScreen(model: widget.model),
+          mainWidgetItem: DirectChatRoomsScreen(
+              model: widget.model,
+              isArchive: false,
+              didSelectChats: () {
+
+              },
+              didSelectArchive: () {
+                Navigator.push(context, MaterialPageRoute(
+                  builder: (_) {
+                    return DirectChatArchiveRoomsScreen(
+                      model: widget.model,
+                    );
+                  }));
+              },
+              didSelectRoom: (room, profile) {
+                ChatHelperCore.isLoading = false;
+                Navigator.push(context, MaterialPageRoute(
+                    builder: (_) {
+                      return DirectChatScreen(
+                        model: widget.model,
+                        room: room,
+                        currentUser: profile,
+                        reservationItem: null,
+                        isFromReservation: false,
+                  );
+                }));
+            },
+          ),
           appBarWidgetItem: AppBar(
             backgroundColor: widget.model.mobileBackgroundColor,
             elevation: 0,
@@ -173,19 +218,10 @@ class _MainMobileScreenState extends State<MainMobileScreen> {
                         BottomNavigationBar(
                           backgroundColor: widget.model.mobileBackgroundColor,
                           elevation: 0,
-                          onTap: (i) async {
-                            if (i == 0) {
-                              // MapHelper.listingStream = FirebaseMapFacade.instance.mapListings(latitude: MapHelper.lat, longitude: MapHelper.lng, selectedRadius: MapHelper.currentZoom);
-                              // // MapHelper.currentZoom = 12;
-                              //
-                              // final listing = await MapHelper.listingStream.first;
-                              // MapHelper.initMarkers(context, widget.model, listing);
-                            }
-
+                          onTap: (i) {
                             setState(() {
                               _selectedIndex = i;
                             });
-
                           },
                           enableFeedback: true,
                           currentIndex: _selectedIndex,

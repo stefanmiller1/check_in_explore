@@ -167,7 +167,7 @@ class _ActivityRuleToCreateState extends State<ActivityRuleToCreate> {
               ]
             ),
           ),
-      ),
+        ),
        );
      }
     )
@@ -181,7 +181,9 @@ class _ActivityRuleToCreateState extends State<ActivityRuleToCreate> {
         children: [
 
             ...customDetailOptionList?.getOrCrash().asMap().map((i,e) {
+
               final _selectedTextEditingController = TextEditingController();
+
               if (_selectedTextEditingController.text != e.customDetail) {
                 _selectedTextEditingController.text = e.customDetail ?? '';
               }
@@ -220,8 +222,8 @@ class _ActivityRuleToCreateState extends State<ActivityRuleToCreate> {
 
                                 context.read<UpdateActivityFormBloc>().state.activitySettingsForm.rulesService.customRuleOption?.getOrCrash().removeAt(i);
                                     context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.customRuleOptionChanged(context.read<UpdateActivityFormBloc>().state.activitySettingsForm.rulesService.customRuleOption ?? ListK([])));
-                                  
-                                
+
+
                               });
                             }, child: Icon(Icons.cancel_outlined, size: 40, color: (i != 0) ? widget.model.paletteColor : widget.model.disabledTextColor)),
                           ),
