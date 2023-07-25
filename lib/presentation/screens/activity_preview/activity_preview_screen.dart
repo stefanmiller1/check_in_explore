@@ -4,10 +4,10 @@ import 'package:check_in_facade/check_in_facade.dart' as facade;
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_domain/domain/misc/attendee_services/attendee_item/attendee_item.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
-import 'package:check_in_web_mobile_explore/presentation/core/account/login_signup_core.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/components/listing_activity_preview_widget.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/components/listing_card.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/components/user_card.dart';
+import 'package:check_in_web_mobile_explore/presentation/core/responsive/responsive.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/activity_preview/activity_preview_screen_helper.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/facility_preview/facility_preview_screen_helper.dart';
 import 'package:dismissible_page/dismissible_page.dart';
@@ -129,20 +129,25 @@ class _ActivityPreviewScreenState extends State<ActivityPreviewScreen> {
                 )
               ),
             ),
-
+            const SizedBox(height: 5),
+            Divider(color: widget.model.paletteColor),
+            const SizedBox(height: 5),
             /// activity requirements ///
-            getActivityRequirementsColumn(
-                context,
-                widget.model,
-                activityOwner,
-                activityForm,
-                getVendorAttendees(
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 18.0),
+              child: getActivityRequirementsColumn(
+                  context,
                   widget.model,
+                  activityOwner,
                   activityForm,
-                  didSelectAttendee: (attendee) {
+                  getVendorAttendees(
+                    widget.model,
+                    activityForm,
+                    didSelectAttendee: (attendee) {
 
                   }
                 ),
+              ),
             ),
 
             /// reservation dates ///
@@ -184,18 +189,61 @@ class _ActivityPreviewScreenState extends State<ActivityPreviewScreen> {
               ),
             ),
 
+            if (activityForm.activityAttendance.isTicketBased == true) Column(
+              children: [
+                const SizedBox(height: 5),
+                Divider(color: widget.model.paletteColor),
+                const SizedBox(height: 5),
+                Row(
+                  children: [
+                    Flexible(
+                      child: Container(
+                        constraints: const BoxConstraints(
+                          maxWidth: 500,
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 14.0),
+                          child: getActivityTicketOptionsColumn(
+                              context,
+                              widget.model,
+                              widget.reservation,
+                              activityForm,
+                              didSelectTicketOption: (e) {
 
-            /// background info of listing ///
+                              },
+                              true && (Responsive.isDesktop(context) == true)
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+
+
+            /// activity report
             /// ---------------------------------------------------- ///
             const SizedBox(height: 5),
             Divider(color: widget.model.paletteColor),
             const SizedBox(height: 5),
+            flagOrReportActivityColumn(
+                widget.model,
+                didSelectReport: () {
 
-            /// host profile info ///
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 18.0),
-              child: getHostColumn(context, activityOwner, widget.model),
+                }
             ),
+            // /// background info of listing ///
+            // /// ---------------------------------------------------- ///
+            // const SizedBox(height: 5),
+            // Divider(color: widget.model.paletteColor),
+            // const SizedBox(height: 5),
+            //
+            // /// host profile info ///
+            // Padding(
+            //   padding: const EdgeInsets.symmetric(horizontal: 18.0),
+            //   child: getHostColumn(context, activityOwner, widget.model),
+            // ),
 
 
             const SizedBox(height: 25),
@@ -233,17 +281,6 @@ class _ActivityPreviewScreenState extends State<ActivityPreviewScreen> {
             providers: [
               BlocProvider(create: (_) => getIt<AuthBloc>()..add(const AuthEvent.mobileAuthCheckRequested())),
               BlocProvider(create: (context) => getIt<UserProfileWatcherBloc>()..add(UserProfileWatcherEvent.watchSelectedUserProfileStarted(widget.reservation.reservationOwnerId.getOrCrash()))),
-              BlocProvider(create: (_) => getIt<AttendeeFormBloc>()..add(AttendeeFormEvent.initializeAttendeeForm(bloc.optionOf(AttendeeItem(
-                  attendeeId: AttendeeItem.empty().attendeeId,
-                  attendeeOwnerId: UniqueId.fromUniqueString(facade.FirebaseChatCore.instance.firebaseUser?.uid ?? ''),
-                  reservationId: widget.reservation.reservationId,
-                  cost: AttendeeItem.empty().cost,
-                  paymentStatus: AttendeeItem.empty().paymentStatus,
-                  attendeeType: AttendeeItem.empty().attendeeType,
-                  paymentIntentId: AttendeeItem.empty().paymentIntentId,
-                  dateCreated: AttendeeItem.empty().dateCreated
-                )
-              ), bloc.optionOf(widget.reservation))))
             ],
             child: retrieveActivitySettings(),
           ),
@@ -299,25 +336,9 @@ class _ActivityPreviewScreenState extends State<ActivityPreviewScreen> {
                         },
                         icon: Icon(Icons.arrow_back_ios, color: widget.model.paletteColor)
                     ),
-                    // IconButton(
-                    //     onPressed: () {
-                    //       setState(() {
-                    //         context.read<AuthBloc>()..add(const AuthEvent.signedOut());
-                    //       });
-                    //     },
-                    //     icon: Icon(Icons.outbond_rounded, color: widget.model.paletteColor)
-                    // ),
-
                     if (!(context.read<AttendeeFormBloc>().state.isSubmitting)) InkWell(
                       onTap: () {
-                        // context.read<AttendeeFormBloc>().add(AttendeeFormEvent.isFinishedCreatingAttendee(
-                        //     item.profile,
-                        //     (getTotalPriceDouble(state.newFacilityBooking.reservationSlotItem, state.newFacilityBooking.cancelledSlotItem ?? []) + getTotalPriceDouble(state.newFacilityBooking.reservationSlotItem, state.newFacilityBooking.cancelledSlotItem ?? []) * CICOReservationPercentageFee + getTotalPriceDouble(state.newFacilityBooking.reservationSlotItem, state.newFacilityBooking.cancelledSlotItem ?? []) * CICOTaxesFee).toString(),
-                        //     (NumberFormat.simpleCurrency(locale: widget.listing.listingProfileService.backgroundInfoServices.currency).currencyName ?? 'cad').toLowerCase(),
-                        //     null,
-                        //     widget.listing.listingReservationService.accessVisibilitySetting.isReviewRequired ?? false
-                        //   )
-                        // );
+
                       },
                       child: Container(
                         height: 60,
@@ -348,48 +369,63 @@ class _ActivityPreviewScreenState extends State<ActivityPreviewScreen> {
 
 
   Widget retrieveMainContainerForAttendee(ActivityManagerForm activityForm, UserProfileModel activityOwnerProfile) {
-    return BlocConsumer<AttendeeFormBloc, AttendeeFormState>(
-      listenWhen: (p,c) => p.isSubmitting != c.isSubmitting,
-      listener: (context, state) {
-        state.authPaymentFailureOrSuccessOption.fold(
-                () => {},
-                (either) => either.fold(
-                    (failure) {
-                  final snackBar = SnackBar(
-                      backgroundColor: widget.model.webBackgroundColor,
-                      content: failure.maybeMap(
-                        couldNotRetrievePaymentMethod: (_) => Text('Could not retrieve payment details', style: TextStyle(color: widget.model.disabledTextColor)),
-                        paymentServerError: (e) => Text(e.failedValue ?? AppLocalizations.of(context)!.serverError, style: TextStyle(color: widget.model.disabledTextColor)),
-                        orElse: () => Text('A Problem Happened', style: TextStyle(color: widget.model.disabledTextColor)),
-                    )
-                  );
-                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                }, (success) {
-              Navigator.of(context).pop();
-            }
-          )
-        );
-      },
-      buildWhen: (p,c) => p.attendeeItem != c.attendeeItem || p.isSubmitting != c.isSubmitting,
-      builder: (context, state) {
+    return BlocProvider(create: (_) => getIt<AttendeeFormBloc>()..add(AttendeeFormEvent.initializeAttendeeForm(bloc.optionOf(AttendeeItem(
+        attendeeId: AttendeeItem.empty().attendeeId,
+        attendeeOwnerId: UniqueId.fromUniqueString(facade.FirebaseChatCore.instance.firebaseUser?.uid ?? ''),
+        reservationId: widget.reservation.reservationId,
+        cost: AttendeeItem.empty().cost,
+        paymentStatus: AttendeeItem.empty().paymentStatus,
+        attendeeType: AttendeeItem.empty().attendeeType,
+        paymentIntentId: AttendeeItem.empty().paymentIntentId,
+        dateCreated: AttendeeItem.empty().dateCreated)),
+        bloc.optionOf(widget.reservation),
+        bloc.optionOf(activityForm),
+        bloc.optionOf(activityOwnerProfile)
+      ),
+    ),
+      child: BlocConsumer<AttendeeFormBloc, AttendeeFormState>(
+        listenWhen: (p,c) => p.isSubmitting != c.isSubmitting,
+        listener: (context, state) {
+          state.authPaymentFailureOrSuccessOption.fold(
+                  () => {},
+                  (either) => either.fold(
+                      (failure) {
+                    final snackBar = SnackBar(
+                        backgroundColor: widget.model.webBackgroundColor,
+                        content: failure.maybeMap(
+                          couldNotRetrievePaymentMethod: (_) => Text('Could not retrieve payment details', style: TextStyle(color: widget.model.disabledTextColor)),
+                          paymentServerError: (e) => Text(e.failedValue ?? AppLocalizations.of(context)!.serverError, style: TextStyle(color: widget.model.disabledTextColor)),
+                          orElse: () => Text('A Problem Happened', style: TextStyle(color: widget.model.disabledTextColor)),
+                      )
+                    );
+                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                  }, (success) {
+                Navigator.of(context).pop();
+              }
+            )
+          );
+        },
+        buildWhen: (p,c) => p.attendeeItem != c.attendeeItem || p.isSubmitting != c.isSubmitting,
+        builder: (context, state) {
 
-        List<NewActivityModel> activityContainerModel = [
-          NewActivityModel(
-              markerItem: ActivityCreateNewMarker.activityDetails,
-              childWidget: getMainContainerForActivityDetails(context, activityForm, activityOwnerProfile)
-          ),
-          NewActivityModel(
-              markerItem: ActivityCreateNewMarker.paymentReview,
-              childWidget: Container()
-          ),
-        ];
+          List<NewActivityModel> activityContainerModel = [
+            NewActivityModel(
+                markerItem: ActivityCreateNewMarker.activityDetails,
+                childWidget: getMainContainerForActivityDetails(context, activityForm, activityOwnerProfile)
+            ),
+            NewActivityModel(
+                markerItem: ActivityCreateNewMarker.paymentReview,
+                childWidget: Container()
+            ),
+          ];
 
-        return Stack(
-          children: [
-            activityContainerModel.firstWhere((element) => element.markerItem == activityMarker).childWidget
-          ],
-        );
-      },
+          return Stack(
+            children: [
+              activityContainerModel.firstWhere((element) => element.markerItem == activityMarker).childWidget
+            ],
+          );
+        },
+      ),
     );
   }
 

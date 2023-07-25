@@ -184,6 +184,7 @@ class _PaymentMethodsWidgetState extends State<PaymentMethodsWidget> {
                       state.isEditing,
                       !cards.map((e) => e.paymentId).contains(widget.profile.defaultPaymentMethod) ? i == cards.length - 1 : widget.profile.defaultPaymentMethod == e.paymentId,
                       isSavingAsDefault,
+                      true,
                       cancellations.contains(e.paymentId),
                       selectedCard: (card) {
                         setState(() {

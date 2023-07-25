@@ -7,15 +7,16 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_switch/flutter_switch.dart';
-import 'package:image_picker_web/image_picker_web.dart';
+// import 'package:image_picker_web/image_picker_web.dart';
 import 'package:jumping_dot/jumping_dot.dart';
 import 'package:check_in_application/un_auth/watcher_services/attendee_watcher_service/attendee_manager_watcher_bloc.dart';
 
 class BackgroundInfoSettingsWidget extends StatefulWidget {
 
   final DashboardModel model;
+  final UserProfileModel activityOwner;
 
-  const BackgroundInfoSettingsWidget({Key? key, required this.model}) : super(key: key);
+  const BackgroundInfoSettingsWidget({Key? key, required this.model, required this.activityOwner}) : super(key: key);
 
   @override
   State<BackgroundInfoSettingsWidget> createState() => _BackgroundInfoSettingsWidgetState();
@@ -37,33 +38,33 @@ class _BackgroundInfoSettingsWidgetState extends State<BackgroundInfoSettingsWid
 
   void _handleImageSelection(BuildContext context) async {
 
-    final file = await ImagePickerWeb.getMultiImagesAsBytes();
-    late List<ImageUpload> currentImages = [];
-    currentImages.addAll(context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityBackground.activityProfileImages ?? []);
-
-
-    setState(() {
-      if (file != null && (file.isNotEmpty)) {
-        if ((file.length + currentImages.length) <= 6 && currentImages.length <= 6) {
-        for (Uint8List dataImage in file) {
-
-          currentImages.add(ImageUpload(
-              key: dataImage.first.toString(),
-              imageToUpload: dataImage
-            )
-          );
-        }
-        context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.activityProfileImagesChanged(currentImages));
-      } else {
-        final snackBar = SnackBar(
-            elevation: 4,
-            backgroundColor: widget.model.paletteColor,
-            content: Text('Sorry, only 6 Images can be added. Please try again', style: TextStyle(color: widget.model.webBackgroundColor))
-        );
-          ScaffoldMessenger.of(context).showSnackBar(snackBar);
-        }
-      }
-    });
+    // final file = await ImagePickerWeb.getMultiImagesAsBytes();
+    // late List<ImageUpload> currentImages = [];
+    // currentImages.addAll(context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityBackground.activityProfileImages ?? []);
+    //
+    //
+    // setState(() {
+    //   if (file != null && (file.isNotEmpty)) {
+    //     if ((file.length + currentImages.length) <= 6 && currentImages.length <= 6) {
+    //     for (Uint8List dataImage in file) {
+    //
+    //       currentImages.add(ImageUpload(
+    //           key: dataImage.first.toString(),
+    //           imageToUpload: dataImage
+    //         )
+    //       );
+    //     }
+    //     context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.activityProfileImagesChanged(currentImages));
+    //   } else {
+    //     final snackBar = SnackBar(
+    //         elevation: 4,
+    //         backgroundColor: widget.model.paletteColor,
+    //         content: Text('Sorry, only 6 Images can be added. Please try again', style: TextStyle(color: widget.model.webBackgroundColor))
+    //     );
+    //       ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    //     }
+    //   }
+    // });
   }
 
 
@@ -89,6 +90,8 @@ class _BackgroundInfoSettingsWidgetState extends State<BackgroundInfoSettingsWid
                   child: CreateNewPartnerForm(
                     model: widget.model,
                     reservation: context.read<UpdateActivityFormBloc>().state.reservationItem,
+                    activityForm: context.read<UpdateActivityFormBloc>().state.activitySettingsForm,
+                    resOwner: widget.activityOwner,
                   )
               ),
             )
@@ -125,6 +128,8 @@ class _BackgroundInfoSettingsWidgetState extends State<BackgroundInfoSettingsWid
                   child: CreateNewInstructorForm(
                     model: widget.model,
                     reservation: context.read<UpdateActivityFormBloc>().state.reservationItem,
+                    activityForm: context.read<UpdateActivityFormBloc>().state.activitySettingsForm,
+                    resOwner: widget.activityOwner,
                   )
               ),
             )

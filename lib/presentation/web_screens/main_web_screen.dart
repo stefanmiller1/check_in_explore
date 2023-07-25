@@ -1,10 +1,10 @@
 import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
-import 'package:check_in_web_mobile_explore/presentation/core/account/login_signup_core.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/responsive/responsive.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/web_dashboard/dashboard_helper.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/web_dashboard/dashboard_main.dart';
+import 'package:check_in_web_mobile_explore/presentation/screens/activity_preview/activity_preview_screen.dart';
 import 'package:check_in_web_mobile_explore/presentation/web_screens/main_container_widgets/activity_settings_widet/activity_settings_container_widget.dart';
 import 'package:check_in_web_mobile_explore/presentation/web_screens/main_container_widgets/chat_widget/chat_helper_core.dart';
 import 'package:check_in_web_mobile_explore/presentation/web_screens/main_container_widgets/chat_widget/chat_main_container_widget.dart';
@@ -33,7 +33,6 @@ class MainWebScreen extends StatefulWidget {
 class _MainWebScreenState extends State<MainWebScreen> {
 
   late DashboardMarker currentDashboardMarker;
-
 
   @override
   void initState() {
@@ -87,6 +86,11 @@ class _MainWebScreenState extends State<MainWebScreen> {
       rebuild: () {
         setState(() {});
       },
+      didPresentSidePanel: () {
+        setState(() {
+          ReservationHelperCore.didPresentSidePanel = !ReservationHelperCore.didPresentSidePanel;
+        });
+      }
     );
     final activitySettingsSubContainer = SettingsListContainer(
         model: widget.model,
@@ -193,7 +197,16 @@ class _MainWebScreenState extends State<MainWebScreen> {
           isVisible: (ReservationHelperCore.selectedReservationItem != null && !Responsive.isMobile(context))
       ),
       DashboardContainerModel(
-          mainContainer: DashboardMainContainerModel(mainContainer: activitySettingsContainer, sidePanelMainContainer: Container(), isSubContainerAllowed: true, presentSidePanel: false),
+          mainContainer: DashboardMainContainerModel(
+              mainContainer: activitySettingsContainer,
+              sidePanelMainContainer: ActivityPreviewScreen(
+                  model: widget.model,
+                  listing: ReservationHelperCore.currentListingManagerForm,
+                  reservation: ReservationHelperCore.selectedReservationItem ?? ReservationItem.empty()
+              ),
+              isSubContainerAllowed: true,
+              presentSidePanel: ReservationHelperCore.didPresentSidePanel,
+          ),
           subContainer: activitySettingsSubContainer,
           dashboardMarker: DashboardMarker.resSettings,
           iconTab: Icons.settings_outlined,
@@ -203,7 +216,12 @@ class _MainWebScreenState extends State<MainWebScreen> {
     ];
 
     final DashboardContainerModel optionsDashboardItem = DashboardContainerModel(
-        mainContainer: DashboardMainContainerModel(mainContainer: Container(), sidePanelMainContainer: Container(), isSubContainerAllowed: false, presentSidePanel: false),
+        mainContainer: DashboardMainContainerModel(
+            mainContainer: Container(),
+            sidePanelMainContainer: Container(),
+            isSubContainerAllowed: false,
+            presentSidePanel: false
+        ),
         subContainer: Container(
           color: Colors.lime,
         ),
@@ -215,14 +233,13 @@ class _MainWebScreenState extends State<MainWebScreen> {
     return BlocProvider(create: (_) => getIt<UserProfileWatcherBloc>()..add(const UserProfileWatcherEvent.watchUserProfileStarted()),
       child: BlocBuilder<UserProfileWatcherBloc, UserProfileWatcherState>(
         builder: (context, authState) {
-
           return authState.maybeMap(
               loadInProgress: (_) => JumpingDots(color: widget.model.paletteColor, numberOfDots: 3),
               loadProfileFailure: (_) => retrieveMainDashboardContainer(context, dashboardContent(null), optionsDashboardItem),
               loadUserProfileSuccess: (item) => retrieveMainDashboardContainer(context, dashboardContent(item.profile), optionsDashboardItem),
               orElse: () {
                 return JumpingDots(color: widget.model.paletteColor, numberOfDots: 3);
-              }
+            }
           );
         },
       ),

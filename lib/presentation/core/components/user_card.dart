@@ -27,27 +27,15 @@ Widget getHostColumn(BuildContext context, UserProfileModel hostProfile, Dashboa
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Text('Hosted By', style: TextStyle(color: model.paletteColor, fontWeight: FontWeight.bold, fontSize: model.questionTitleFontSize)),
-                  const SizedBox(width: 4),
-                  Text(hostProfile.legalName.getOrCrash(), style: TextStyle(color: model.paletteColor, fontWeight: FontWeight.bold, fontSize: model.questionTitleFontSize),)
-                ],
-              ),
-              Row(
-                children: [
-                  Text('Joined', style: TextStyle(color: model.disabledTextColor)),
-                  const SizedBox(width: 4),
-                  Text(DateFormat.MMMM().format(hostProfile.joinedDate), style: TextStyle(color: model.disabledTextColor),),
-                  const SizedBox(width: 4),
-                  Text(DateFormat.y().format(hostProfile.joinedDate), style: TextStyle(color: model.disabledTextColor),),
-                ],
-              ),
-            ],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Text('Hosted By ${hostProfile.legalName.getOrCrash()}', style: TextStyle(color: model.paletteColor, fontWeight: FontWeight.bold, fontSize: model.questionTitleFontSize, overflow: TextOverflow.ellipsis), maxLines: 2,),
+                Text('Joined ${DateFormat.MMMM().format(hostProfile.joinedDate)} ${DateFormat.y().format(hostProfile.joinedDate)}', style: TextStyle(color: model.disabledTextColor, overflow: TextOverflow.ellipsis), maxLines: 1),
+              ],
+            ),
           ),
           if (hostProfile.profileImage != null) CircleAvatar(radius: 30, foregroundImage: (hostProfile.profileImage?.image ?? Image.asset('assets/profile-avatar.png').image)),
           if (hostProfile.profileImage == null) Container(
@@ -77,28 +65,28 @@ Widget getHostColumn(BuildContext context, UserProfileModel hostProfile, Dashboa
                 if (hostProfile.isEmailAuth && hostProfile.isPhoneAuth) Row(
                   children: [
                     Icon(Icons.verified, color: model.paletteColor,),
-                    const SizedBox(width: 4),
+                    const SizedBox(width: 6),
                     Text('Verified Listing Host', style: TextStyle(color: model.paletteColor, fontWeight: FontWeight.bold))
                   ],
                 ),
                 if (!(hostProfile.isEmailAuth && hostProfile.isPhoneAuth)) Row(
                   children: [
                     Icon(Icons.verified_outlined, color: model.disabledTextColor),
-                    const SizedBox(width: 4),
-                    Text('Host is not yet Verified', style: TextStyle(color: model.paletteColor, fontWeight: FontWeight.bold),)
+                    const SizedBox(width: 6),
+                    Text('Host is not yet Verified', style: TextStyle(color: model.disabledTextColor),)
                   ],
                 )
 
               ],
             ),
-            SizedBox(height: 4),
+            const SizedBox(height: 8),
             Row(
               children: [
                 Row(
                   children: [
                     Icon(Icons.star, color: model.disabledTextColor),
-                    const SizedBox(width: 4),
-                    Text('No Reviews Yet', style: TextStyle(color: model.paletteColor, fontWeight: FontWeight.bold),)
+                    const SizedBox(width: 6),
+                    Text('No Reviews Yet', style: TextStyle(color: model.disabledTextColor))
                   ],
                 )
               ],

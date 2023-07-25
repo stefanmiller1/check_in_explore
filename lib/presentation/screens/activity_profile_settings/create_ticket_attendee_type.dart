@@ -21,6 +21,7 @@ class _CreateTicketAttendeeState extends State<CreateTicketAttendee> {
 
   ScrollController? _scrollController;
   ReservationSlotItem? _selectedReservationSlot;
+  ReservationTimeFeeSlotItem? _selectedReservationTimeSlot;
 
   late TextEditingController _firstTextEditingController;
   late TextEditingController _secondTextEditingController;
@@ -49,6 +50,14 @@ class _CreateTicketAttendeeState extends State<CreateTicketAttendee> {
       }
   }
 
+  void checkSelectedReservationSlot(List<ReservationSlotItem> reservationSlots) {
+    if (reservationSlots.isNotEmpty) {
+      if (reservationSlots[0].selectedSlots.isNotEmpty) {
+        _selectedReservationTimeSlot = reservationSlots[0].selectedSlots[0];
+      }
+    }
+  }
+
   void rebuildPrice(BuildContext context) {
 
     if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.isTicketFixed == true) {
@@ -60,7 +69,7 @@ class _CreateTicketAttendeeState extends State<CreateTicketAttendee> {
         }
       }
     }
-    else {
+    else if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.isTicketPerSlotBased == false) {
       if (_selectedReservationSlot == null) checkSelectedReservation(context.read<UpdateActivityFormBloc>().state.reservationItem.reservationSlotItem);
           if (_firstTextEditingController.text != context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.activityTickets?.firstWhere(
                   (element) => element.reservationSlot == _selectedReservationSlot, orElse: () => ActivityTicketOption.empty()).ticketFee.toString()) {
@@ -70,6 +79,19 @@ class _CreateTicketAttendeeState extends State<CreateTicketAttendee> {
             } else if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.activityTickets != null) {
               _firstTextEditingController.text = context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.activityTickets!.firstWhere(
                       (element) => element.reservationSlot == _selectedReservationSlot, orElse: () => ActivityTicketOption.empty()).ticketFee.toString();
+        }
+      }
+    } else {
+      if (_selectedReservationSlot == null) checkSelectedReservation(context.read<UpdateActivityFormBloc>().state.reservationItem.reservationSlotItem);
+      if (_selectedReservationTimeSlot == null) checkSelectedReservationSlot(context.read<UpdateActivityFormBloc>().state.reservationItem.reservationSlotItem);
+      if (_firstTextEditingController.text != context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.activityTickets?.firstWhere(
+              (element) => element.reservationSlot == _selectedReservationSlot && element.reservationTimeSlot == _selectedReservationTimeSlot, orElse: () => ActivityTicketOption.empty()).ticketFee.toString()) {
+        if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.activityTickets?.firstWhere(
+                (element) => element.reservationSlot == _selectedReservationSlot && element.reservationTimeSlot == _selectedReservationTimeSlot, orElse: () => ActivityTicketOption.empty()).ticketFee == null) {
+          _firstTextEditingController.text = '';
+        } else if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.activityTickets != null) {
+          _firstTextEditingController.text = context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.activityTickets!.firstWhere(
+                  (element) => element.reservationSlot == _selectedReservationSlot && element.reservationTimeSlot == _selectedReservationTimeSlot, orElse: () => ActivityTicketOption.empty()).ticketFee.toString();
         }
       }
     }
@@ -84,7 +106,7 @@ class _CreateTicketAttendeeState extends State<CreateTicketAttendee> {
           _secondTextEditingController.text = context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.defaultActivityTickets!.ticketQuantity.toString();
         }
       }
-    } else {
+    } else if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.isTicketPerSlotBased == false) {
       if (_selectedReservationSlot == null) checkSelectedReservation(context.read<UpdateActivityFormBloc>().state.reservationItem.reservationSlotItem);
         if (_secondTextEditingController.text != context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.activityTickets?.firstWhere(
               (element) => element.reservationSlot == _selectedReservationSlot, orElse: () => ActivityTicketOption.empty()).ticketQuantity.toString()) {
@@ -96,27 +118,68 @@ class _CreateTicketAttendeeState extends State<CreateTicketAttendee> {
                   (element) => element.reservationSlot == _selectedReservationSlot, orElse: () => ActivityTicketOption.empty()).ticketQuantity.toString();
         }
       }
+    } else {
+      if (_selectedReservationSlot == null) checkSelectedReservation(context.read<UpdateActivityFormBloc>().state.reservationItem.reservationSlotItem);
+      if (_selectedReservationTimeSlot == null) checkSelectedReservationSlot(context.read<UpdateActivityFormBloc>().state.reservationItem.reservationSlotItem);
+      if (_secondTextEditingController.text != context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.activityTickets?.firstWhere(
+              (element) => element.reservationSlot == _selectedReservationSlot && element.reservationTimeSlot == _selectedReservationTimeSlot, orElse: () => ActivityTicketOption.empty()).ticketQuantity.toString()) {
+        if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.activityTickets?.firstWhere(
+                (element) => element.reservationSlot == _selectedReservationSlot && element.reservationTimeSlot == _selectedReservationTimeSlot, orElse: () => ActivityTicketOption.empty()).ticketQuantity == null) {
+          _secondTextEditingController.text = '';
+        } else if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.activityTickets != null) {
+          _secondTextEditingController.text = context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.activityTickets!.firstWhere(
+                  (element) => element.reservationSlot == _selectedReservationSlot && element.reservationTimeSlot == _selectedReservationTimeSlot, orElse: () => ActivityTicketOption.empty()).ticketQuantity.toString();
+        }
+      }
     }
   }
 
   void createNewSlotsObject(BuildContext context) {
 
-    if (!(context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.activityTickets?.map((e) => e.reservationSlot).contains(_selectedReservationSlot) ?? false)) {
-      final List<ActivityTicketOption> newTickets = [];
+    final List<ActivityTicketOption> newTickets = [];
+
+    for (ReservationSlotItem resSlot in context.read<UpdateActivityFormBloc>().state.reservationItem.reservationSlotItem) {
       late ActivityTicketOption ticketOption = ActivityTicketOption(
+        ticketId: UniqueId(),
+        isAllowedGroupAttendance: ActivityTicketOption.empty().isAllowedGroupAttendance,
+        minimumGroupQuantity: ActivityTicketOption.empty().minimumGroupQuantity,
+        maximumGroupQuantity: ActivityTicketOption.empty().maximumGroupQuantity,
+        ticketQuantity: ActivityTicketOption.empty().ticketQuantity,
+        reservationSlot: resSlot,
+        reservationTimeSlot: null,
+        ticketTitle: null,
+        ticketFee: null,
+      );
+      newTickets.add(ticketOption);
+    }
+
+    context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.activityTicketsChanged(newTickets));
+
+  }
+
+  void createNewSlotBasedObject(BuildContext context) {
+
+    final List<ActivityTicketOption> newTickets = [];
+
+    for (ReservationSlotItem resSlot in context.read<UpdateActivityFormBloc>().state.reservationItem.reservationSlotItem) {
+      for (ReservationTimeFeeSlotItem slotTime in resSlot.selectedSlots) {
+        late ActivityTicketOption ticketOption = ActivityTicketOption(
+          ticketId: UniqueId(),
           isAllowedGroupAttendance: ActivityTicketOption.empty().isAllowedGroupAttendance,
           minimumGroupQuantity: ActivityTicketOption.empty().minimumGroupQuantity,
           maximumGroupQuantity: ActivityTicketOption.empty().maximumGroupQuantity,
           ticketQuantity: ActivityTicketOption.empty().ticketQuantity,
-          reservationSlot: _selectedReservationSlot,
+          reservationSlot: resSlot,
+          reservationTimeSlot: slotTime,
+          ticketTitle: null,
           ticketFee: null,
-      );
+        );
 
-      newTickets.addAll(context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.activityTickets ?? []);
-      newTickets.add(ticketOption);
+        newTickets.add(ticketOption);
 
-      context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.activityTicketsChanged(newTickets));
+      }
     }
+    context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.activityTicketsChanged(newTickets));
 
   }
 
@@ -145,33 +208,75 @@ class _CreateTicketAttendeeState extends State<CreateTicketAttendee> {
                     state: context.read<UpdateActivityFormBloc>().state,
                     didSelectTicketFixed: () {
                       setState(() {
-                        createNewSlotsObject(context);
 
                         if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.isTicketFixed == true) {
+                          createNewSlotsObject(context);
                           context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.isTicketFixedChanged(false));
-                          _firstTextEditingController.text = context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.activityTickets!.firstWhere(
-                                  (element) => element.reservationSlot == _selectedReservationSlot, orElse: () => ActivityTicketOption.empty()).ticketFee.toString();
-                          _secondTextEditingController.text = context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.activityTickets!.firstWhere(
-                                  (element) => element.reservationSlot == _selectedReservationSlot, orElse: () => ActivityTicketOption.empty()).ticketQuantity.toString();
+                          _firstTextEditingController.text = context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.activityTickets?.firstWhere(
+                                  (element) => element.reservationSlot == _selectedReservationSlot, orElse: () => ActivityTicketOption.empty()).ticketFee.toString() ?? '';
+                          _secondTextEditingController.text = context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.activityTickets?.firstWhere(
+                                  (element) => element.reservationSlot == _selectedReservationSlot, orElse: () => ActivityTicketOption.empty()).ticketQuantity.toString() ?? '';
                         } else {
                           context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.isTicketFixedChanged(true));
+                          context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.isTicketSlotBasedOnly(false));
                           _firstTextEditingController.text = context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.defaultActivityTickets?.ticketFee.toString() ?? '';
                           _secondTextEditingController.text = context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.defaultActivityTickets?.ticketQuantity.toString() ?? '';
                         }
                       });
                     },
+                    didSelectTicketPerSlotBased: () {
+
+                      setState(() {
+
+
+
+                        if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.isTicketPerSlotBased == true) {
+                          createNewSlotsObject(context);
+                          context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.isTicketSlotBasedOnly(false));
+                          _firstTextEditingController.text = context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.activityTickets!.firstWhere(
+                                  (element) => element.reservationSlot == _selectedReservationSlot, orElse: () => ActivityTicketOption.empty()).ticketFee.toString();
+                          _secondTextEditingController.text = context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.activityTickets!.firstWhere(
+                                  (element) => element.reservationSlot == _selectedReservationSlot, orElse: () => ActivityTicketOption.empty()).ticketQuantity.toString();
+                        } else {
+                          createNewSlotBasedObject(context);
+                          context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.isTicketSlotBasedOnly(true));
+                          _firstTextEditingController.text = context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.activityTickets!.firstWhere(
+                                  (element) => element.reservationSlot == _selectedReservationSlot && element.reservationTimeSlot == _selectedReservationTimeSlot, orElse: () => ActivityTicketOption.empty()).ticketFee.toString();
+                          _secondTextEditingController.text = context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.activityTickets!.firstWhere(
+                                  (element) => element.reservationSlot == _selectedReservationSlot && element.reservationTimeSlot == _selectedReservationTimeSlot, orElse: () => ActivityTicketOption.empty()).ticketQuantity.toString();
+                        }
+                      });
+                    },
                     selectedReservationSlot: _selectedReservationSlot,
+                    selectedResTimeSlot: _selectedReservationTimeSlot,
                     didSelectRes: (res) {
                       setState(() {
                         _selectedReservationSlot = res;
+                        _selectedReservationTimeSlot = null;
 
                         if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.activityTickets?.isNotEmpty == true) {
-                          createNewSlotsObject(context);
+                          // createNewSlotsObject(context);
 
-                          _firstTextEditingController.text = context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.activityTickets!.firstWhere(
-                                  (element) => element.reservationSlot == res, orElse: () => ActivityTicketOption.empty()).ticketFee.toString();
-                          _secondTextEditingController.text = context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.activityTickets!.firstWhere(
-                                  (element) => element.reservationSlot == res, orElse: () => ActivityTicketOption.empty()).ticketQuantity.toString();
+                          _firstTextEditingController.text = context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.activityTickets?.firstWhere(
+                                  (element) => element.reservationSlot == res, orElse: () => ActivityTicketOption.empty()).ticketFee.toString() ?? '';
+                          _secondTextEditingController.text = context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.activityTickets?.firstWhere(
+                                  (element) => element.reservationSlot == res, orElse: () => ActivityTicketOption.empty()).ticketQuantity.toString() ?? '';
+                        }
+                      });
+                    },
+                    didSelectSlotRes: (res , slot) {
+                      setState(() {
+                        _selectedReservationSlot = res;
+                        _selectedReservationTimeSlot = slot;
+
+                        if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.activityTickets?.isNotEmpty == true) {
+                          // createNewSlotBasedObject(context);
+
+                          _firstTextEditingController.text = context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.activityTickets?.firstWhere(
+                                  (element) => element.reservationSlot == res && element.reservationTimeSlot == slot, orElse: () => ActivityTicketOption.empty()).ticketFee.toString() ?? '';
+                          _secondTextEditingController.text = context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.activityTickets?.firstWhere(
+                                  (element) => element.reservationSlot == res && element.reservationTimeSlot == slot, orElse: () => ActivityTicketOption.empty()).ticketQuantity.toString() ?? '';
+
                         }
                       });
                     },
@@ -188,22 +293,38 @@ class _CreateTicketAttendeeState extends State<CreateTicketAttendee> {
                           context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.defaultTicketChanged(_currentTicketOption));
 
 
-                        } else {
+                        } else if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.isTicketPerSlotBased == false) {
+
+                            late List<ActivityTicketOption> newTicketList = [];
+                            newTicketList.addAll(context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.activityTickets ?? []);
+
+                            // createNewSlotsObject(context);
+
+                            late int index = newTicketList.indexWhere((element) => element.reservationSlot == _selectedReservationSlot);
+                            late ActivityTicketOption currentTicket = newTicketList[index];
+                            currentTicket = currentTicket.copyWith(
+                                reservationSlot: _selectedReservationSlot,
+                                ticketFee: int.parse(e)
+                            );
+
+                            newTicketList.replaceRange(index, index+1, [currentTicket]);
+                            context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.activityTicketsChanged(newTicketList));
+                          } else {
 
                           late List<ActivityTicketOption> newTicketList = [];
                           newTicketList.addAll(context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.activityTickets ?? []);
 
-                          createNewSlotsObject(context);
+                          // createNewSlotBasedObject(context);
 
-                          late int index = newTicketList.indexWhere((element) => element.reservationSlot == _selectedReservationSlot);
+                          late int index = newTicketList.indexWhere((element) => element.reservationSlot == _selectedReservationSlot && element.reservationTimeSlot == _selectedReservationTimeSlot);
                           late ActivityTicketOption currentTicket = newTicketList[index];
                           currentTicket = currentTicket.copyWith(
                               reservationSlot: _selectedReservationSlot,
+                              reservationTimeSlot: _selectedReservationTimeSlot,
                               ticketFee: int.parse(e)
                           );
 
                           newTicketList.replaceRange(index, index+1, [currentTicket]);
-                          print(newTicketList);
                           context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.activityTicketsChanged(newTicketList));
 
                         }
@@ -222,12 +343,12 @@ class _CreateTicketAttendeeState extends State<CreateTicketAttendee> {
                           context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.defaultTicketChanged(_currentTicketOption));
 
 
-                        } else {
+                        } else if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.isTicketPerSlotBased == false) {
 
                           late List<ActivityTicketOption> newTicketList = [];
                           newTicketList.addAll(context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.activityTickets ?? []);
 
-                          createNewSlotsObject(context);
+                          // createNewSlotsObject(context);
 
                           late int index = newTicketList.indexWhere((element) => element.reservationSlot == _selectedReservationSlot);
                           late ActivityTicketOption currentTicket = newTicketList[index];
@@ -239,10 +360,28 @@ class _CreateTicketAttendeeState extends State<CreateTicketAttendee> {
                           newTicketList.replaceRange(index, index+1, [currentTicket]);
                           context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.activityTicketsChanged(newTicketList));
 
+                        } else {
+
+                          late List<ActivityTicketOption> newTicketList = [];
+                          newTicketList.addAll(context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.activityTickets ?? []);
+
+                          // createNewSlotBasedObject(context);
+
+                          late int index = newTicketList.indexWhere((element) => element.reservationSlot == _selectedReservationSlot && element.reservationTimeSlot == _selectedReservationTimeSlot);
+                          late ActivityTicketOption currentTicket = newTicketList[index];
+                          currentTicket = currentTicket.copyWith(
+                              reservationSlot: _selectedReservationSlot,
+                              reservationTimeSlot: _selectedReservationTimeSlot,
+                              ticketQuantity: int.parse(e)
+                          );
+
+                          newTicketList.replaceRange(index, index+1, [currentTicket]);
+                          context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.activityTicketsChanged(newTicketList));
+
                         }
-                      });
-                    }
-                )
+                  });
+                },
+              )
             ],
           )
         ),

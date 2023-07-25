@@ -22,6 +22,13 @@ import 'package:url_launcher/url_launcher.dart';
 
 enum ResSettingMarker {details, manageActivity, messageOwner, sendInvites, addCalendar, receipts, showListing, sendInvite, leaveReservation}
 enum ResOverviewMarker {messageHost, receipts, showListing, getSupport}
+enum ResOverViewTabs {activity, reservation, discussion}
+
+class ReservationCoreHelper {
+
+  static ResOverViewTabs resOverViewTabs = ResOverViewTabs.discussion;
+  static late PageController? pageController = null;
+}
 
 class ReservationSettingListModel {
 
@@ -47,8 +54,9 @@ class ReservationOverviewModel {
     required this.icon,
     required this.marker
   });
-
 }
+
+
 
 Widget loadReservations(BuildContext context) {
   return Shimmer.fromColors(

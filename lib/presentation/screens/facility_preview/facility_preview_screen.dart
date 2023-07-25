@@ -5,11 +5,9 @@ import 'package:check_in_credentials/check_in_credentials.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_facade/check_in_facade.dart' as facade;
 import 'package:check_in_presentation/check_in_presentation.dart';
-import 'package:check_in_web_mobile_explore/presentation/core/account/login_signup_core.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/account/sign_in_loading_page.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/components/user_card.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/core_helper.dart';
-import 'package:check_in_web_mobile_explore/presentation/core/create_new_with_steps/create_new_main.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/facility_preview/components/add_new_reservation_slots.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/facility_preview/components/map_listing_component.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/facility_preview/facility_preview_screen_helper.dart';
@@ -68,7 +66,7 @@ class _FacilityPreviewScreenState extends State<FacilityPreviewScreen> {
   void showBookingSlots(BuildContext context, ReservationFormState state, List<ReservationItem> reservations) {
     Navigator.push(context, MaterialPageRoute(
         builder: (_) {
-          return BlocProvider(create: (_) => getIt<ReservationFormBloc>()..add(ReservationFormEvent.initializedReservation(bloc.optionOf(state.newFacilityBooking), bloc.optionOf(widget.listing))),
+          return BlocProvider(create: (_) => getIt<ReservationFormBloc>()..add(ReservationFormEvent.initializedReservation(bloc.optionOf(state.newFacilityBooking), bloc.optionOf(widget.listing), bloc.optionOf(state.listingOwner))),
             child: AddNewReservationSlots(
               model: widget.model,
               listing: widget.listing,
@@ -535,11 +533,11 @@ class _FacilityPreviewScreenState extends State<FacilityPreviewScreen> {
                             widget.listing.listingReservationService.cancellationSetting.isAllowedEarlyEndAndChanges ?? false),
                       if ((widget.listing.listingReservationService.cancellationSetting.isAllowedFeeBasedChanges ?? false) &&
                           (widget.listing.listingReservationService.cancellationSetting.feeBasedCancellationOptions?.isNotEmpty ?? false))
-                        getPricingWithFeeCancellation(context, widget.model, state.newFacilityBooking.reservationSlotItem,
+                        getPricingWithFeeCancellation(context, widget.model, state.newFacilityBooking.reservationSlotItem.map((e) => e.selectedDate).toList(),
                             widget.listing.listingReservationService.cancellationSetting.feeBasedCancellationOptions ?? []),
                       if ((widget.listing.listingReservationService.cancellationSetting.isAllowedTimeBasedChanges ?? false) &&
                           (widget.listing.listingReservationService.cancellationSetting.timeBasedCancellationOptions?.isNotEmpty ?? false))
-                        getPricingWithTimeCancellation(context, widget.model, state.newFacilityBooking.reservationSlotItem, widget.listing.listingReservationService.cancellationSetting.timeBasedCancellationOptions ?? [])
+                        getPricingWithTimeCancellation(context, widget.model, state.newFacilityBooking.reservationSlotItem.map((e) => e.selectedDate).toList(), widget.listing.listingReservationService.cancellationSetting.timeBasedCancellationOptions ?? [])
                     ],
                   ),
 
@@ -730,9 +728,9 @@ class _FacilityPreviewScreenState extends State<FacilityPreviewScreen> {
                           ],
                         ),
                         subtitle: Text('Pay the complete amount (${completeTotalPriceWithCurrency(
-                                getTotalPriceDouble(context.read<ReservationFormBloc>().state.newFacilityBooking.reservationSlotItem, context.read<ReservationFormBloc>().state.newFacilityBooking.cancelledSlotItem ?? []) +
-                                getTotalPriceDouble(context.read<ReservationFormBloc>().state.newFacilityBooking.reservationSlotItem, context.read<ReservationFormBloc>().state.newFacilityBooking.cancelledSlotItem ?? [])*CICOReservationPercentageFee +
-                                getTotalPriceDouble(context.read<ReservationFormBloc>().state.newFacilityBooking.reservationSlotItem, context.read<ReservationFormBloc>().state.newFacilityBooking.cancelledSlotItem ?? [])*CICOTaxesFee, widget.listing.listingProfileService.backgroundInfoServices.currency)}) now and have your slots secured', style: TextStyle(color: model.disabledTextColor)),
+                                getListingTotalPriceDouble(context.read<ReservationFormBloc>().state.newFacilityBooking.reservationSlotItem, context.read<ReservationFormBloc>().state.newFacilityBooking.cancelledSlotItem ?? []) +
+                                getListingTotalPriceDouble(context.read<ReservationFormBloc>().state.newFacilityBooking.reservationSlotItem, context.read<ReservationFormBloc>().state.newFacilityBooking.cancelledSlotItem ?? [])*CICOReservationPercentageFee +
+                                getListingTotalPriceDouble(context.read<ReservationFormBloc>().state.newFacilityBooking.reservationSlotItem, context.read<ReservationFormBloc>().state.newFacilityBooking.cancelledSlotItem ?? [])*CICOTaxesFee, widget.listing.listingProfileService.backgroundInfoServices.currency)}) now and have your slots secured', style: TextStyle(color: model.disabledTextColor)),
                       ),
                       const SizedBox(height: 8),
                       RadioListTile(
@@ -809,11 +807,11 @@ class _FacilityPreviewScreenState extends State<FacilityPreviewScreen> {
                         widget.listing.listingReservationService.cancellationSetting.isAllowedEarlyEndAndChanges ?? false),
                   if ((widget.listing.listingReservationService.cancellationSetting.isAllowedFeeBasedChanges ?? false) &&
                       (widget.listing.listingReservationService.cancellationSetting.feeBasedCancellationOptions?.isNotEmpty ?? false))
-                    getPricingWithFeeCancellation(context, widget.model, state.newFacilityBooking.reservationSlotItem,
+                    getPricingWithFeeCancellation(context, widget.model, state.newFacilityBooking.reservationSlotItem.map((e) => e.selectedDate).toList(),
                         widget.listing.listingReservationService.cancellationSetting.feeBasedCancellationOptions ?? []),
                   if ((widget.listing.listingReservationService.cancellationSetting.isAllowedTimeBasedChanges ?? false) &&
                       (widget.listing.listingReservationService.cancellationSetting.timeBasedCancellationOptions?.isNotEmpty ?? false))
-                    getPricingWithTimeCancellation(context, widget.model, state.newFacilityBooking.reservationSlotItem, widget.listing.listingReservationService.cancellationSetting.timeBasedCancellationOptions ?? []),
+                    getPricingWithTimeCancellation(context, widget.model, state.newFacilityBooking.reservationSlotItem.map((e) => e.selectedDate).toList(), widget.listing.listingReservationService.cancellationSetting.timeBasedCancellationOptions ?? []),
 
                   /// ------------------------ ///
                   /// policy & guidelines
@@ -1009,19 +1007,6 @@ class _FacilityPreviewScreenState extends State<FacilityPreviewScreen> {
               BlocProvider(create: (_) => getIt<AuthBloc>()..add(const AuthEvent.mobileAuthCheckRequested())),
               BlocProvider(create: (_) => getIt<ReservationManagerWatcherBloc>()..add(ReservationManagerWatcherEvent.watchReservationsList([widget.listing.listingServiceId.getOrCrash()], null, null, [ReservationSlotState.requested, ReservationSlotState.cancelled, ReservationSlotState.refunded, ReservationSlotState.current, ReservationSlotState.completed]))),
               BlocProvider(create: (context) => getIt<UserProfileWatcherBloc>()..add(UserProfileWatcherEvent.watchSelectedUserProfileStarted(widget.listing.listingProfileService.backgroundInfoServices.listingOwner.getOrCrash()))),
-              BlocProvider(create: (_) => getIt<ReservationFormBloc>()..add(ReservationFormEvent.initializedReservation(bloc.optionOf(ReservationItem(
-                reservationId: ReservationItem.empty().reservationId,
-                reservationOwnerId: UniqueId.fromUniqueString(facade.FirebaseChatCore.instance.firebaseUser?.uid ?? ''),
-                instanceId: widget.listing.listingServiceId,
-                reservationCost: widget.listing.listingRulesService.defaultPricingRuleSettings.defaultPricingRate.toString(),
-                reservationState: (widget.listing.listingReservationService.accessVisibilitySetting.isReviewRequired ?? false) ? ReservationSlotState.requested : ReservationSlotState.confirmed,
-                paymentStatus: ReservationItem.empty().paymentStatus,
-                paymentIntentId: ReservationItem.empty().paymentIntentId,
-                reservationSlotItem: [],
-                customFieldRuleSetting: widget.listing.listingReservationService.customFieldRuleSetting,
-                dateCreated: ReservationItem.empty().dateCreated,
-                )),
-                bloc.optionOf(widget.listing)))),
             ],
             child: retrieveExistingReservations(),
         ),
@@ -1076,20 +1061,11 @@ class _FacilityPreviewScreenState extends State<FacilityPreviewScreen> {
                       },
                     icon: Icon(Icons.arrow_back_ios, color: widget.model.paletteColor)
                   ),
-                  // IconButton(
-                  //     onPressed: () {
-                  //       setState(() {
-                  //         context.read<AuthBloc>()..add(const AuthEvent.signedOut());
-                  //       });
-                  //     },
-                  //     icon: Icon(Icons.outbond_rounded, color: widget.model.paletteColor)
-                  // ),
-
                   if (!(context.read<ReservationFormBloc>().state.isSubmitting)) InkWell(
                     onTap: () {
                       context.read<ReservationFormBloc>().add(ReservationFormEvent.isFinishedCreatingBooking(
                           item.profile,
-                          (getTotalPriceDouble(state.newFacilityBooking.reservationSlotItem, state.newFacilityBooking.cancelledSlotItem ?? []) + getTotalPriceDouble(state.newFacilityBooking.reservationSlotItem, state.newFacilityBooking.cancelledSlotItem ?? []) * CICOReservationPercentageFee + getTotalPriceDouble(state.newFacilityBooking.reservationSlotItem, state.newFacilityBooking.cancelledSlotItem ?? []) * CICOTaxesFee).toString(),
+                          (getListingTotalPriceDouble(state.newFacilityBooking.reservationSlotItem, state.newFacilityBooking.cancelledSlotItem ?? []) + getListingTotalPriceDouble(state.newFacilityBooking.reservationSlotItem, state.newFacilityBooking.cancelledSlotItem ?? []) * CICOReservationPercentageFee + getListingTotalPriceDouble(state.newFacilityBooking.reservationSlotItem, state.newFacilityBooking.cancelledSlotItem ?? []) * CICOTaxesFee).toString(),
                           (NumberFormat.simpleCurrency(locale: widget.listing.listingProfileService.backgroundInfoServices.currency).currencyName ?? 'cad').toLowerCase(),
                           null,
                           widget.listing.listingReservationService.accessVisibilitySetting.isReviewRequired ?? false)
@@ -1124,122 +1100,145 @@ class _FacilityPreviewScreenState extends State<FacilityPreviewScreen> {
 
 
   Widget retrieveMainContainerForReservation(List<ReservationItem> reservations, UserProfileModel listingOwnerProfile) {
-    return BlocConsumer<ReservationFormBloc, ReservationFormState>(
-      listenWhen: (p, c) => p.isSubmitting != c.isSubmitting,
-      listener: (context, state) {
-        state.authFailureOrSuccessOption.fold(
-                () {},
-                (either) => either.fold((failure) {
+    return BlocProvider(create: (_) => getIt<ReservationFormBloc>()..add(ReservationFormEvent.initializedReservation(bloc.optionOf(ReservationItem(
+      reservationId: ReservationItem.empty().reservationId,
+      reservationOwnerId: UniqueId.fromUniqueString(facade.FirebaseChatCore.instance.firebaseUser?.uid ?? ''),
+      instanceId: widget.listing.listingServiceId,
+      reservationCost: widget.listing.listingRulesService.defaultPricingRuleSettings.defaultPricingRate.toString(),
+      reservationState: (widget.listing.listingReservationService.accessVisibilitySetting.isReviewRequired ?? false) ? ReservationSlotState.requested : ReservationSlotState.confirmed,
+      paymentStatus: ReservationItem.empty().paymentStatus,
+      paymentIntentId: ReservationItem.empty().paymentIntentId,
+      reservationSlotItem: [],
+      customFieldRuleSetting: widget.listing.listingReservationService.customFieldRuleSetting,
+      dateCreated: ReservationItem.empty().dateCreated)),
+      bloc.optionOf(widget.listing),
+      bloc.optionOf(listingOwnerProfile))
+      ),
+      child: BlocConsumer<ReservationFormBloc, ReservationFormState>(
+        listenWhen: (p, c) => p.isSubmitting != c.isSubmitting,
+        listener: (context, state) {
+          state.authFailureOrSuccessOption.fold(
+                  () {},
+                  (either) => either.fold((failure) {
 
-              final snackBar = SnackBar(
-                  backgroundColor: widget.model.webBackgroundColor,
-                  content: failure.maybeMap(
-                    invalidDate: (_) => Text('Sorry, the Date(s) You Have Selected are Conflicting', style: TextStyle(color: widget.model.disabledTextColor)),
-                    waitingForPaymentConfirmation: (_) => Text('Waiting for payment confirmation', style: TextStyle(color: widget.model.disabledTextColor)),
-                    // waitingForPaymentConfirmation: (_) => Text('Sorry, You will Need to first Agree to the Terms and Conditions Before Completing Your Reservation', style: TextStyle(color: widget.model.disabledTextColor)),
-                    paymentResultError: (_) => Text('Please Fill Out Payment Method Details', style: TextStyle(color: widget.model.disabledTextColor)),
-                    // cancelled: (_) => Text(AppLocalizations.of(context)!.loginFailuresCancelled, style: TextStyle( color: widget.model.disabledTextColor)),
+                final snackBar = SnackBar(
+                    backgroundColor: widget.model.webBackgroundColor,
+                    content: failure.maybeMap(
+                      invalidDate: (_) => Text('Sorry, the Date(s) You Have Selected are Conflicting', style: TextStyle(color: widget.model.disabledTextColor)),
+                      waitingForPaymentConfirmation: (_) => Text('Waiting for payment confirmation', style: TextStyle(color: widget.model.disabledTextColor)),
+                      // waitingForPaymentConfirmation: (_) => Text('Sorry, You will Need to first Agree to the Terms and Conditions Before Completing Your Reservation', style: TextStyle(color: widget.model.disabledTextColor)),
+                      paymentResultError: (_) => Text('Please Fill Out Payment Method Details', style: TextStyle(color: widget.model.disabledTextColor)),
+                      // cancelled: (_) => Text(AppLocalizations.of(context)!.loginFailuresCancelled, style: TextStyle( color: widget.model.disabledTextColor)),
 
-                    reservationServerError: (e) => Text(AppLocalizations.of(context)!.serverError, style: TextStyle(color: widget.model.disabledTextColor)),
-                    orElse: () => Text('A Problem Happened', style: TextStyle(color: widget.model.disabledTextColor)),
-                  ));
+                      reservationServerError: (e) => Text(AppLocalizations.of(context)!.serverError, style: TextStyle(color: widget.model.disabledTextColor)),
+                      orElse: () => Text('A Problem Happened', style: TextStyle(color: widget.model.disabledTextColor)),
+                    ));
 
-              ScaffoldMessenger.of(context).showSnackBar(snackBar);
-            }, (_) {
+                ScaffoldMessenger.of(context).showSnackBar(snackBar);
+              }, (_) {
 
-              // final snackBar = SnackBar(
-              //     elevation: 4,
-              //     backgroundColor: widget.model.paletteColor,
-              //     /// booking successful - confirmation e-mail sent!
-              //     content: Text(AppLocalizations.of(context)!.saved, style: TextStyle(color: widget.model.webBackgroundColor))
-              // );
-              // ScaffoldMessenger.of(context).showSnackBar(snackBar);
-              // Navigator.of(context).pop(context);
-            }));
+                // final snackBar = SnackBar(
+                //     elevation: 4,
+                //     backgroundColor: widget.model.paletteColor,
+                //     /// booking successful - confirmation e-mail sent!
+                //     content: Text(AppLocalizations.of(context)!.saved, style: TextStyle(color: widget.model.webBackgroundColor))
+                // );
+                // ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                // Navigator.of(context).pop(context);
+              }));
 
-        state.authPaymentFailureOrSuccessOption.fold(
-          () => {},
-          (either) => either.fold(
-            (failure) {
-              final snackBar = SnackBar(
-                  backgroundColor: widget.model.webBackgroundColor,
-                  content: failure.maybeMap(
-                    couldNotRetrievePaymentMethod: (_) => Text('Could not retrieve payment details', style: TextStyle(color: widget.model.disabledTextColor)),
-                    paymentServerError: (e) => Text(e.failedValue ?? AppLocalizations.of(context)!.serverError, style: TextStyle(color: widget.model.disabledTextColor)),
-                    orElse: () => Text('A Problem Happened', style: TextStyle(color: widget.model.disabledTextColor)),
-                )
-              );
-              ScaffoldMessenger.of(context).showSnackBar(snackBar);
-            }, (success) {
-             
-              Navigator.of(context).pop();
+          state.authPaymentFailureOrSuccessOption.fold(
+            () => {},
+            (either) => either.fold(
+              (failure) {
+                final snackBar = SnackBar(
+                    backgroundColor: widget.model.webBackgroundColor,
+                    content: failure.maybeMap(
+                      couldNotRetrievePaymentMethod: (_) => Text('Could not retrieve payment details', style: TextStyle(color: widget.model.disabledTextColor)),
+                      paymentServerError: (e) => Text(e.failedValue ?? AppLocalizations.of(context)!.serverError, style: TextStyle(color: widget.model.disabledTextColor)),
+                      orElse: () => Text('A Problem Happened', style: TextStyle(color: widget.model.disabledTextColor)),
+                  )
+                );
+                ScaffoldMessenger.of(context).showSnackBar(snackBar);
+              }, (success) {
 
-            }
-          )
-        );
-      },
-      buildWhen: (p,c) =>  p.newFacilityBooking != c.newFacilityBooking ||
-        p.isTermsConditionsAccepted != c.isTermsConditionsAccepted ||
-        p.currentSelectedSpace != c.currentSelectedSpace ||
-        p.currentSelectedSpaceOption != c.currentSelectedSpaceOption ||
-        p.cardItem != c.cardItem ||
-        p.isSavingCard != c.isSavingCard ||
-        p.isSubmitting != c.isSubmitting,
-      builder: (context, state) {
+                Navigator.of(context).pop();
 
-        List<NewReservationModel> reservationContainerModel = [
-          NewReservationModel(
-            markerItem: ReservationMobileCreateNewMarker.listingDetails,
-              childWidget: getMainContainerForFacilityDetails(
-                context,
-                widget.model,
-                state,
-                listingOwnerProfile,
-                reservations)
-          ),
-          NewReservationModel(markerItem: ReservationMobileCreateNewMarker.additionalDetails, childWidget: InkWell(
-            onTap: () {Navigator.of(context).pop();},
-              child: Container(color: Colors.red,))),
-          NewReservationModel(
-              markerItem: ReservationMobileCreateNewMarker.paymentReview,
-              childWidget: getMainContainerForPaymentReview(
+              }
+            )
+          );
+        },
+        buildWhen: (p,c) =>  p.newFacilityBooking != c.newFacilityBooking ||
+          p.isTermsConditionsAccepted != c.isTermsConditionsAccepted ||
+          p.currentSelectedSpace != c.currentSelectedSpace ||
+          p.currentSelectedSpaceOption != c.currentSelectedSpaceOption ||
+          p.cardItem != c.cardItem ||
+          p.isSavingCard != c.isSavingCard ||
+          p.isSubmitting != c.isSubmitting,
+        builder: (context, state) {
+
+          List<NewReservationModel> reservationContainerModel = [
+            NewReservationModel(
+              markerItem: ReservationMobileCreateNewMarker.listingDetails,
+                childWidget: getMainContainerForFacilityDetails(
                   context,
                   widget.model,
                   state,
-                  listingOwnerProfile)
-          ),
-        ];
-        if (context.read<ReservationFormBloc>().state.currentSelectedSpace == null && context.read<ReservationFormBloc>().state.currentSelectedSpaceOption == null) {
-          (context.read<ReservationFormBloc>().add(ReservationFormEvent.spaceDetailChanged(widget.listing.listingProfileService.spaceSetting.spaceTypes.value.fold((l) => [], (r) => r)[0])));
-          context.read<ReservationFormBloc>().add(ReservationFormEvent.selectedSizeOptionChanged(widget.listing.listingProfileService.spaceSetting.spaceTypes.value.fold((l) => [], (r) => r)[0].quantity[0]));
-        }
-
-        return Stack(
-          children: [
-            CreateNewMain(
-                child: reservationContainerModel.firstWhere((element) => element.markerItem == reservationMarker).childWidget),
-
-            if (reservationMarker != ReservationMobileCreateNewMarker.paymentReview) Positioned(
-                bottom: 0,
-                child: Container(
-                  color: widget.model.accentColor,
-                  height: 100,
-                  width: MediaQuery.of(context).size.width,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: getBottomContainer(
-                        context,
-                        reservationMarker,
-                        state,
-                        reservations,
-                        listingOwnerProfile
-                  )
-                ),
+                  listingOwnerProfile,
+                  reservations
               )
-            )
-          ],
-        );
-      }
+            ),
+            NewReservationModel(
+              markerItem: ReservationMobileCreateNewMarker.additionalDetails,
+              childWidget: InkWell(
+              onTap: () {
+                Navigator.of(context).pop();
+                },
+                child: Container(color: Colors.red,)
+              )
+            ),
+            NewReservationModel(
+                markerItem: ReservationMobileCreateNewMarker.paymentReview,
+                childWidget: getMainContainerForPaymentReview(
+                    context,
+                    widget.model,
+                    state,
+                    listingOwnerProfile
+              )
+            ),
+          ];
+          if (context.read<ReservationFormBloc>().state.currentSelectedSpace == null && context.read<ReservationFormBloc>().state.currentSelectedSpaceOption == null) {
+            (context.read<ReservationFormBloc>().add(ReservationFormEvent.spaceDetailChanged(widget.listing.listingProfileService.spaceSetting.spaceTypes.value.fold((l) => [], (r) => r)[0])));
+            context.read<ReservationFormBloc>().add(ReservationFormEvent.selectedSizeOptionChanged(widget.listing.listingProfileService.spaceSetting.spaceTypes.value.fold((l) => [], (r) => r)[0].quantity[0]));
+          }
+
+          return Stack(
+            children: [
+              CreateNewMain(
+                  child: reservationContainerModel.firstWhere((element) => element.markerItem == reservationMarker).childWidget),
+
+              if (reservationMarker != ReservationMobileCreateNewMarker.paymentReview) Positioned(
+                  bottom: 0,
+                  child: Container(
+                    color: widget.model.accentColor,
+                    height: 100,
+                    width: MediaQuery.of(context).size.width,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: getBottomContainer(
+                          context,
+                          reservationMarker,
+                          state,
+                          reservations,
+                          listingOwnerProfile
+                    )
+                  ),
+                )
+              )
+            ],
+          );
+        }
+      ),
     );
   }
 }

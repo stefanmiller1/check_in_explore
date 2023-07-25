@@ -56,7 +56,7 @@ class _SidePanelContainerState extends State<SidePanelContainer> {
               height: MediaQuery.of(context).size.width,
               width: 80,
               child: ListView(
-                children: widget.sideMarkerItems.asMap().map((i, e) => MapEntry(i, MouseRegion(
+                children: widget.sideMarkerItems.where((element) => element.isVisible == true).toList().asMap().map((i, e) => MapEntry(i, MouseRegion(
                     onEnter: (g) {
                         setState(() {
                           e.isHovering = true;

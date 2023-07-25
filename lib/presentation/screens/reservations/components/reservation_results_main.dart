@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:math';
 import 'dart:ui';
 
 import 'package:check_in_application/auth/update_services/booked_reservation_services/booked_reservation_form_bloc.dart';
@@ -34,7 +33,6 @@ import 'package:reservation_post/inputs/media_attatchment_preview.dart';
 import 'package:reservation_post/models/media_mode.dart';
 import 'package:reservation_post/reservation_post.dart';
 import 'package:share_plus/share_plus.dart';
-
 
 class ReservationResultMain extends StatefulWidget {
 
@@ -72,9 +70,8 @@ class ReservationResultMain extends StatefulWidget {
 class _ReservationResultMainState extends State<ReservationResultMain> with SingleTickerProviderStateMixin {
 
   final _controller = ScrollController();
-  final _headerController = ScrollController();
   late TabController? _tabController;
-  late PageController? _pageController;
+
 
   double _offset = 0;
   late double _percentageOpen = 0;
@@ -93,53 +90,245 @@ class _ReservationResultMainState extends State<ReservationResultMain> with Sing
   /// see [Input.isAudioAttachmentUploading]
   late bool isAudioAttachmentUploading = false;
 
-  /// SilverAppBar collapsed height
-  final double _collapsedHeight = 60;
-
-  /// SilverAppBar expanded height
-  double _expandedHeight(BuildContext context) => MediaQuery.of(context).size.height * 0.75;
-
-  /// value to control SilverAppBar widget sizes, based on boxconstraints
-  late double extentRatio;
-
-  /// minimum height for main widget.
-  late double minH1 = 40;
-
-  /// maximum height for main widget.
-  late double maxH1 = 60;
-
   /// check if current user is reservation owner.
   late bool isOwner = false;
 
+  ReservationMobileCreateNewMarker reservationMarker = ReservationMobileCreateNewMarker.listingDetails;
   /// check if current user is a reservation guest or affiliate.
-  late bool isAffiliate = false;
 
 
 
  @override
   void initState() {
     _selectedFileSpaceImage = [];
-    _controller.addListener(moveOffset);
-    _tabController = TabController(length: 3, vsync: this);
-    _pageController = PageController(initialPage: _tabController?.index ?? 0);
+    int tabIndex = ResOverViewTabs.values.indexWhere((element) => element == ReservationCoreHelper.resOverViewTabs);
+
+    _tabController = TabController(initialIndex: tabIndex, length: 3, vsync: this);
+    ReservationCoreHelper.pageController = PageController(initialPage: tabIndex, keepPage: true);
+
     super.initState();
   }
 
-  moveOffset() {
-    setState(() {
-      _offset = min(max(0, _controller.offset / 6 - 16), 32);
-    });
-  }
 
   @override
   void dispose() {
-    _headerController.dispose();
-    _controller.removeListener(moveOffset);
     _controller.dispose();
     _tabController?.dispose();
-    _pageController?.dispose();
+    // pageController?.dispose();
     super.dispose();
   }
+
+  
+  void showReservationTicketOptions(BuildContext context) {
+    
+  }
+  
+  Widget getMainContainerForReservationOverview(BuildContext context, BookedReservationFormState state, bool isOwner, UserProfileModel resOwner, ListingManagerForm listing, ReservationItem reservation, UserProfileModel? reservationOwner, UserProfileModel currentUser, List<Post> postList, List<UserProfileModel> userProfiles, ActivityManagerForm activityForm) {
+   return Stack(
+     children: [
+       Container(
+         color: widget.model.webBackgroundColor,
+         width: MediaQuery.of(context).size.width,
+         height: MediaQuery.of(context).size.height,
+       ),
+       Column(
+         mainAxisAlignment: MainAxisAlignment.center,
+         children: [
+           Expanded(
+             child: Container(
+                 child: mainContainerPageView(
+                     context,
+                     listing,
+                     reservation,
+                     isOwner,
+                     reservationOwner,
+                     currentUser,
+                     postList,
+                     userProfiles,
+                     activityForm
+                 )
+             ),
+           )
+         ]
+       ),
+       Positioned(
+         bottom: 0,
+         child: ClipRRect(
+           child: BackdropFilter(
+             filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
+             child: Container(
+               height: (widget.isReply && widget.replyToPost != null) ? (_selectedFileSpaceImage.isNotEmpty && ReservationCoreHelper.resOverViewTabs == ResOverViewTabs.discussion) ? 415 : 300 : (_selectedFileSpaceImage.isNotEmpty && ReservationCoreHelper.resOverViewTabs == ResOverViewTabs.discussion) ? 200 : 80,
+               width: MediaQuery.of(context).size.width,
+               color: Colors.grey.shade200.withOpacity(0.5),
+             ),
+           ),
+         ),
+       ),
+
+       AnimatedOpacity(
+         opacity: (ReservationCoreHelper.resOverViewTabs == ResOverViewTabs.reservation || ReservationCoreHelper.resOverViewTabs == ResOverViewTabs.activity) ? 1 : 0,
+         duration: const Duration(milliseconds: 900),
+         child: Visibility(
+           visible: (ReservationCoreHelper.resOverViewTabs == ResOverViewTabs.reservation || ReservationCoreHelper.resOverViewTabs == ResOverViewTabs.activity),
+           child: Column(
+             mainAxisSize: MainAxisSize.max,
+             mainAxisAlignment: MainAxisAlignment.end,
+             crossAxisAlignment: CrossAxisAlignment.start,
+             children: [
+               getInviteToJoinWidget(
+                   context,
+                   widget.model,
+                   activityForm,
+                   reservation,
+                   resOwner,
+                   isOwner,
+                   didSelectJoin: () {
+                     setState(() {
+
+                     });
+                   },
+                   didSelectManage: () {
+
+                   },
+                   didSelectManageTickets: () {
+
+                   },
+                   didSelectFindTickets: () {
+
+                   },
+                   didSelectShare: () {
+
+                   },
+                   didSelectMoreOptions: () {
+                     presentMoreOptions(
+                         context,
+                         widget.model,
+                         isOwner,
+                         currentUser,
+                         reservation,
+                         listing,
+                         userProfiles,
+                         didLeaveListing: () {
+                           // List<ContactDetails> updatedAffiliates = [];
+                           // updatedAffiliates.addAll(reservation.reservationAffiliates ?? []);
+                           //
+                           // updatedAffiliates.removeWhere((element) => element.contactId == currentUser.userId);
+                           // context.read<BookedReservationFormBloc>().add(BookedReservationFormEvent.didLeaveBookedReservation(reservation, updatedAffiliates));
+
+                           Navigator.of(context).pop();
+                         }
+                     );
+                   }
+               )
+             ],
+           ),
+         ),
+       ),
+
+       AnimatedOpacity(
+         opacity: (ReservationCoreHelper.resOverViewTabs == ResOverViewTabs.discussion) ? 1 : 0,
+         duration: const Duration(milliseconds: 900),
+         curve: Curves.easeInOut,
+         child: Visibility(
+           visible: (ReservationCoreHelper.resOverViewTabs == ResOverViewTabs.discussion),
+           child: Column(
+             mainAxisSize: MainAxisSize.max,
+             mainAxisAlignment: MainAxisAlignment.end,
+             crossAxisAlignment: CrossAxisAlignment.start,
+             children: [
+               AnimatedContainer(
+                 duration: const Duration(milliseconds: 900),
+                 curve: Curves.easeInOut,
+                 height: (_selectedFileSpaceImage.isNotEmpty) ? 125 : 0,
+                 child: MediaAttachmentPreview(
+                   selectedMedia: _selectedFileSpaceImage.map((e) => Image.file(File(e.path))).toList(),
+                   didRemoveMediaFromPost: (context, media) {
+                     _selectedFileSpaceImage.removeWhere((element) => Image.file(File(element.path)).image == media.image);
+                     setState(() {
+                     });
+                   },
+                   model: widget.model,
+                 ),
+               ),
+               retrieveInputForPost(context, state, reservation.reservationId.getOrCrash()),
+             ],
+           ),
+         ),
+       ),
+
+       if (kIsWeb) mainContainerHeaderTab(),
+
+       if (!(kIsWeb)) Container(
+         height: 180,
+         width: MediaQuery.of(context).size.width,
+         child: AppBar(
+           toolbarHeight: 80,
+           centerTitle: true,
+           title: Column(
+             children: [
+               Text(listing.listingProfileService.backgroundInfoServices.listingName.getOrCrash(), style: TextStyle(color: widget.model.accentColor, fontWeight: FontWeight.bold)),
+               const SizedBox(height: 5),
+               if (reservation.reservationState == ReservationSlotState.completed) Container(
+                   decoration: BoxDecoration(
+                       borderRadius: BorderRadius.circular(50),
+                       color: widget.model.accentColor.withOpacity(0.5)
+                   ),
+                   child: Padding(
+                     padding: const EdgeInsets.all(4.0),
+                     child: Text('Finished', style: TextStyle(fontSize: 14, color: widget.model.accentColor)),
+                 )
+               ),
+             ],
+           ),
+           bottom: PreferredSize(
+             preferredSize: const Size.fromHeight(0),
+             child:  Padding(
+               padding: const EdgeInsets.only(bottom: 8.0),
+               child: mainContainerHeaderTab(),
+             ),
+           ),
+           elevation: 0,
+           actions: [
+             if (isOwner) if (!state.isCreatingLink) IconButton(
+               onPressed: () {
+                 setState(() {
+                   context.read<BookedReservationFormBloc>().add(BookedReservationFormEvent.didFinishCreateNewInviteLink(reservation));
+                 });
+               },
+               icon: Icon(Icons.ios_share_rounded, color: widget.model.accentColor),
+             ),
+             if (state.isCreatingLink) JumpingDots(numberOfDots: 2, color: widget.model.accentColor),
+             IconButton(
+               onPressed: () {
+                 presentMoreOptions(
+                     context,
+                     widget.model,
+                     isOwner,
+                     currentUser,
+                     reservation,
+                     listing,
+                     userProfiles,
+                     didLeaveListing: () {
+                       // List<ContactDetails> updatedAffiliates = [];
+                       // updatedAffiliates.addAll(reservation.reservationAffiliates ?? []);
+                       //
+                       // updatedAffiliates.removeWhere((element) => element.contactId == currentUser.userId);
+                       // context.read<BookedReservationFormBloc>().add(BookedReservationFormEvent.didLeaveBookedReservation(reservation, updatedAffiliates));
+
+                       Navigator.of(context).pop();
+                     }
+                 );
+               },
+               icon: Icon(Icons.more_vert_rounded, color: widget.model.accentColor),
+             ),
+           ],
+           backgroundColor: widget.model.paletteColor,
+         ),
+       ),
+     ],
+   );
+  }
+  
 
 
   @override
@@ -147,13 +336,9 @@ class _ReservationResultMainState extends State<ReservationResultMain> with Sing
    if (ReservationHelperCore.isLoading) {
      return JumpingDots(color: widget.model.paletteColor, numberOfDots: 3);
    }
+
     return Scaffold(
-      resizeToAvoidBottomInset: false,
-      appBar: (widget.isReply) ? AppBar(
-        elevation: 0,
-        backgroundColor: widget.model.paletteColor,
-        title: Text('Reply', style: TextStyle(color: widget.model.accentColor),),
-      ) : null,
+      resizeToAvoidBottomInset: true,
       body: MultiBlocProvider(
         providers: [
           if (widget.currentUser == null) BlocProvider(create: (_) => getIt<UserProfileWatcherBloc>()..add(UserProfileWatcherEvent.watchSelectedUserProfileStarted(widget.currentUserId))),
@@ -299,8 +484,6 @@ class _ReservationResultMainState extends State<ReservationResultMain> with Sing
         return BlocConsumer<BookedReservationFormBloc, BookedReservationFormState>(
            listenWhen: (p,c) => p.isSubmitting != c.isSubmitting || p.isCreatingLink != c.isCreatingLink,
            listener: (context, state) {
-             print(state.authFailureOrSuccess);
-
              state.authFailureOrSuccessInviteLink.fold(
                      () => null,
                      (either) => either.fold(
@@ -337,7 +520,7 @@ class _ReservationResultMainState extends State<ReservationResultMain> with Sing
                      },
                          (_) {
                         setState(() {
-                          isAffiliate = true;
+                          // isAffiliate = true;
                         });
                      }
                  )
@@ -346,822 +529,210 @@ class _ReservationResultMainState extends State<ReservationResultMain> with Sing
            buildWhen: (p,c) => p.isSubmitting != c.isSubmitting || p.isCreatingLink != c.isCreatingLink,
            builder: (context, state) {
 
-             final double closingRate = (_offset / (30 - 10 - 60));
              isOwner = currentUser.userId == reservation.reservationOwnerId;
-             isAffiliate = reservation.reservationAffiliates?.where((element) => element.contactId == currentUser.userId && element.contactStatus == ContactStatus.joined).isNotEmpty ?? false;
              final resOwner = (userProfiles.where((element) => element.userId == reservation.reservationOwnerId).isNotEmpty) ? userProfiles.where((element) => element.userId == reservation.reservationOwnerId).first : currentUser;
-             bool isLessThanMain = (MediaQuery.of(context).size.width <= 1400);
+
+             List<NewReservationModel> reservationContainerModel = [
+               NewReservationModel(
+                 markerItem: ReservationMobileCreateNewMarker.listingDetails,
+                 childWidget: getMainContainerForReservationOverview(
+                     context,
+                     state,
+                     isOwner,
+                     resOwner,
+                     listing,
+                     reservation,
+                     reservationOwner,
+                     currentUser,
+                     postList,
+                     userProfiles,
+                     activityForm
+                 ),
+               ),
+               if (activityForm.activityAttendance.isTicketBased == true) NewReservationModel(
+                   markerItem: ReservationMobileCreateNewMarker.paymentReview,
+                     childWidget: ReservationCreateTicketAttendee(
+                        model: widget.model,
+                        reservation: reservation,
+                        activityForm: activityForm,
+                        currentUser: currentUser,
+                        resOwner: resOwner,
+                        didSelectBack: () {
+                        setState(() {
+                          reservationMarker = ReservationMobileCreateNewMarker.listingDetails;
+                     });
+                   }
+                 )
+               )
+             ];
 
              return Stack(
+               alignment: Alignment.topCenter,
                children: [
                  Container(
                    width: MediaQuery.of(context).size.width,
                    height: MediaQuery.of(context).size.height,
                  ),
-                if (!(kIsWeb)) CustomScrollView(
-                  controller: _controller,
-                  physics: const BouncingScrollPhysics(),
-                  slivers: [
-                    if (!widget.isReply) SliverAppBar(
-                       expandedHeight: _expandedHeight(context),
-                       collapsedHeight: _collapsedHeight,
-                       stretch: true,
-                       pinned: true,
-                       centerTitle: true,
-                        /// show if booking has ended.
-                        /// show if booking is taking place now!
-                       title: Column(
-                         children: [
-                           Text(listing.listingProfileService.backgroundInfoServices.listingName.getOrCrash(), style: TextStyle(color: widget.model.accentColor, fontWeight: FontWeight.bold)),
-                           const SizedBox(height: 5),
-                           if (reservation.reservationState == ReservationSlotState.completed) Container(
-                               decoration: BoxDecoration(
-                                   borderRadius: BorderRadius.circular(50),
-                                   color: widget.model.accentColor.withOpacity(0.5)
-                               ),
-                               child: Padding(
-                                 padding: const EdgeInsets.all(4.0),
-                                 child: Text('Finished', style: TextStyle(fontSize: 14, color: widget.model.accentColor)),
-                               )
-                           )
-                         ],
-                       ),
-                       elevation: 0,
-                       actions: [
-                       ],
-                       backgroundColor: widget.model.paletteColor,
-                       flexibleSpace: LayoutBuilder(
-                         builder: (BuildContext context, BoxConstraints constraints) {
-
-                            return flexibleReservationProfileHeader(
-                                context,
-                                widget.model,
-                                reservation,
-                                listing,
-                                isOwner,
-                                userProfiles,
-                                didSelectNewInvite: () {
-                                  Navigator.of(context).push(MaterialPageRoute(builder: (_) {
-                                    return SendInvitationRequest(
-                                      model: widget.model,
-                                      currentUser: currentUser,
-                                      currentGuests: reservation,
-                                      );
-                                    })
-                                  );
-                                },
-                                didSelectAllParticipants: () {
-
-                                  showGeneralDialog(
-                                      barrierLabel: '',
-                                      barrierDismissible: true,
-                                      barrierColor: Colors.black.withOpacity(0.5),
-                                      transitionDuration: const Duration(milliseconds: 400),
-                                      context: context,
-                                      pageBuilder: (contexts, anim1, anim2) {
-                                        return ReservationAffiliatesWidget(
-                                            model: widget.model,
-                                            reservationId: reservation.reservationId.getOrCrash(),
-                                            users: userProfiles,
-                                            currentUser: currentUser,
-                                            isOwner: isOwner,
-                                            didSelectProfile: (userProfile) {
-
-
-                                              Navigator.of(contexts).push(MaterialPageRoute(builder: (_) {
-                                                return ReviewCurrentProfile(
-                                                    currentUser: userProfile,
-                                                    model: widget.model,
-                                                    didSelectEditProfile: (profile) {
-
-                                                  },
-                                                );
-                                              })
-                                            );
-                                          },
-                                        );
-                                      },
-                                     transitionBuilder: (context, anim1, anim2, child) {
-                                        return SlideTransition(
-                                            position: Tween(begin: const Offset(0, 1), end: const Offset(0, 0.15)).animate(anim1),
-                                           child: child,
-                                        );
-                                     }
-                                  );
-                                },
-                            );
-                         },
-                       )
-                     ),
-
-                   //  SliverToBoxAdapter(
-                   //    child: PostWidgetBuilder(
-                   //        model: widget.model,
-                   //        postList: widget.replyPosts ?? postList,
-                   //        isReply: widget.isReply,
-                   //        listing: listing,
-                   //        currentUser: currentUser,
-                   //        emptyPostView: (widget.isReply) ? emptyReplyContainer(context, widget.model) : emptyPostContainer(context, widget.model),
-                   //        reservation: reservation,
-                   //        userProfiles: userProfiles,
-                   //        // onEndReached: () => _controller.animateTo(300, duration: const Duration(milliseconds: 800), curve: Curves.easeIn),
-                   //   ),
-                   // ),
-                 ],
-               ),
-
-
-                 // DraggableHome(
-                 //   appBarColor: widget.model.paletteColor,
-                 //   alwaysShowTitle: true,
-                 //   alwaysShowLeadingAndAction: true,
-                 //   title: Column(
-                 //     children: [
-                 //       Text(listing.listingProfileService.backgroundInfoServices.listingName.getOrCrash(), style: TextStyle(color: widget.model.accentColor, fontWeight: FontWeight.bold)),
-                 //       const SizedBox(height: 5),
-                 //       if (reservation.reservationState == ReservationSlotState.completed) Container(
-                 //           decoration: BoxDecoration(
-                 //               borderRadius: BorderRadius.circular(50),
-                 //               color: widget.model.accentColor.withOpacity(0.5)
-                 //           ),
-                 //           child: Padding(
-                 //             padding: const EdgeInsets.all(4.0),
-                 //             child: Text('Finished', style: TextStyle(fontSize: 14, color: widget.model.accentColor)),
-                 //           )
-                 //       )
-                 //     ],
-                 //   ),
-                 //   headerExpandedHeight: 0.78,
-                 //   backgroundColor: widget.model.mobileBackgroundColor,
-                 //   headerWidget: flexibleReservationProfileHeader(
-                 //     context,
-                 //     widget.model,
-                 //     reservation,
-                 //     listing,
-                 //     isOwner,
-                 //     userProfiles,
-                 //     didSelectNewInvite: () {
-                 //       Navigator.of(context).push(MaterialPageRoute(builder: (_) {
-                 //         return SendInvitationRequest(
-                 //           model: widget.model,
-                 //           currentUser: currentUser,
-                 //           currentGuests: reservation,
-                 //         );
-                 //       })
-                 //       );
-                 //     },
-                 //     didSelectAllParticipants: () {
-                 //       showGeneralDialog(
-                 //           barrierLabel: '',
-                 //           barrierDismissible: true,
-                 //           barrierColor: Colors.black.withOpacity(0.5),
-                 //           transitionDuration: const Duration(milliseconds: 400),
-                 //           context: context,
-                 //           pageBuilder: (contexts, anim1, anim2) {
-                 //             return ReservationAffiliatesWidget(
-                 //               model: widget.model,
-                 //               reservationId: reservation.reservationId.getOrCrash(),
-                 //               users: userProfiles,
-                 //               currentUser: currentUser,
-                 //               isOwner: isOwner,
-                 //               didSelectProfile: (userProfile) {
-                 //
-                 //
-                 //                 Navigator.of(contexts).push(MaterialPageRoute(builder: (_) {
-                 //                   return ReviewCurrentProfile(
-                 //                       currentUser: userProfile,
-                 //                       model: widget.model
-                 //                   );
-                 //                 })
-                 //                 );
-                 //               },
-                 //             );
-                 //           },
-                 //           transitionBuilder: (context, anim1, anim2, child) {
-                 //             return SlideTransition(
-                 //               position: Tween(begin: const Offset(0, 1), end: const Offset(0, 0.15)).animate(anim1),
-                 //               child: child,
-                 //             );
-                 //           }
-                 //       );
-                 //     },
-                 //   ),
-                 //   actions: [
-                 //     if (isOwner) if (!state.isCreatingLink) IconButton(
-                 //       onPressed: () {
-                 //         setState(() {
-                 //           context.read<BookedReservationFormBloc>().add(BookedReservationFormEvent.didFinishCreateNewInviteLink(reservation));
-                 //         });
-                 //       },
-                 //       icon: Icon(Icons.ios_share_rounded, color: widget.model.accentColor),
-                 //     ),
-                 //     if (state.isCreatingLink) JumpingDots(numberOfDots: 2, color: widget.model.accentColor),
-                 //     if (isAffiliate || isOwner) IconButton(
-                 //       onPressed: () {
-                 //         presentMoreOptions(
-                 //             context,
-                 //             widget.model,
-                 //             isOwner,
-                 //             currentUser,
-                 //             reservation,
-                 //             listing,
-                 //             userProfiles,
-                 //             didLeaveListing: () {
-                 //               List<ContactDetails> updatedAffiliates = [];
-                 //               updatedAffiliates.addAll(reservation.reservationAffiliates ?? []);
-                 //
-                 //               updatedAffiliates.removeWhere((element) => element.contactId == currentUser.userId);
-                 //               context.read<BookedReservationFormBloc>().add(BookedReservationFormEvent.didLeaveBookedReservation(reservation, updatedAffiliates));
-                 //
-                 //               Navigator.of(context).pop();
-                 //             }
-                 //         );
-                 //       },
-                 //       icon: Icon(Icons.more_vert_rounded, color: widget.model.accentColor),
-                 //     ),
-                 //   ],
-                 //   body: [
-                 //     PostWidgetBuilder(
-                 //       model: widget.model,
-                 //       postList: widget.replyPosts ?? postList,
-                 //       isReply: widget.isReply,
-                 //       listing: listing,
-                 //       currentUser: currentUser,
-                 //       emptyPostView: (widget.isReply) ? emptyReplyContainer(context, widget.model) : emptyPostContainer(context, widget.model),
-                 //       reservation: reservation,
-                 //       userProfiles: userProfiles,
-                 //       // onEndReached: () => _controller.animateTo(300, duration: const Duration(milliseconds: 800), curve: Curves.easeIn),
-                 //     ),
-                 //   ],
-                 // ),
-
-
-
-                // SingleChildScrollView(
-                //   controller: _controller,
-                //   child:  Padding(
-                //     padding: const EdgeInsets.all(15.0),
-                //     child: (isLessThanMain) ? Column(
-                //       children: [
-                //         Padding(
-                //           padding: const EdgeInsets.only(top: 120.0),
-                //           child: mainContainerSectionOneRowTwo(context, postList, listing, currentUser, reservation, userProfiles),
-                //       ),
-                //     ],
-                //   ) : Column(
-                //     crossAxisAlignment: CrossAxisAlignment.start,
-                //     mainAxisAlignment: MainAxisAlignment.center,
-                //     children: [
-                //         Flexible(
-                //           child: Container(
-                //               constraints: BoxConstraints(
-                //                 maxWidth: 550,
-                //               ),
-                //             child: mainContainerSectionOneRowTwo(
-                //                 context,
-                //                 postList,
-                //                 listing,
-                //                 currentUser,
-                //                 reservation,
-                //                 userProfiles
-                //             )
-                //           ),
-                //         ),
-                //         const SizedBox(width: 25),
-                //         Container(
-                //           width: 400,
-                //             child: mainContainerSectionOneRowOne(
-                //                 context,
-                //                 listing,
-                //                 reservation,
-                //                 reservationOwner,
-                //                 userProfiles,
-                //                 activityForm)
-                //         ),
-                //         // if (MediaQuery.of(context).size.width >= 1300) SizedBox(width: MediaQuery.of(context).size.width * 0.025)
-                //       ],
-                //     ),
-                //   )
-                // ),
-
-                 if (isLessThanMain) Column(
-                   mainAxisAlignment: MainAxisAlignment.center,
-                   children: [
-
-                       Row(
-                       children: [
-                         Flexible(
-                           child: Center(
-                             child: Container(
-                               constraints: const BoxConstraints(maxWidth: 700),
-                               child: mainContainerHeader(
-                                 context,
-                                 listing,
-                                 reservation,
-                                 reservationOwner,
-                                 userProfiles,
-                                 activityForm
-                               ),
-                             ),
-                           ),
-                         ),
-                       ],
-                       ),
-                       const SizedBox(height: 10),
-                       // Divider(color: widget.model.disabledTextColor),
-                       Expanded(
-                       child: Container(
-                         child: PageView.builder(
-                           controller: _pageController,
-                           itemCount: 3,
-                           scrollDirection: Axis.horizontal,
-                           allowImplicitScrolling: true,
-                           itemBuilder: (_, index) {
-                               return SingleChildScrollView(
-                                 child: Padding(
-                                   padding: const EdgeInsets.symmetric(horizontal: 25.0),
-                                   child: Row(
-                                     children: [
-                                       if (index == 0) Flexible(
-                                         child: Center(
-                                           child: Container(
-                                             constraints: const BoxConstraints(maxWidth: 700),
-                                             child: ReservationActivityInfoWidget(
-                                                 model: widget.model,
-                                                 activityForm: activityForm,
-                                                 activityOwner: reservationOwner,
-                                                 reservation: reservation
-                                             ),
-                                           ),
-                                         ),
-                                       ),
-                                       if (index == 1) Flexible(
-                                         child: Center(
-                                           child: Container(
-                                             constraints: const BoxConstraints(maxWidth: 700),
-                                             child: ReservationInfoWidget(
-                                             model: widget.model,
-                                             listing: listing,
-                                             reservationItem: reservation,
-                                             users: userProfiles,
-                                             isOwner: isOwner,
-                                             didSelectAllParticipants: () {
-
-                                             },
-                                             didSelectNewInvite: () {
-
-                                              },
-                                            ),
-                                           ),
-                                         ),
-                                       ),
-                                       if (index == 2) Flexible(
-                                         child: Center(
-                                           child: Container(
-                                             constraints: const BoxConstraints(maxWidth: 700),
-                                             child: mainContainerSectionOneRowTwo(
-                                                 context,
-                                                 postList,
-                                                 listing,
-                                                 currentUser,
-                                                 reservation,
-                                                 userProfiles
-                                             ),
-                                           ),
-                                         ),
-                                       )
-                                     ],
-                                   ),
-                                 ),
-                               );
-                            }
-
-                          )
-                        ),
-                      )
-                   ]
-                 ),
-
-                 /// TODO: Side bar to contain - (Join, Buy, Leave, Interested...Button), Activity Title, Activity Dates, Activity Location??, Attending/Interested
-                 /// TODO: Hide bottom when not on discussion..
-
-                 // if (isLessThanMain) AnimatedContainer(
-                 //   duration: Duration(milliseconds: 600),
-                 //   curve: Curves.easeInOut,
-                 //   color: widget.model.accentColor,
-                 //   height: isShowingReservationInfo ? 600 : 130,
-                 //   width: MediaQuery.of(context).size.width,
-                 //   child: SingleChildScrollView(
-                 //     controller: _headerController,
-                 //     physics: (isShowingReservationInfo) ? const BouncingScrollPhysics() : const NeverScrollableScrollPhysics(),
-                 //     child: Column(
-                 //       children: [
-                 //         const SizedBox(height: 10),
-                 //         Text(listing.listingProfileService.backgroundInfoServices.listingName.getOrCrash(), style: TextStyle(color: widget.model.paletteColor, fontSize: widget.model.secondaryQuestionTitleFontSize, fontWeight: FontWeight.bold)),
-                 //         const SizedBox(height: 5),
-                 //         Container(
-                 //             decoration: BoxDecoration(
-                 //                 borderRadius: BorderRadius.circular(50),
-                 //                 color: widget.model.disabledTextColor
-                 //             ),
-                 //             child: Padding(
-                 //               padding: const EdgeInsets.all(8.0),
-                 //               child: Text(getReservationStateTitle(reservation.reservationState), style: TextStyle(fontSize: 14, color: widget.model.webBackgroundColor)),
-                 //             )
-                 //         ),
-                 //         const SizedBox(height: 10),
-                 //         InkWell(
-                 //           onTap: () {
-                 //             setState(() {
-                 //               isShowingReservationInfo = !isShowingReservationInfo;
-                 //
-                 //               if (!isShowingReservationInfo) {
-                 //                 _headerController.animateTo(0, duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
-                 //               }
-                 //             });
-                 //           },
-                 //           child: Container(
-                 //             height: 35,
-                 //             width: 35,
-                 //             decoration: BoxDecoration(
-                 //                 borderRadius: BorderRadius.circular(25),
-                 //                 color: widget.model.paletteColor
-                 //             ),
-                 //             child: Icon(
-                 //               isShowingReservationInfo ? Icons.keyboard_arrow_down : Icons.keyboard_arrow_up_rounded,
-                 //               color: widget.model.accentColor,
-                 //             ),
-                 //           ),
-                 //         ),
-                 //         const SizedBox(height: 10),
-                 //         AnimatedOpacity(
-                 //           duration: const Duration(milliseconds: 300),
-                 //             opacity: (isShowingReservationInfo) ? 1 : 0,
-                 //             child: mainContainerSectionOneRowOne(
-                 //                 context,
-                 //                 listing,
-                 //                 reservation,
-                 //                 reservationOwner,
-                 //                 userProfiles,
-                 //                 activityForm)
-                 //         )
-                 //       ],
-                 //     ),
-                 //   ),
-                 // ),
-
-                 Positioned(
-                  bottom: 0,
-                   child: ClipRRect(
-                     child: BackdropFilter(
-                       filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
-                       child: Container(
-                         height: (widget.isReply && widget.replyToPost != null) ? (_selectedFileSpaceImage.isNotEmpty) ? 415 : 275 : (_selectedFileSpaceImage.isNotEmpty) ? 200 : 80,
-                         width: MediaQuery.of(context).size.width,
-                         color: Colors.grey.shade200.withOpacity(0.5),
-                       ),
-                     ),
-                   ),
-                 ),
-
-                 AnimatedOpacity(
-                     opacity: (_tabController?.index == 1 || _tabController?.index == 0) ? 1 : 0,
-                     duration: const Duration(milliseconds: 900),
-                     child: Column(
-                       mainAxisSize: MainAxisSize.max,
-                       mainAxisAlignment: MainAxisAlignment.end,
-                       crossAxisAlignment: CrossAxisAlignment.start,
-                       children: [
-                       getInviteToJoinWidget(
-                              context,
-                              widget.model,
-                              resOwner,
-                              didSelectJoinBooking: () {
-                                setState(() {
-
-                                  final ContactDetails joinedContact = ContactDetails(
-                                      contactId: currentUser.userId,
-                                      name: currentUser.legalName,
-                                      dateStarted: DateTime.now(),
-                                      emailAddress: currentUser.emailAddress,
-                                      contactStatus: ContactStatus.joined
-                                  );
-                                  List<ContactDetails> updatedAffiliates = [];
-                                  updatedAffiliates.addAll(reservation.reservationAffiliates ?? []);
-
-                                  final index = updatedAffiliates.indexWhere((element) => element.contactId == currentUser.userId);
-
-                                  updatedAffiliates.replaceRange(index, index + 1, [joinedContact]);
-
-                                  context.read<BookedReservationFormBloc>().add(BookedReservationFormEvent.didJoinBookedReservation(reservation, updatedAffiliates));
-                                });
-                              },
-                              didSelectCancel: () {
-                                Navigator.of(context).pop();
-                           }
-                         )
-                       ],
-                     ),
-                 ),
-
-                 AnimatedOpacity(
-                   opacity: (_tabController?.index == 2) ? 1 : 0,
-                   duration: const Duration(milliseconds: 900),
-                   curve: Curves.easeInOut,
-                   child: Column(
-                     mainAxisSize: MainAxisSize.max,
-                     mainAxisAlignment: MainAxisAlignment.end,
-                     crossAxisAlignment: CrossAxisAlignment.start,
-                     children: [
-                       // if (widget.isReply && widget.replyToPost != null) Padding(
-                       //   padding: const EdgeInsets.only(left: 8.0),
-                       //   child: Text('Reply To: ', style: TextStyle(color: widget.model.paletteColor)),
-                       // ),
-                       // if (widget.isReply && widget.replyToPost != null) retrieveReplyPostUser(
-                       //     widget.replyToPost!.authorId.getOrCrash(),
-                       //     widget.replyToPost!,
-                       //     currentUser
-                       // ),
-                       AnimatedContainer(
-                         duration: const Duration(milliseconds: 900),
-                         curve: Curves.easeInOut,
-                         height: (_selectedFileSpaceImage.isNotEmpty) ? 125 : 0,
-                         child: MediaAttachmentPreview(
-                           selectedMedia: _selectedFileSpaceImage.map((e) => Image.file(File(e.path))).toList(),
-                           didRemoveMediaFromPost: (context, media) {
-                             _selectedFileSpaceImage.removeWhere((element) => Image.file(File(element.path)).image == media.image);
-                             setState(() {
-                             });
-                           },
-                           model: widget.model,
-                         ),
-                       ),
-                       retrieveInputForPost(context, state, reservation.reservationId.getOrCrash()),
-                     ],
-                   ),
-                 ),
-
-            ]
-          );
-       }
+                CreateNewMain(
+                    child: reservationContainerModel.firstWhere((element) => element.markerItem == reservationMarker).childWidget
+                ),
+          ]
+        );
+      }
     );
   }
 
-  Widget mainContainerHeader(BuildContext context, ListingManagerForm listing, ReservationItem reservationItem, UserProfileModel? reservationOwner, List<UserProfileModel> users, ActivityManagerForm activityForm) {
-   return Stack(
-     alignment: Alignment.bottomCenter,
+  Widget mainContainerHeaderTab() {
+   return Row(
+     mainAxisAlignment: MainAxisAlignment.center,
      children: [
-       AnimatedOpacity(
-         duration: const Duration(milliseconds: 300),
-         opacity: (_tabController?.index == 1) ? 1 : 0,
-         child: SizedBox(
-           height: 225,
-           child: ClipRRect(
-             borderRadius: BorderRadius.circular(25),
-             child: PageView.builder(
-                 itemCount: retrieveReservationSpacesFromListing(reservationItem, listing).length,
-                 itemBuilder: (_, index) {
-                   final SpaceOptionSizeDetail reservationSpace = retrieveReservationSpacesFromListing(reservationItem, listing)[index];
+       Flexible(
+           child: Container(
+             constraints: const BoxConstraints(maxWidth: 700),
+             child: Padding(
+               padding: const EdgeInsets.symmetric(horizontal: 4.0),
+               child: Padding(
+                 padding: const EdgeInsets.only(top: 18.0),
+                 child: ClipRRect(
+                   borderRadius: BorderRadius.circular(25.0),
+                   child: BackdropFilter(
+                     filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
+                     child: Container(
+                       decoration: BoxDecoration(
+                           borderRadius: BorderRadius.circular(25.0),
+                           color: widget.model.accentColor.withOpacity(0.35)
+                       ),
+                       child: TabBar(
+                         controller: _tabController,
+                         onTap: (index) {
+                           setState(() {
+                             ReservationCoreHelper.resOverViewTabs = ResOverViewTabs.values[index];
+                             ReservationCoreHelper.pageController?.animateToPage(index, duration: const Duration(milliseconds: 350), curve: Curves.easeInOut);
+                           });
+                         },
+                         indicator: BoxDecoration(
+                             borderRadius: BorderRadius.circular(25.0),
+                             color: widget.model.paletteColor
+                         ),
 
-                   if (reservationSpace.spacePhoto != null) {
-                     return Image(image: reservationSpace.spacePhoto!.image, fit: BoxFit.cover);
-                   }
-                   return  getActivityTypeTabOption(
-                       context,
-                       widget.model,
-                       40,
-                       false,
-                       getActivityOptions().firstWhere((element) => element.activityId == reservationItem.reservationSlotItem.first.selectedActivityType)
-                 );
-               }
-             ),
-           ),
-         ),
-       ),
-       AnimatedOpacity(
-         duration: const Duration(milliseconds: 300),
-         opacity: (_tabController?.index == 0) ? 1 : 0,
-         child: SizedBox(
-           height: 225,
-           child: ClipRRect(
-             borderRadius: BorderRadius.circular(25),
-             child: PageView.builder(
-                 itemCount: activityForm.profileService.activityBackground.activityProfileImages?.length ?? 1,
-                 itemBuilder: (context, index) {
-                   final String activityImage = activityForm.profileService.activityBackground.activityProfileImages?[index].uriPath ?? '';
-                   if (activityImage != '') {
-                     return Image.network(activityImage, fit: BoxFit.cover);
-                   }
-                   return getActivityTypeTabOption(
-                       context,
-                       widget.model,
-                       150,
-                       false,
-                       getActivityOptions().firstWhere((element) => element.activityId == reservationItem.reservationSlotItem.first.selectedActivityType)
-                 );
-               }
-             ),
-           ),
-         ),
-       ),
-       Padding(
-         padding: const EdgeInsets.symmetric(horizontal: 4.0),
-         child: Padding(
-           padding: const EdgeInsets.only(bottom: 4.0),
-           child: TabBar(
-             controller: _tabController,
-             onTap: (index) {
-               setState(() {
-                 _pageController?.animateToPage(index, duration: const Duration(milliseconds: 350), curve: Curves.easeInOut);
-               });
-             },
-             indicator: BoxDecoration(
-                 borderRadius: BorderRadius.circular(25.0),
-                 color: widget.model.paletteColor
-             ),
-             labelStyle: const TextStyle(fontWeight: FontWeight.bold),
-             labelColor: widget.model.accentColor,
-             unselectedLabelColor: widget.model.disabledTextColor,
-             tabs: [
-               ClipRRect(
-                   borderRadius: BorderRadius.circular(25),
-                   child: Tab(text: 'Activity')
+                         labelStyle: const TextStyle(fontWeight: FontWeight.bold),
+                         labelColor: widget.model.accentColor,
+                         unselectedLabelColor: widget.model.paletteColor,
+                         tabs: ResOverViewTabs.values.map(
+                                 (e) => ClipRRect(
+                               borderRadius: BorderRadius.circular(25),
+                               child: Tab(text: e.name.toUpperCase())
+                         )
+                       ).toList()
+                     ),
+                   ),
+                 ),
                ),
-               ClipRRect(
-                   borderRadius: BorderRadius.circular(25),
-                   child: const Tab(text: 'Reservation')
-               ),
-               ClipRRect(
-                   borderRadius: BorderRadius.circular(25),
-                   child: Tab(text: 'Discussion')
-               )
-             ],
+             ),
            ),
-         ),
-       ),
+         )
+       )
      ],
    );
   }
 
-  Widget mainContainerSectionOneRowOne(BuildContext context, ListingManagerForm listing, ReservationItem reservationItem, UserProfileModel? reservationOwner, List<UserProfileModel> users, ActivityManagerForm activityForm) {
-   return Column(
-     children: [
-       Stack(
-         alignment: Alignment.bottomCenter,
-         children: [
 
-           AnimatedOpacity(
-             duration: const Duration(milliseconds: 300),
-             opacity: (_tabController?.index == 0) ? 1 : 0,
-             child: SizedBox(
-               height: 225,
-               child: ClipRRect(
-                 borderRadius: BorderRadius.circular(25),
-                 child: PageView.builder(
-                     itemCount: retrieveReservationSpacesFromListing(reservationItem, listing).length,
-                     itemBuilder: (_, index) {
-                       final SpaceOptionSizeDetail reservationSpace = retrieveReservationSpacesFromListing(reservationItem, listing)[index];
+  Widget mainContainerPageView(BuildContext context, ListingManagerForm listing, ReservationItem reservation, bool isOwner, UserProfileModel? reservationOwner, UserProfileModel currentUser, List<Post> postList, List<UserProfileModel> userProfiles, ActivityManagerForm activityForm) {
+   return PageView.builder(
+       controller: ReservationCoreHelper.pageController,
+       itemCount: 3,
+       scrollDirection: Axis.horizontal,
+       allowImplicitScrolling: true,
+       physics: const NeverScrollableScrollPhysics(),
+       itemBuilder: (_, index) {
 
-                       if (reservationSpace.spacePhoto != null) {
-                         return Image(image: reservationSpace.spacePhoto!.image, fit: BoxFit.cover);
-                       }
-                       return  getActivityTypeTabOption(
-                           context,
-                           widget.model,
-                           40,
-                           false,
-                           getActivityOptions().firstWhere((element) => element.activityId == reservationItem.reservationSlotItem.first.selectedActivityType)
-                       );
-                     }
-                 ),
-               ),
-             ),
+         ResOverViewTabs pageIndex = ResOverViewTabs.values[index];
+
+         return SingleChildScrollView(
+           child: Padding(
+             padding: const EdgeInsets.symmetric(horizontal: (kIsWeb) ? 25.0 : 0),
+             child: Row(
+               children: [
+                   if (pageIndex == ResOverViewTabs.activity) Flexible(
+                         child: Center(
+                           child: Container(
+                             constraints: const BoxConstraints(maxWidth: 700),
+                             child: ReservationActivityInfoWidget(
+                               model: widget.model,
+                               activityForm: activityForm,
+                               activityOwner: reservationOwner,
+                               reservation: reservation,
+                               listing: listing,
+                               didSelectActivityTicket: (ticket) {
+
+                                 setState(() {
+                                   reservationMarker = ReservationMobileCreateNewMarker.paymentReview;
+
+                                 });
+
+                                 // if (isOwner) {
+                                 //   if (kIsWeb) {
+                                 //
+                                 //   }
+                                 // }
+                                 //
+                                 // if (kIsWeb) {
+                                 //
+                                 // }
+
+                               },
+                             ),
+                           ),
+                         ),
+                       ),
+
+                     if (pageIndex == ResOverViewTabs.reservation) Flexible(
+                         child: Center(
+                           child: Container(
+                             constraints: const BoxConstraints(maxWidth: 700),
+                             child: ReservationInfoWidget(
+                               model: widget.model,
+                               listing: listing,
+                               reservationItem: reservation,
+                               users: userProfiles,
+                               isOwner: isOwner,
+                               didSelectAllParticipants: () {
+
+                               },
+                               didSelectNewInvite: () {
+
+                             },
+                           ),
+                         ),
+                       ),
+                     ),
+
+
+                     if (pageIndex == ResOverViewTabs.discussion) Flexible(
+                         child: Center(
+                           child: Container(
+                             constraints: const BoxConstraints(maxWidth: 600),
+                             child: Column(
+                               children: [
+                                 const SizedBox(height: (kIsWeb) ? 80 : 175),
+                                 mainContainerSectionOneRowTwo(
+                                     context,
+                                     postList,
+                                     listing,
+                                     currentUser,
+                                     reservation,
+                                     userProfiles
+                               ),
+                             ],
+                           ),
+                         ),
+                       ),
+                     )
+             ]
            ),
-           AnimatedOpacity(
-             duration: const Duration(milliseconds: 300),
-             opacity: (_tabController?.index == 1) ? 1 : 0,
-             child: SizedBox(
-               height: 225,
-               child: ClipRRect(
-                 borderRadius: BorderRadius.circular(25),
-                 child: PageView.builder(
-                     itemCount: activityForm.profileService.activityBackground.activityProfileImages?.length ?? 1,
-                     itemBuilder: (context, index) {
-                       final String activityImage = activityForm.profileService.activityBackground.activityProfileImages?[index].uriPath ?? '';
-                       if (activityImage != '') {
-                        return Image.network(activityImage, fit: BoxFit.cover);
-                       }
-                       return getActivityTypeTabOption(
-                        context,
-                        widget.model,
-                        150,
-                        false,
-                        getActivityOptions().firstWhere((element) => element.activityId == reservationItem.reservationSlotItem.first.selectedActivityType)
-                      );
-                   }
-                 ),
-               ),
-             ),
-           ),
-           Padding(
-             padding: const EdgeInsets.symmetric(horizontal: 4.0),
-             child: Padding(
-               padding: const EdgeInsets.only(bottom: 4.0),
-               child: TabBar(
-                 controller: _tabController,
-
-                 onTap: (index) {
-                   setState(() {
-                     _pageController?.animateToPage(index, duration: const Duration(milliseconds: 350), curve: Curves.easeInOut);
-                   });
-                 },
-                 indicator: BoxDecoration(
-                     borderRadius: BorderRadius.circular(25.0),
-                     color: widget.model.paletteColor
-                 ),
-                 labelStyle: const TextStyle(fontWeight: FontWeight.bold),
-                 labelColor: widget.model.accentColor,
-                 unselectedLabelColor: widget.model.disabledTextColor,
-                 tabs: [
-                   ClipRRect(
-                       borderRadius: BorderRadius.circular(25),
-                       child: Tab(text: 'Activity')
-                   ),
-                   ClipRRect(
-                       borderRadius: BorderRadius.circular(25),
-                       child: const Tab(text: 'Reservation')
-                   ),
-                   ClipRRect(
-                       borderRadius: BorderRadius.circular(25),
-                       child: Tab(text: 'Discussion')
-                   )
-                 ],
-               ),
-             ),
-           ),
-         ],
-       ),
-
-
-       // const SizedBox(height: 10),
-       // Divider(color: widget.model.disabledTextColor),
-       // Container(
-       //   constraints: BoxConstraints(
-       //     maxHeight: MediaQuery.of(context).size.height - 450,
-       //   ),
-       //   child: PageView.builder(
-       //       controller: _pageController,
-       //       itemCount: 2,
-       //       scrollDirection: Axis.horizontal,
-       //       allowImplicitScrolling: true,
-       //       physics: const NeverScrollableScrollPhysics(),
-       //       itemBuilder: (_, index) {
-       //         return SingleChildScrollView(
-       //           child: (index == 0) ? ReservationInfoWidget(
-       //             model: widget.model,
-       //             listing: listing,
-       //             reservationItem: reservationItem,
-       //             users: users,
-       //             isOwner: isOwner,
-       //             didSelectAllParticipants: () {
-       //
-       //             },
-       //             didSelectNewInvite: () {
-       //
-       //             },
-       //           ) : ReservationActivityInfoWidget(
-       //               model: widget.model,
-       //               activityForm: activityForm,
-       //               activityOwner: reservationOwner,
-       //               reservation: reservationItem
-       //           ),
-       //         );
-             //   if (index == 0) {
-             //     return ReservationInfoWidget(
-             //         model: widget.model,
-             //         listing: listing,
-             //         reservationItem: reservationItem,
-             //         users: users,
-             //         isOwner: isOwner,
-             //         didSelectAllParticipants: () {
-             //
-             //         },
-             //         didSelectNewInvite: () {
-             //
-             //         },
-             //     );
-             //   } else {
-             //     return ReservationActivityInfoWidget(
-             //         model: widget.model,
-             //         activityForm: activityForm,
-             //         activityOwner: users.where((element) => element.userId == reservationItem.reservationOwnerId).isNotEmpty ? users.where((element) => element.userId == reservationItem.reservationOwnerId).first : null,
-             //         reservation: reservationItem
-             //     );
-             // }
-     //       }
-     //     ),
-     //   )
-     ],
+         ),
+       );
+     }
    );
   }
 
@@ -1179,8 +750,6 @@ class _ReservationResultMainState extends State<ReservationResultMain> with Sing
      // onEndReached: () => _controller.animateTo(300, duration: const Duration(milliseconds: 800), curve: Curves.easeIn),
    );
   }
-
-
 
 
 
@@ -1320,7 +889,418 @@ class _ReservationResultMainState extends State<ReservationResultMain> with Sing
         model: widget.model
     );
   }
-
-
-
 }
+
+
+
+
+
+
+//        flexibleSpace: LayoutBuilder(
+//          builder: (BuildContext context, BoxConstraints constraints) {
+//
+//             return flexibleReservationProfileHeader(
+//                 context,
+//                 widget.model,
+//                 mainContainerHeaderTab(),
+//                 reservation,
+//                 listing,
+//                 // didSelectNewInvite: () {
+//                 //   Navigator.of(context).push(MaterialPageRoute(builder: (_) {
+//                 //     return SendInvitationRequest(
+//                 //       model: widget.model,
+//                 //       currentUser: currentUser,
+//                 //       currentGuests: reservation,
+//                 //       );
+//                 //     })
+//                 //   );
+//                 // },
+//                 // didSelectAllParticipants: () {
+//                 //
+//                 //   showGeneralDialog(
+//                 //       barrierLabel: '',
+//                 //       barrierDismissible: true,
+//                 //       barrierColor: Colors.black.withOpacity(0.5),
+//                 //       transitionDuration: const Duration(milliseconds: 400),
+//                 //       context: context,
+//                 //       pageBuilder: (contexts, anim1, anim2) {
+//                 //         return ReservationAffiliatesWidget(
+//                 //             model: widget.model,
+//                 //             reservationId: reservation.reservationId.getOrCrash(),
+//                 //             users: userProfiles,
+//                 //             currentUser: currentUser,
+//                 //             isOwner: isOwner,
+//                 //             didSelectProfile: (userProfile) {
+//                 //
+//                 //
+//                 //               Navigator.of(contexts).push(MaterialPageRoute(builder: (_) {
+//                 //                 return ReviewCurrentProfile(
+//                 //                     currentUser: userProfile,
+//                 //                     model: widget.model,
+//                 //                     didSelectEditProfile: (profile) {
+//                 //
+//                 //                   },
+//                 //                 );
+//                 //               })
+//                 //             );
+//                 //           },
+//                 //         );
+//                 //       },
+//                 //      transitionBuilder: (context, anim1, anim2, child) {
+//                 //         return SlideTransition(
+//                 //             position: Tween(begin: const Offset(0, 1), end: const Offset(0, 0.15)).animate(anim1),
+//                 //            child: child,
+//                 //         );
+//                 //      }
+//                 //   );
+//                 // },
+//             );
+//          },
+//        )
+//      ),
+//
+//     SliverToBoxAdapter(
+//       child: Container(
+//         height: MediaQuery.of(context).size.height,
+//         width: MediaQuery.of(context).size.width,
+//         child: mainContainerPageView(
+//             context,
+//             listing,
+//             reservation,
+//             reservationOwner,
+//             currentUser,
+//             postList,
+//             userProfiles,
+//             activityForm
+//             ),
+//           )
+//        ),
+//      ],
+//    ),
+
+
+// DraggableHome(
+//   appBarColor: widget.model.paletteColor,
+//   alwaysShowTitle: true,
+//   alwaysShowLeadingAndAction: true,
+//   title: Column(
+//     children: [
+//       Text(listing.listingProfileService.backgroundInfoServices.listingName.getOrCrash(), style: TextStyle(color: widget.model.accentColor, fontWeight: FontWeight.bold)),
+//       const SizedBox(height: 5),
+//       if (reservation.reservationState == ReservationSlotState.completed) Container(
+//           decoration: BoxDecoration(
+//               borderRadius: BorderRadius.circular(50),
+//               color: widget.model.accentColor.withOpacity(0.5)
+//           ),
+//           child: Padding(
+//             padding: const EdgeInsets.all(4.0),
+//             child: Text('Finished', style: TextStyle(fontSize: 14, color: widget.model.accentColor)),
+//           )
+//       )
+//     ],
+//   ),
+//   headerExpandedHeight: 0.78,
+//   backgroundColor: widget.model.mobileBackgroundColor,
+//   headerWidget: flexibleReservationProfileHeader(
+//     context,
+//     widget.model,
+//     reservation,
+//     listing,
+//     isOwner,
+//     userProfiles,
+//     didSelectNewInvite: () {
+//       Navigator.of(context).push(MaterialPageRoute(builder: (_) {
+//         return SendInvitationRequest(
+//           model: widget.model,
+//           currentUser: currentUser,
+//           currentGuests: reservation,
+//         );
+//       })
+//       );
+//     },
+//     didSelectAllParticipants: () {
+//       showGeneralDialog(
+//           barrierLabel: '',
+//           barrierDismissible: true,
+//           barrierColor: Colors.black.withOpacity(0.5),
+//           transitionDuration: const Duration(milliseconds: 400),
+//           context: context,
+//           pageBuilder: (contexts, anim1, anim2) {
+//             return ReservationAffiliatesWidget(
+//               model: widget.model,
+//               reservationId: reservation.reservationId.getOrCrash(),
+//               users: userProfiles,
+//               currentUser: currentUser,
+//               isOwner: isOwner,
+//               didSelectProfile: (userProfile) {
+//
+//
+//                 Navigator.of(contexts).push(MaterialPageRoute(builder: (_) {
+//                   return ReviewCurrentProfile(
+//                       currentUser: userProfile,
+//                       model: widget.model
+//                   );
+//                 })
+//                 );
+//               },
+//             );
+//           },
+//           transitionBuilder: (context, anim1, anim2, child) {
+//             return SlideTransition(
+//               position: Tween(begin: const Offset(0, 1), end: const Offset(0, 0.15)).animate(anim1),
+//               child: child,
+//             );
+//           }
+//       );
+//     },
+//   ),
+//   actions: [
+//
+//     if (isOwner) if (!state.isCreatingLink) IconButton(
+//       onPressed: () {
+//         setState(() {
+//           context.read<BookedReservationFormBloc>().add(BookedReservationFormEvent.didFinishCreateNewInviteLink(reservation));
+//         });
+//       },
+//       icon: Icon(Icons.ios_share_rounded, color: widget.model.accentColor),
+//     ),
+//     if (state.isCreatingLink) JumpingDots(numberOfDots: 2, color: widget.model.accentColor),
+//     if (isAffiliate || isOwner) IconButton(
+//       onPressed: () {
+//         presentMoreOptions(
+//             context,
+//             widget.model,
+//             isOwner,
+//             currentUser,
+//             reservation,
+//             listing,
+//             userProfiles,
+//             didLeaveListing: () {
+//               List<ContactDetails> updatedAffiliates = [];
+//               updatedAffiliates.addAll(reservation.reservationAffiliates ?? []);
+//
+//               updatedAffiliates.removeWhere((element) => element.contactId == currentUser.userId);
+//               context.read<BookedReservationFormBloc>().add(BookedReservationFormEvent.didLeaveBookedReservation(reservation, updatedAffiliates));
+//
+//               Navigator.of(context).pop();
+//             }
+//         );
+//       },
+//       icon: Icon(Icons.more_vert_rounded, color: widget.model.accentColor),
+//     ),
+//   ],
+//   body: [
+//     PostWidgetBuilder(
+//       model: widget.model,
+//       postList: widget.replyPosts ?? postList,
+//       isReply: widget.isReply,
+//       listing: listing,
+//       currentUser: currentUser,
+//       emptyPostView: (widget.isReply) ? emptyReplyContainer(context, widget.model) : emptyPostContainer(context, widget.model),
+//       reservation: reservation,
+//       userProfiles: userProfiles,
+//       // onEndReached: () => _controller.animateTo(300, duration: const Duration(milliseconds: 800), curve: Curves.easeIn),
+//     ),
+//   ],
+// ),
+
+
+
+// SingleChildScrollView(
+//   controller: _controller,
+//   child:  Padding(
+//     padding: const EdgeInsets.all(15.0),
+//     child: (isLessThanMain) ? Column(
+//       children: [
+//         Padding(
+//           padding: const EdgeInsets.only(top: 120.0),
+//           child: mainContainerSectionOneRowTwo(context, postList, listing, currentUser, reservation, userProfiles),
+//       ),
+//     ],
+//   ) : Column(
+//     crossAxisAlignment: CrossAxisAlignment.start,
+//     mainAxisAlignment: MainAxisAlignment.center,
+//     children: [
+//         Flexible(
+//           child: Container(
+//               constraints: BoxConstraints(
+//                 maxWidth: 550,
+//               ),
+//             child: mainContainerSectionOneRowTwo(
+//                 context,
+//                 postList,
+//                 listing,
+//                 currentUser,
+//                 reservation,
+//                 userProfiles
+//             )
+//           ),
+//         ),
+//         const SizedBox(width: 25),
+//         Container(
+//           width: 400,
+//             child: mainContainerSectionOneRowOne(
+//                 context,
+//                 listing,
+//                 reservation,
+//                 reservationOwner,
+//                 userProfiles,
+//                 activityForm)
+//         ),
+//         // if (MediaQuery.of(context).size.width >= 1300) SizedBox(width: MediaQuery.of(context).size.width * 0.025)
+//       ],
+//     ),
+//   )
+// ),
+
+
+
+
+// if (isLessThanMain) AnimatedContainer(
+//   duration: Duration(milliseconds: 600),
+//   curve: Curves.easeInOut,
+//   color: widget.model.accentColor,
+//   height: isShowingReservationInfo ? 600 : 130,
+//   width: MediaQuery.of(context).size.width,
+//   child: SingleChildScrollView(
+//     controller: _headerController,
+//     physics: (isShowingReservationInfo) ? const BouncingScrollPhysics() : const NeverScrollableScrollPhysics(),
+//     child: Column(
+//       children: [
+//         const SizedBox(height: 10),
+//         Text(listing.listingProfileService.backgroundInfoServices.listingName.getOrCrash(), style: TextStyle(color: widget.model.paletteColor, fontSize: widget.model.secondaryQuestionTitleFontSize, fontWeight: FontWeight.bold)),
+//         const SizedBox(height: 5),
+//         Container(
+//             decoration: BoxDecoration(
+//                 borderRadius: BorderRadius.circular(50),
+//                 color: widget.model.disabledTextColor
+//             ),
+//             child: Padding(
+//               padding: const EdgeInsets.all(8.0),
+//               child: Text(getReservationStateTitle(reservation.reservationState), style: TextStyle(fontSize: 14, color: widget.model.webBackgroundColor)),
+//             )
+//         ),
+//         const SizedBox(height: 10),
+//         InkWell(
+//           onTap: () {
+//             setState(() {
+//               isShowingReservationInfo = !isShowingReservationInfo;
+//
+//               if (!isShowingReservationInfo) {
+//                 _headerController.animateTo(0, duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+//               }
+//             });
+//           },
+//           child: Container(
+//             height: 35,
+//             width: 35,
+//             decoration: BoxDecoration(
+//                 borderRadius: BorderRadius.circular(25),
+//                 color: widget.model.paletteColor
+//             ),
+//             child: Icon(
+//               isShowingReservationInfo ? Icons.keyboard_arrow_down : Icons.keyboard_arrow_up_rounded,
+//               color: widget.model.accentColor,
+//             ),
+//           ),
+//         ),
+//         const SizedBox(height: 10),
+//         AnimatedOpacity(
+//           duration: const Duration(milliseconds: 300),
+//             opacity: (isShowingReservationInfo) ? 1 : 0,
+//             child: mainContainerSectionOneRowOne(
+//                 context,
+//                 listing,
+//                 reservation,
+//                 reservationOwner,
+//                 userProfiles,
+//                 activityForm)
+//         )
+//       ],
+//     ),
+//   ),
+// ),
+
+
+
+
+
+
+
+
+//     Container(
+//       height: 120,
+//       width: MediaQuery.of(context).size.width,
+//       child: CustomScrollView(
+//           controller: _controller,
+//           physics: const BouncingScrollPhysics(),
+//           slivers: [
+//             SliverAppBar(
+//               expandedHeight: 280,
+//               collapsedHeight: _collapsedHeight,
+//               floating: false,
+//               snap: false,
+//               pinned: true,
+//               centerTitle: true,
+//               bottom: PreferredSize(
+//                 preferredSize: const Size.fromHeight(0),
+//                 child: mainContainerHeaderTab(),
+//               ),
+//               /// show if booking has ended.
+//               /// show if booking is taking place now!
+//               title: Column(
+//                 children: [
+//                   Text(listing.listingProfileService.backgroundInfoServices.listingName.getOrCrash(), style: TextStyle(color: widget.model.accentColor, fontWeight: FontWeight.bold)),
+//                   const SizedBox(height: 5),
+//                   if (reservation.reservationState == ReservationSlotState.completed) Container(
+//                       decoration: BoxDecoration(
+//                           borderRadius: BorderRadius.circular(50),
+//                           color: widget.model.accentColor.withOpacity(0.5)
+//                       ),
+//                       child: Padding(
+//                         padding: const EdgeInsets.all(4.0),
+//                         child: Text('Finished', style: TextStyle(fontSize: 14, color: widget.model.accentColor)),
+//                       )
+//                   ),
+//                 ],
+//               ),
+//               elevation: 0,
+//               actions: [
+//                 if (isOwner) if (!state.isCreatingLink) IconButton(
+//                   onPressed: () {
+//                     setState(() {
+//                       context.read<BookedReservationFormBloc>().add(BookedReservationFormEvent.didFinishCreateNewInviteLink(reservation));
+//                     });
+//                   },
+//                   icon: Icon(Icons.ios_share_rounded, color: widget.model.accentColor),
+//                 ),
+//                 if (state.isCreatingLink) JumpingDots(numberOfDots: 2, color: widget.model.accentColor),
+//                 IconButton(
+//                   onPressed: () {
+//                     presentMoreOptions(
+//                         context,
+//                         widget.model,
+//                         isOwner,
+//                         currentUser,
+//                         reservation,
+//                         listing,
+//                         userProfiles,
+//                         didLeaveListing: () {
+//                           // List<ContactDetails> updatedAffiliates = [];
+//                           // updatedAffiliates.addAll(reservation.reservationAffiliates ?? []);
+//                           //
+//                           // updatedAffiliates.removeWhere((element) => element.contactId == currentUser.userId);
+//                           // context.read<BookedReservationFormBloc>().add(BookedReservationFormEvent.didLeaveBookedReservation(reservation, updatedAffiliates));
+//
+//                           Navigator.of(context).pop();
+//                         }
+//                     );
+//                   },
+//                   icon: Icon(Icons.more_vert_rounded, color: widget.model.accentColor),
+//                 ),
+//               ],
+//          backgroundColor: widget.model.paletteColor,
+//       ),
+//     ]
+//   ),
+// ),

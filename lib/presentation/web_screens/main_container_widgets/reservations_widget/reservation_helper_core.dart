@@ -9,6 +9,7 @@ class ReservationHelperCore {
   static ListingManagerForm? currentListingManagerForm;
   static UserProfileModel? currentUserProfile;
   static bool isLoading = false;
+  static bool didPresentSidePanel = false;
 
   static SettingsItemModel currentSettingsItemModel = subActivitySettingItems(null)[0];
 

@@ -1,4 +1,5 @@
 import 'package:check_in_presentation/check_in_presentation.dart';
+import 'package:check_in_web_mobile_explore/presentation/screens/reservations/components/reservation_helper.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/reservations/reservations_screen.dart';
 import 'package:check_in_web_mobile_explore/presentation/web_screens/main_container_widgets/reservations_widget/reservation_helper_core.dart';
 import 'package:flutter/cupertino.dart';
@@ -27,10 +28,16 @@ class ReservationSubContainerWidget extends StatelessWidget {
                 ReservationHelperCore.currentUserProfile = profile;
                 ReservationHelperCore.selectedReservationItem = reservation;
                 ReservationHelperCore.currentActivityForm = activity;
+                ReservationCoreHelper.pageController = null;
+
+
                 didSelectReservation();
 
                 Future.delayed(const Duration(seconds: 2), () {
                   ReservationHelperCore.isLoading = false;
+                  int tabIndex = ResOverViewTabs.values.indexWhere((element) => element == ReservationCoreHelper.resOverViewTabs);
+                  ReservationCoreHelper.pageController = PageController(initialPage: tabIndex);
+
                   didSelectReservation();
                 });
             },

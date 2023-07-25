@@ -1,5 +1,6 @@
 import 'package:check_in_presentation/check_in_presentation.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 class MainDashboardContainer extends StatefulWidget {
 
@@ -33,30 +34,26 @@ class _MainDashboardContainerState extends State<MainDashboardContainer> {
 
         widget.mainContainer,
 
-        AnimatedContainer(
-            width: (widget.presentSidePanelContainer) ? 350 : 0,
-            duration: const Duration(milliseconds: 650),
-            curve: Curves.easeInOut,
-            child: Container(
-              decoration: BoxDecoration(
-                color: widget.model.webBackgroundColor,
-                  boxShadow: [
-                    BoxShadow(
-                        color: widget.model.disabledTextColor.withOpacity(0.35),
-                        spreadRadius: 5,
-                        blurRadius: 13,
-                        offset: const Offset(5,0)
-                    )
-                  ]
-              ),
-              width: 350,
-              height: MediaQuery.of(context).size.height,
-              child: SingleChildScrollView(
-                controller: _sidePanelScrollController,
-                child: widget.sidePanelContainer,
-              ),
-          ),
-        ),
+        // Positioned(
+        //   top: 120,
+        //   child: AnimatedContainer(
+        //       width: (widget.presentSidePanelContainer) ? 350 : 0,
+        //       duration: const Duration(milliseconds: 650),
+        //       curve: Curves.easeInOut,
+        //       child: Padding(
+        //         padding: const EdgeInsets.all(8.0),
+        //         child: Container(
+        //           decoration: BoxDecoration(
+        //             color: Colors.transparent,
+        //             borderRadius: BorderRadius.circular(25),
+        //           ),
+        //           width: 350,
+        //           height: MediaQuery.of(context).size.height - 120,
+        //           child: widget.sidePanelContainer,
+        //     ),
+        //       ),
+        //   ),
+        // ),
 
       ],
     );

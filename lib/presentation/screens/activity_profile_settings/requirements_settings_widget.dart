@@ -3,6 +3,7 @@ import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_chat_types/flutter_chat_types.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:check_in_application/un_auth/watcher_services/attendee_watcher_service/attendee_manager_watcher_bloc.dart';
@@ -11,8 +12,9 @@ import 'package:jumping_dot/jumping_dot.dart';
 class RequirementSettingsWidget extends StatefulWidget {
 
   final DashboardModel model;
+  final UserProfileModel activityOwner;
 
-  const RequirementSettingsWidget({Key? key, required this.model}) : super(key: key);
+  const RequirementSettingsWidget({Key? key, required this.model, required this.activityOwner}) : super(key: key);
 
   @override
   State<RequirementSettingsWidget> createState() => _RequirementSettingsWidgetState();
@@ -101,6 +103,8 @@ class _RequirementSettingsWidgetState extends State<RequirementSettingsWidget> {
                   child: CreateNewVendorMerchant(
                     model: widget.model,
                     reservation: context.read<UpdateActivityFormBloc>().state.reservationItem,
+                    activityForm: context.read<UpdateActivityFormBloc>().state.activitySettingsForm,
+                    resOwner: widget.activityOwner,
                   )
               ),
             )

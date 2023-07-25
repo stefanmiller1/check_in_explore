@@ -376,11 +376,11 @@ class _ReservationDetailsWidgetState extends State<ReservationDetailsWidget> {
                         widget.listing.listingReservationService.cancellationSetting.isAllowedEarlyEndAndChanges ?? false),
                   if ((widget.listing.listingReservationService.cancellationSetting.isAllowedFeeBasedChanges ?? false) &&
                       (widget.listing.listingReservationService.cancellationSetting.feeBasedCancellationOptions?.isNotEmpty ?? false))
-                    getPricingWithFeeCancellation(context, widget.model, widget.reservationItem.reservationSlotItem,
+                    getPricingWithFeeCancellation(context, widget.model, widget.reservationItem.reservationSlotItem.map((e) => e.selectedDate).toList(),
                         widget.listing.listingReservationService.cancellationSetting.feeBasedCancellationOptions ?? []),
                   if ((widget.listing.listingReservationService.cancellationSetting.isAllowedTimeBasedChanges ?? false) &&
                       (widget.listing.listingReservationService.cancellationSetting.timeBasedCancellationOptions?.isNotEmpty ?? false))
-                    getPricingWithTimeCancellation(context, widget.model, widget.reservationItem.reservationSlotItem, widget.listing.listingReservationService.cancellationSetting.timeBasedCancellationOptions ?? []),
+                    getPricingWithTimeCancellation(context, widget.model, widget.reservationItem.reservationSlotItem.map((e) => e.selectedDate).toList(), widget.listing.listingReservationService.cancellationSetting.timeBasedCancellationOptions ?? []),
                   const SizedBox(height: 8),
 
                   /// ------------------------ ///
@@ -401,9 +401,9 @@ class _ReservationDetailsWidgetState extends State<ReservationDetailsWidget> {
                           Text('Total:', style: TextStyle(color: widget.model.paletteColor, fontSize: widget.model.secondaryQuestionTitleFontSize,)),
                           const SizedBox(width: 15),
                           Expanded(
-                            child: Text(completeTotalPriceWithCurrency((getTotalPriceDouble(widget.reservationItem.reservationSlotItem, widget.reservationItem.cancelledSlotItem ?? []) +
-                                getTotalPriceDouble(widget.reservationItem.reservationSlotItem, widget.reservationItem.cancelledSlotItem ?? [])*CICOReservationPercentageFee +
-                                getTotalPriceDouble(widget.reservationItem.reservationSlotItem, widget.reservationItem.cancelledSlotItem ?? [])*CICOTaxesFee), widget.listing.listingProfileService.backgroundInfoServices.currency), style: TextStyle(color: widget.model.paletteColor, fontSize: widget.model.secondaryQuestionTitleFontSize, fontWeight: FontWeight.bold)),
+                            child: Text(completeTotalPriceWithCurrency((getListingTotalPriceDouble(widget.reservationItem.reservationSlotItem, widget.reservationItem.cancelledSlotItem ?? []) +
+                                getListingTotalPriceDouble(widget.reservationItem.reservationSlotItem, widget.reservationItem.cancelledSlotItem ?? [])*CICOReservationPercentageFee +
+                                getListingTotalPriceDouble(widget.reservationItem.reservationSlotItem, widget.reservationItem.cancelledSlotItem ?? [])*CICOTaxesFee), widget.listing.listingProfileService.backgroundInfoServices.currency), style: TextStyle(color: widget.model.paletteColor, fontSize: widget.model.secondaryQuestionTitleFontSize, fontWeight: FontWeight.bold)),
                           ),
 
                         ],

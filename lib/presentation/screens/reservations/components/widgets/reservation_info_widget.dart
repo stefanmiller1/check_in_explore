@@ -39,28 +39,67 @@ class ReservationInfoWidget extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        const SizedBox(height: 80),
+        SizedBox(
+          height: 285,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(25),
+            child: PageView.builder(
+                itemCount: retrieveReservationSpacesFromListing(reservationItem, listing).length,
+                itemBuilder: (_, index) {
+                  final SpaceOptionSizeDetail reservationSpace = retrieveReservationSpacesFromListing(reservationItem, listing)[index];
+
+                  if (reservationSpace.spacePhoto != null) {
+                    return Image(image: reservationSpace.spacePhoto!.image, fit: BoxFit.cover);
+                  }
+                  return  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: getActivityTypeTabOption(
+                          context,
+                          model,
+                          100,
+                          false,
+                          getActivityOptions().firstWhere((element) => element.activityId == reservationItem.reservationSlotItem.first.selectedActivityType)
+                      ),
+                    ),
+                  );
+                }
+            ),
+          ),
+        ),
         const SizedBox(height: 10),
-        Text(listing.listingProfileService.backgroundInfoServices.listingName.getOrCrash(), style: TextStyle(color: model.paletteColor, fontWeight: FontWeight.bold, fontSize: model.questionTitleFontSize), maxLines: 2, overflow: TextOverflow.ellipsis),
-        const SizedBox(height: 4),
-        Text('Opened On ${DateFormat.MMMMd().format(listing.listingProfileService.backgroundInfoServices.startEndDate.start)}', style: TextStyle(color: model.disabledTextColor),),
-        FutureBuilder<double?>(
-            future: MapHelper.determineDistanceAway(LatLng(listing.listingProfileService.listingLocationSetting.locationPosition?.latitude ?? 0, listing.listingProfileService.listingLocationSetting.locationPosition?.longitude ?? 0)),
-            initialData: 0,
-            builder: (context, snap) {
-              if (snap.hasData) {
-                return Row(
-                  children: [
-                    Text('Around ${snap.data?.toInt()}m away •', style: TextStyle(color: model.disabledTextColor)),
-                    const SizedBox(width: 10),
-                    Expanded(child: Text(' -- slots this week', style: TextStyle(color: model.paletteColor), overflow: TextOverflow.ellipsis, maxLines: 1,)
-                    )
-                  ],
-                );
-              }
-              return Container();
-            }),
-        const SizedBox(height: 5),
-        Text(listing.listingProfileService.backgroundInfoServices.listingDescription.getOrCrash(), style: TextStyle(color: model.paletteColor), overflow: TextOverflow.ellipsis, maxLines: 2),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 18.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(listing.listingProfileService.backgroundInfoServices.listingName.getOrCrash(), style: TextStyle(color: model.paletteColor, fontWeight: FontWeight.bold, fontSize: model.questionTitleFontSize), maxLines: 2, overflow: TextOverflow.ellipsis),
+              const SizedBox(height: 4),
+              Text('Opened On ${DateFormat.MMMMd().format(listing.listingProfileService.backgroundInfoServices.startEndDate.start)}', style: TextStyle(color: model.disabledTextColor),),
+              FutureBuilder<double?>(
+                  future: MapHelper.determineDistanceAway(LatLng(listing.listingProfileService.listingLocationSetting.locationPosition?.latitude ?? 0, listing.listingProfileService.listingLocationSetting.locationPosition?.longitude ?? 0)),
+                  initialData: 0,
+                  builder: (context, snap) {
+                    if (snap.hasData) {
+                      return Row(
+                        children: [
+                          Text('Around ${snap.data?.toInt()}m away •', style: TextStyle(color: model.disabledTextColor)),
+                          const SizedBox(width: 10),
+                          Expanded(child: Text(' -- slots this week', style: TextStyle(color: model.paletteColor), overflow: TextOverflow.ellipsis, maxLines: 1,)
+                          )
+                        ],
+                      );
+                    }
+                    return Container();
+                  }),
+              const SizedBox(height: 5),
+              Text(listing.listingProfileService.backgroundInfoServices.listingDescription.getOrCrash(), style: TextStyle(color: model.paletteColor), overflow: TextOverflow.ellipsis, maxLines: 2),
+            ],
+          ),
+        ),
         ListTile(
           leading: Icon(Icons.location_on_outlined, color: model.paletteColor),
           title: Text('${listing.listingProfileService.listingLocationSetting.city.getOrCrash()}, ${listing.listingProfileService.listingLocationSetting.provinceState.getOrCrash()}, ${listing.listingProfileService.listingLocationSetting.countryRegion}'),
@@ -257,24 +296,36 @@ class ReservationInfoWidget extends StatelessWidget {
 
 
         const SizedBox(height: 10),
-        viewListOfSelectedSlots(
-            context,
-            model,
-            [],
-            reservationItem.reservationSlotItem,
-            reservationItem.cancelledSlotItem ?? [],
-            false,
-            AppLocalizations.of(context)!.profileFacilitySlotTime,
-            AppLocalizations.of(context)!.profileFacilitySlotBookingLocation,
-            AppLocalizations.of(context)!.profileFacilitySlotBookingDate,
-            listing,
-            didSelectReservation: (e) {
-            },
-            didSelectCancelResSlot: (e, f) {
-            },
-            didSelectRemoveResSlot: (e, f) {
-            }
+        Row(
+          children: [
+            Flexible(
+              child: Container(
+                constraints: BoxConstraints(
+                  maxWidth: 470
+                ),
+                child: viewListOfSelectedSlots(
+                    context,
+                    model,
+                    [],
+                    reservationItem.reservationSlotItem,
+                    reservationItem.cancelledSlotItem ?? [],
+                    false,
+                    AppLocalizations.of(context)!.profileFacilitySlotTime,
+                    AppLocalizations.of(context)!.profileFacilitySlotBookingLocation,
+                    AppLocalizations.of(context)!.profileFacilitySlotBookingDate,
+                    listing,
+                    didSelectReservation: (e) {
+                    },
+                    didSelectCancelResSlot: (e, f) {
+                    },
+                    didSelectRemoveResSlot: (e, f) {
+                    }
+                ),
+              ),
+            ),
+          ],
         ),
+        const SizedBox(height: 80),
       ],
     );
   }

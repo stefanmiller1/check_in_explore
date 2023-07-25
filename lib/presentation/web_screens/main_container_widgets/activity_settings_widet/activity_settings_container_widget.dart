@@ -1,9 +1,9 @@
 import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
-import 'package:check_in_web_mobile_explore/presentation/core/account/login_signup_core.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/responsive/responsive.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/activity_profile_settings/activity_profile_settings_container_widget.dart';
+import 'package:check_in_web_mobile_explore/presentation/screens/activity_profile_settings/settings_helper.dart';
 import 'package:check_in_web_mobile_explore/presentation/web_screens/main_container_widgets/reservations_widget/reservation_helper_core.dart';
 import 'package:flutter/material.dart';
 import 'package:jumping_dot/jumping_dot.dart';
@@ -17,8 +17,9 @@ class ActivitySettingsMainContainerWidget extends StatelessWidget {
   final ActivityManagerForm? activityManagerForm;
   final SettingsItemModel currentNavItem;
   final Function() rebuild;
+  final Function() didPresentSidePanel;
 
-  const ActivitySettingsMainContainerWidget({super.key, required this.model, this.reservationItem, this.currentUser, this.activityManagerForm, required this.currentNavItem, required this.rebuild});
+  const ActivitySettingsMainContainerWidget({super.key, required this.model, this.reservationItem, this.currentUser, this.activityManagerForm, required this.currentNavItem, required this.rebuild, required this.didPresentSidePanel});
 
   @override
   Widget build(BuildContext context) {
@@ -56,20 +57,11 @@ class ActivitySettingsMainContainerWidget extends StatelessWidget {
                       reservationItem: reservationItem!,
                       currentNavItem: currentNavItem,
                       rebuild: rebuild,
+                      didPresentSidePanel: () {
+                        didPresentSidePanel();
+                      }
                 ),
-              ) : Container(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Icon(Icons.info_outline, color: model.disabledTextColor, size: 85),
-                    const SizedBox(height: 10),
-                    Text('Sorry, Cannot Change Settings', style: TextStyle(color: model.disabledTextColor, fontSize: model.secondaryQuestionTitleFontSize)),
-                    const SizedBox(height: 10),
-                    Text('Start your own reservation and be able to setup and change your plans', style: TextStyle(color: model.disabledTextColor)),
-                  ],
-                ),
-              ),
+              ) : settingsFailureToLoadContainer(model),
               orElse: () {
                 return JumpingDots(color: model.paletteColor, numberOfDots: 3);
               }
