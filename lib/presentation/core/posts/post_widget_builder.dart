@@ -14,7 +14,7 @@ import 'package:check_in_web_mobile_explore/presentation/screens/reservations/co
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+// import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:reservation_post/reservation_post.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
@@ -129,20 +129,19 @@ class _PostWidgetBuilderState extends State<PostWidgetBuilder> {
             didSelectEditProfile: (profile) {
 
               if (!kIsWeb && Platform.isIOS) {
-                CupertinoScaffold.showCupertinoModalBottomSheet(
-                    context: context,
-                    expand: true,
-                    builder: (contexts) {
-                      return EditCurrentProfile(
-                        profile: widget.currentUser,
-                        model: widget.model,
-                        didFinishSaving: (profile) {
-                          setState(() {
-                            Navigator.of(context).pop();
-                          });
-                        },
-                      );
-                    });
+                  Navigator.push(context, MaterialPageRoute(
+                      builder: (_) {
+                        return EditCurrentProfile(
+                          profile: widget.currentUser,
+                          model: widget.model,
+                          didFinishSaving: (profile) {
+                            setState(() {
+                              Navigator.of(context).pop();
+                            });
+                          },
+                        );
+                      })
+                  );
                 } else {
                   Navigator.push(context, MaterialPageRoute(
                     builder: (_) {

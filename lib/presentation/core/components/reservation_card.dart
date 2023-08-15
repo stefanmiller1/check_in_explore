@@ -8,6 +8,7 @@ import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:lottie/lottie.dart';
 import 'package:shimmer/shimmer.dart';
 
 Widget noReservationsFound(DashboardModel model, IconData icon, String mainTitle, String subTitle, String buttonTitle,  {required Function() didTapStartButton}) {
@@ -43,7 +44,6 @@ Widget noReservationsFound(DashboardModel model, IconData icon, String mainTitle
                 child: Center(
                   child: Text(buttonTitle, style: TextStyle(color: model.accentColor, fontWeight: FontWeight.bold)),
                 ),
-
               ),
             ),
           )

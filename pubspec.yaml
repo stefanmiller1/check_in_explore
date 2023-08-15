@@ -34,40 +34,43 @@ dependencies:
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  firebase_core: ^2.2.0
+  firebase_core: ^2.15.0
   firebase_storage: ^11.0.10
   firebase_messaging: ^14.3.0
   cupertino_icons: ^1.0.2
   google_maps_flutter: ^2.2.1
   phone_form_field:
-    git:
-      url: https://github.com/stefanmiller1/phone_form_field.git
+    path: /Users/stefanmiller/AndroidStudioProjects/phone_form_field
   geoflutterfire:
     git: https://github.com/stefanmiller1/GeoFlutterFire
   sliding_up_panel:
     path: /Users/stefanmiller/AndroidStudioProjects/sliding_up_panel
-  flutter_svg: ^1.1.6
+  flutter_svg: ^2.0.1
   flutter_local_notifications: ^13.0.0
   flutter_localizations:
     sdk: flutter
-  intl: ^0.17.0
+  intl: ^0.18.0
   jumping_dot: ^0.0.4
   shimmer: ^2.0.0
   provider: ^6.0.1
   syncfusion_flutter_calendar: ^20.2.36
   syncfusion_flutter_datepicker: ^20.2.36
   dropdown_button2: ^1.7.0
-  dismissible_page: ^0.7.3
+  dismissible_page: ^1.0.2
   geolocator: ^9.0.2
   geocoding: ^2.0.5
   fluster: ^1.2.0
   url_launcher: ^6.0.2
-  flutter_stripe: ^7.0.0
+  flutter_stripe: ^9.3.0
+  flutter_stripe_web: ^4.3.0
   flutter_cache_manager: ^3.3.0
-  auth_buttons: ^3.0.0
+  auth_buttons:
+    git:
+      url: https://github.com/elbeicktalat/flutter_auth_buttons.git
+      ref: main
   flutter_chat_types: ^3.6.0
-  flutter_chat_ui: ^1.6.6
-  modal_bottom_sheet: ^2.1.2
+  flutter_chat_ui: ^1.6.9
+#  modal_bottom_sheet: ^2.1.2
   image_picker: ^0.8.6
   webview_flutter: ^4.0.2
   flutter_switch: ^0.3.2
@@ -80,11 +83,11 @@ dependencies:
   collection: ^1.16.0
   badges: ^3.0.3
   draggable_home: ^1.0.4
-  custom_marker: ^1.0.0
-  implicitly_animated_reorderable_list: ^0.4.0
-  material_floating_search_bar: ^0.3.4
+  implicitly_animated_reorderable_list_2: ^0.5.1
+  material_floating_search_bar_2: ^0.5.0
   timeago: ^3.2.2
   image_picker_web: ^3.0.0+1
+  lottie: ^2.5.0
   check_in_domain:
     path: /Users/stefanmiller/AndroidStudioProjects/check_in_domain
   check_in_presentation:
@@ -162,7 +165,7 @@ flutter:
     - assets/payment_icons/verve.svg
     - assets/payment_icons/visa.svg
     - assets/profile-avatar.png
-
+    - assets/html/checkout.html
     - assets/images/activity_creator/provider_options/provided_activity_options_Alcohol.png
     - assets/images/activity_creator/provider_options/provided_activity_options_Equipment.png
     - assets/images/activity_creator/provider_options/provided_activity_options_Food_Drinks.png
@@ -170,7 +173,7 @@ flutter:
     - assets/images/activity_creator/provider_options/provided_activity_options_Referee_Officiator.png
     - assets/images/activity_creator/provider_options/provided_activity_options_Security.png
     - assets/images/activity_creator/provider_options/provided_activity_options_Statistics.png
-
+    - assets/lottie_animations/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

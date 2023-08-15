@@ -1065,8 +1065,8 @@ class _FacilityPreviewScreenState extends State<FacilityPreviewScreen> {
                     onTap: () {
                       context.read<ReservationFormBloc>().add(ReservationFormEvent.isFinishedCreatingBooking(
                           item.profile,
-                          (getListingTotalPriceDouble(state.newFacilityBooking.reservationSlotItem, state.newFacilityBooking.cancelledSlotItem ?? []) + getListingTotalPriceDouble(state.newFacilityBooking.reservationSlotItem, state.newFacilityBooking.cancelledSlotItem ?? []) * CICOReservationPercentageFee + getListingTotalPriceDouble(state.newFacilityBooking.reservationSlotItem, state.newFacilityBooking.cancelledSlotItem ?? []) * CICOTaxesFee).toString(),
-                          (NumberFormat.simpleCurrency(locale: widget.listing.listingProfileService.backgroundInfoServices.currency).currencyName ?? 'cad').toLowerCase(),
+                          completeTotalPriceWithIntFormat(getListingTotalPriceDouble(state.newFacilityBooking.reservationSlotItem, state.newFacilityBooking.cancelledSlotItem ?? []) + getListingTotalPriceDouble(state.newFacilityBooking.reservationSlotItem, state.newFacilityBooking.cancelledSlotItem ?? []) * CICOReservationPercentageFee + getListingTotalPriceDouble(state.newFacilityBooking.reservationSlotItem, state.newFacilityBooking.cancelledSlotItem ?? []) * CICOTaxesFee, widget.listing.listingProfileService.backgroundInfoServices.currency),
+                          widget.listing.listingProfileService.backgroundInfoServices.currency,
                           null,
                           widget.listing.listingReservationService.accessVisibilitySetting.isReviewRequired ?? false)
                       );

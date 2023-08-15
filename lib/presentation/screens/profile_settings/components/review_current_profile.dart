@@ -11,7 +11,7 @@ import 'package:flutter/foundation.dart';
 // import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+// import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 
 class ReviewCurrentProfile extends StatefulWidget {
@@ -50,39 +50,40 @@ class _ReviewCurrentProfileState extends State<ReviewCurrentProfile> {
     if (!(Responsive.isMobile(context))) {
       pageController = PageController(viewportFraction: 0.75);
     }
-
-    return (!(kIsWeb) && Platform.isIOS) ?
-    Scaffold(
-      body: CupertinoScaffold(
-        body: CupertinoTheme(
-          data: CupertinoThemeData(
-            textTheme: CupertinoTextThemeData(
-              primaryColor: widget.model.paletteColor
-            )
-          ),
-          child: CupertinoPageScaffold(
-            navigationBar: CupertinoNavigationBar(
-              transitionBetweenRoutes: true,
-              middle: Text(widget.currentUser.legalName.getOrCrash()),
-            ),
-            child: MultiBlocProvider(
-              providers: [
-                BlocProvider(create: (_) => getIt<PublicListingWatcherBloc>()..add(const PublicListingWatcherEvent.watchAllPublicListingsStarted(['']))),
-                BlocProvider(create: (_) => getIt<ReservationManagerWatcherBloc>()..add(ReservationManagerWatcherEvent.watchCurrentUsersReservations(widget.currentUser, false)))
-              ],
-              child: BlocBuilder<PublicListingWatcherBloc, PublicListingWatcherState>(
-                  builder: (context, state) {
-                    return state.maybeMap(
-                        loadAllPublicListingItemsSuccess: (e) => getAllReservation(context, e.items.where((element) => element.listingProfileService.backgroundInfoServices.listingOwner == widget.currentUser.userId).toList()),
-                        loadAllPublicListingItemsFailure: (e) => getAllReservation(context, []),
-                        orElse: () => getAllReservation(context, []));
-                  }
-              )
-            ),
-          ),
-        ),
-      )
-    ) : ClipRRect(
+    //
+    // return (!(kIsWeb) && Platform.isIOS) ?
+    // Scaffold(
+    //   body: CupertinoScaffold(
+    //     body: CupertinoTheme(
+    //       data: CupertinoThemeData(
+    //         textTheme: CupertinoTextThemeData(
+    //           primaryColor: widget.model.paletteColor
+    //         )
+    //       ),
+    //       child: CupertinoPageScaffold(
+    //         navigationBar: CupertinoNavigationBar(
+    //           transitionBetweenRoutes: true,
+    //           middle: Text(widget.currentUser.legalName.getOrCrash()),
+    //         ),
+    //         child: MultiBlocProvider(
+    //           providers: [
+    //             BlocProvider(create: (_) => getIt<PublicListingWatcherBloc>()..add(const PublicListingWatcherEvent.watchAllPublicListingsStarted(['']))),
+    //             BlocProvider(create: (_) => getIt<ReservationManagerWatcherBloc>()..add(ReservationManagerWatcherEvent.watchCurrentUsersReservations(widget.currentUser, false)))
+    //           ],
+    //           child: BlocBuilder<PublicListingWatcherBloc, PublicListingWatcherState>(
+    //               builder: (context, state) {
+    //                 return state.maybeMap(
+    //                     loadAllPublicListingItemsSuccess: (e) => getAllReservation(context, e.items.where((element) => element.listingProfileService.backgroundInfoServices.listingOwner == widget.currentUser.userId).toList()),
+    //                     loadAllPublicListingItemsFailure: (e) => getAllReservation(context, []),
+    //                     orElse: () => getAllReservation(context, []));
+    //               }
+    //           )
+    //         ),
+    //       ),
+    //     ),
+    //   )
+    // ) :
+    return ClipRRect(
       borderRadius: (kIsWeb) ? BorderRadius.circular(20) : BorderRadius.zero,
       child: Scaffold(
           backgroundColor: (kIsWeb) ? Colors.transparent : null,
@@ -161,22 +162,24 @@ class _ReviewCurrentProfileState extends State<ReviewCurrentProfile> {
                                   reservations.length,
                                   editProfile: () {
 
-                                    if (!kIsWeb && Platform.isIOS) {
-                                      CupertinoScaffold.showCupertinoModalBottomSheet(
-                                          context: context,
-                                          expand: true,
-                                          builder: (contexts) {
-                                            return EditCurrentProfile(
-                                              profile: widget.currentUser,
-                                              model: model,
-                                              didFinishSaving: (profile) {
-                                                setState(() {
-                                                  Navigator.of(context).pop();
-                                                });
-                                              },
-                                            );
-                                          });
-                                    } else if (kIsWeb) {
+                                    // if (!kIsWeb && Platform.isIOS) {
+                                    //   CupertinoScaffold.showCupertinoModalBottomSheet(
+                                    //       context: context,
+                                    //       expand: true,
+                                    //       builder: (contexts) {
+                                    //         return EditCurrentProfile(
+                                    //           profile: widget.currentUser,
+                                    //           model: model,
+                                    //           didFinishSaving: (profile) {
+                                    //             setState(() {
+                                    //               Navigator.of(context).pop();
+                                    //             });
+                                    //           },
+                                    //         );
+                                    //       });
+                                    // } else
+                                    //
+                                    if (kIsWeb) {
                                       widget.didSelectEditProfile(widget.currentUser);
                                     } else {
                                       Navigator.push(context, MaterialPageRoute(

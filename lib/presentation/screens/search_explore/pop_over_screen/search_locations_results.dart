@@ -7,7 +7,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:jumping_dot/jumping_dot.dart';
-import 'package:material_floating_search_bar/material_floating_search_bar.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:check_in_facade/check_in_facade.dart';
 import 'package:provider/provider.dart';
