@@ -14,8 +14,10 @@ class SearchByTimeSlots extends StatefulWidget {
   final String heroTag;
   final String buttonTitle;
   final int durationType;
+  final List<ReservationTimeFeeSlotItem> reservationItemSlot;
+  final Function(List<ReservationTimeFeeSlotItem>) didSelectRes;
 
-  const SearchByTimeSlots({super.key, required this.model, required this.heroTag, required this.durationType, required this.buttonTitle});
+  const SearchByTimeSlots({super.key, required this.model, required this.heroTag, required this.durationType, required this.buttonTitle, required this.reservationItemSlot, required this.didSelectRes});
 
   @override
   State<SearchByTimeSlots> createState() => _SearchByTimeSlotsState();
@@ -25,12 +27,14 @@ class _SearchByTimeSlotsState extends State<SearchByTimeSlots> with TickerProvid
 
   late DateRangePickerController dController;
   late DateTime currentDateTime;
+  List<ReservationTimeFeeSlotItem> slots = [];
   // List<String> tabWhenTime = ['30/min', '60/min', 'A Day'];
 
   @override
   void initState() {
     dController = DateRangePickerController();
     currentDateTime = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+    slots.addAll(widget.reservationItemSlot);
     super.initState();
   }
 
@@ -82,7 +86,7 @@ class _SearchByTimeSlotsState extends State<SearchByTimeSlots> with TickerProvid
                   DateTimeRange(start: DateTime.now(), end: DateTime.now().add(Duration(days: 365))),
                   widget.durationType,
                   currentDateTime,
-                  context.read<ListingsSearchRequirementsBloc>().state.selectedReservationsSlots?.toList() ?? [],
+                  slots,
                   selectedDateTime: (date) {
                     setState(() {
                       currentDateTime = date;
@@ -90,22 +94,14 @@ class _SearchByTimeSlotsState extends State<SearchByTimeSlots> with TickerProvid
                   },
                   selectedRes: (slot) {
                     setState(() {
-                      List<ReservationTimeFeeSlotItem> slots = [];
-                      slots.addAll(context.read<ListingsSearchRequirementsBloc>().state.selectedReservationsSlots?.toList() ?? []);
-
                       if (slots.contains(slot)) {
                         slots.remove(slot);
                       } else {
                         slots.add(slot);
                       }
-                      context.read<ListingsSearchRequirementsBloc>().add(const ListingsSearchRequirementsEvent.datesRequiredChanged(null));
-                      context.read<ListingsSearchRequirementsBloc>().add(const ListingsSearchRequirementsEvent.flexibleMonthIdChanged(null));
-                      context.read<ListingsSearchRequirementsBloc>().add(const ListingsSearchRequirementsEvent.flexibleTimeRangeIdChanged(null));
-
-                      context.read<ListingsSearchRequirementsBloc>().add(ListingsSearchRequirementsEvent.selectedTimeSlotChanged(slots));
-                      context.read<ListingsSearchRequirementsBloc>().add(ListingsSearchRequirementsEvent.searchDurationTypeChanged(widget.durationType));
-                    });
-                  }
+                      widget.didSelectRes(slots);
+                  });
+                }
               ),
             ],
           ),

@@ -1,17 +1,20 @@
 import 'package:check_in_application/check_in_application.dart';
+import 'package:check_in_application/un_auth/watcher_services/attendee_watcher_service/attendee_manager_watcher_bloc.dart';
 import 'package:check_in_domain/check_in_domain.dart';
+import 'package:check_in_domain/domain/misc/attendee_services/attendee_item/attendee_item.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/components/reservation_details_widget.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/responsive/responsive.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/search_helper.dart';
+import 'package:check_in_web_mobile_explore/presentation/screens/reservations/components/widgets/reservation_footer_widget.dart';
+import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/search_components/search_helper.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:lottie/lottie.dart';
 import 'package:shimmer/shimmer.dart';
 
-Widget noReservationsFound(DashboardModel model, IconData icon, String mainTitle, String subTitle, String buttonTitle,  {required Function() didTapStartButton}) {
+Widget noItemsFound(DashboardModel model, IconData icon, String mainTitle, String subTitle, String buttonTitle,  {required Function() didTapStartButton}) {
   return Padding(
     padding: const EdgeInsets.all(18.0),
     child: Container(
@@ -81,15 +84,14 @@ Widget LoadingReservationCard(BuildContext context) {
 
 
 
-Widget getReservationCard(BuildContext context, bool isMessenger, ReservationItem reservationItem, UserProfileModel currentUser, DashboardModel model, bool endedReservation, bool isSelected, {required Function(ListingManagerForm listing, ReservationItem reservation, ActivityManagerForm activity) didSelectReservation}) {
-
+Widget getReservationCardListing(BuildContext context, bool isMessenger, ReservationItem reservationItem, UserProfileModel currentUser, DashboardModel model, bool endedReservation, bool isSelected, {required Function(ListingManagerForm listing, ReservationItem reservation, ActivityManagerForm activity, AttendeeItem? attendee, List<TicketItem> activityTickets) didSelectReservation}) {
   return BlocProvider(create: (_) => getIt<ListingManagerWatcherBloc>()..add(ListingManagerWatcherEvent.watchListingManagerItemStarted(reservationItem.instanceId.getOrCrash())),
     child: BlocBuilder<ListingManagerWatcherBloc, ListingManagerWatcherState>(
       builder: (context, state) {
         return state.maybeMap(
           loadListingManagerItemFailure: (_) => LoadingReservationCard(context),
           loadListingManagerItemSuccess: (item) {
-            return getReservationCardActivity(context, isMessenger, item.failure, reservationItem, currentUser, model, endedReservation, isSelected, didSelectReservation: (listing, reservation, activity) => didSelectReservation(listing, reservation, activity));
+            return getReservationCardAttendance(context, isMessenger, item.failure, reservationItem, currentUser, model, endedReservation, isSelected, didSelectReservation: (listing, reservation, activity, attendee, activityTickets) => didSelectReservation(listing, reservation, activity, attendee, activityTickets));
           },
           orElse: () => LoadingReservationCard(context),
         );
@@ -98,23 +100,36 @@ Widget getReservationCard(BuildContext context, bool isMessenger, ReservationIte
   );
 }
 
+/// check current users [UserProfileModel]'s [AttendeeItem] for [ReservationItem]
+Widget getReservationCardAttendance(BuildContext context, bool isMessenger, ListingManagerForm listing, ReservationItem reservationItem, UserProfileModel currentUser, DashboardModel model, bool isEnded, bool isSelected, {required Function(ListingManagerForm listing, ReservationItem reservation, ActivityManagerForm activity, AttendeeItem? attendance, List<TicketItem> currentAttTickets) didSelectReservation}) {
+  if (reservationItem.reservationOwnerId == currentUser.userId) {
+    final ownerAttendee = AttendeeItem(attendeeId: UniqueId(), attendeeOwnerId: currentUser.userId, contactStatus: ContactStatus.joined, reservationId: reservationItem.reservationId, cost: '', paymentStatus: PaymentStatusType.noStatus, attendeeType: AttendeeType.free, paymentIntentId: '', dateCreated: DateTime.now(), );
+    return getReservationCardActivity(context, isMessenger, listing, reservationItem, currentUser, ownerAttendee,  model, isEnded, isSelected, didSelectReservation: didSelectReservation);
+  } else {
+  return BlocProvider(create: (_) => getIt<AttendeeManagerWatcherBloc>()..add(AttendeeManagerWatcherEvent.watchAttendeeItem(reservationItem.reservationId.getOrCrash(), currentUser.userId.getOrCrash())),
+    child: BlocBuilder<AttendeeManagerWatcherBloc, AttendeeManagerWatcherState>(
+      builder: (context, state) {
+        return state.maybeMap(
+            loadAttendeeItemSuccess: (item) => getReservationCardActivity(context, isMessenger, listing, reservationItem, currentUser, item.item,  model, isEnded, isSelected, didSelectReservation: didSelectReservation),
+            orElse: () => getReservationCardActivity(context, isMessenger, listing, reservationItem, currentUser, AttendeeItem.empty(),  model, isEnded, isSelected, didSelectReservation: didSelectReservation),
+          );
+        },
+      ),
+    );
+  }
+}
 
-Widget getReservationCardActivity(BuildContext context, bool isMessenger, ListingManagerForm listing, ReservationItem reservationItem, UserProfileModel currentUser, DashboardModel model, bool isEnded, bool isSelected, {required Function(ListingManagerForm listing, ReservationItem reservation, ActivityManagerForm activity) didSelectReservation}) {
+
+Widget getReservationCardActivity(BuildContext context, bool isMessenger, ListingManagerForm listing, ReservationItem reservationItem, UserProfileModel currentUser, AttendeeItem? attendance, DashboardModel model, bool isEnded, bool isSelected, {required Function(ListingManagerForm listing, ReservationItem reservation, ActivityManagerForm activity, AttendeeItem? attendance, List<TicketItem> currentAttTickets) didSelectReservation}) {
   return BlocProvider(create: (context) =>  getIt<ActivityManagerWatcherBloc>()..add(ActivityManagerWatcherEvent.watchActivityManagerFormStarted(reservationItem.reservationId.getOrCrash())),
     child: BlocBuilder<ActivityManagerWatcherBloc, ActivityManagerWatcherState>(
       builder: (context, state) {
         return state.maybeMap(
             loadActivityManagerFormSuccess: (item) {
-              if (isMessenger) {
-                return getMessengerReservationHeader(context, listing, item.item, reservationItem, currentUser, model, didSelectReservation: (listing, reservation, activity) => didSelectReservation(listing, reservation, activity));
-              }
-              return getReservationCardItem(context, listing, item.item, reservationItem, model, isEnded, isSelected, didSelectReservation: (listing, reservation, activity) => didSelectReservation(listing, reservation, activity));
+              return getReservationCardActivityTickets(context, isMessenger, listing, item.item, reservationItem, attendance, currentUser, model, isEnded, isSelected, didSelectReservation: didSelectReservation);
             },
             orElse: () {
-              if (isMessenger) {
-                return getMessengerReservationHeader(context, listing, ActivityManagerForm.empty(), reservationItem, currentUser, model, didSelectReservation: (listing, reservation, activity) => didSelectReservation(listing, reservation, activity));
-              }
-              return getReservationCardItem(context, listing, ActivityManagerForm.empty(), reservationItem, model, isEnded, isSelected, didSelectReservation: (listing, reservation, activity) => didSelectReservation(listing, reservation, activity));
+              return getReservationCardActivityTickets(context, isMessenger, listing, ActivityManagerForm.empty(), reservationItem, attendance, currentUser, model, isEnded, isSelected, didSelectReservation: didSelectReservation);
             }
         );
       },
@@ -124,7 +139,34 @@ Widget getReservationCardActivity(BuildContext context, bool isMessenger, Listin
 
 
 
-Widget getMessengerReservationHeader(BuildContext context, ListingManagerForm listing, ActivityManagerForm activity, ReservationItem reservationItem, UserProfileModel currentUser, DashboardModel model, {required Function(ListingManagerForm listing, ReservationItem reservation, ActivityManagerForm activity) didSelectReservation}) {
+
+
+/// an optional watcher in the case that an activity is ticket based
+Widget getReservationCardActivityTickets(BuildContext context, bool isMessenger, ListingManagerForm listing, ActivityManagerForm activity, ReservationItem reservationItem, AttendeeItem? attendeeItem, UserProfileModel currentUser, DashboardModel model, bool isEnded, bool isSelected, {required Function(ListingManagerForm listing, ReservationItem reservation, ActivityManagerForm activity, AttendeeItem? attendeeItem, List<TicketItem> tickets) didSelectReservation}) {
+  return BlocProvider(create: (context) => getIt<ActivityTicketWatcherBloc>()..add(ActivityTicketWatcherEvent.watchCurrentUserTicketsStarted(currentUser.userId.getOrCrash(), reservationItem.reservationId.getOrCrash())),
+    child: BlocBuilder<ActivityTicketWatcherBloc, ActivityTicketWatcherState>(
+      builder: (context, state) {
+          return state.maybeWhen(
+            loadCurrentUsersTicketsSuccess: (item) {
+              if (isMessenger) {
+                return getMessengerReservationHeader(context, listing, activity, reservationItem, attendeeItem, currentUser, model, didSelectReservation: (listing, reservation, activity, attendeeItem) => didSelectReservation(listing, reservation, activity, attendeeItem, item));
+              }
+              return getReservationCardItem(context, listing, activity, reservationItem, attendeeItem, item, model, isEnded, isSelected, didSelectReservation: didSelectReservation);
+            },
+            orElse: () {
+              if (isMessenger) {
+                return getMessengerReservationHeader(context, listing, activity, reservationItem, attendeeItem, currentUser, model, didSelectReservation: (listing, reservation, activity, attendeeItem) => didSelectReservation(listing, reservation, activity, attendeeItem, []));
+              }
+              return getReservationCardItem(context, listing, activity, reservationItem, attendeeItem, [], model, isEnded, isSelected, didSelectReservation: didSelectReservation);
+            }
+          );
+      }
+    )
+  );
+}
+
+
+Widget getMessengerReservationHeader(BuildContext context, ListingManagerForm listing, ActivityManagerForm activity, ReservationItem reservationItem, AttendeeItem? attendeeItem, UserProfileModel currentUser, DashboardModel model, {required Function(ListingManagerForm listing, ReservationItem reservation, ActivityManagerForm activity, AttendeeItem? attendeeItem) didSelectReservation}) {
   late List<ReservationTimeFeeSlotItem> allSlots = [];
 
   for (ReservationSlotItem slots in reservationItem.reservationSlotItem) {
@@ -192,7 +234,7 @@ Widget getMessengerReservationHeader(BuildContext context, ListingManagerForm li
                       /// go to reservation
                       InkWell(
                         onTap: () {
-                          didSelectReservation(listing, reservationItem, activity);
+                          didSelectReservation(listing, reservationItem, activity, attendeeItem);
                         },
                         child: Container(
                           height: 38,
@@ -224,7 +266,7 @@ Widget getMessengerReservationHeader(BuildContext context, ListingManagerForm li
                               listing: listing,
                               reservationItem: reservationItem,
                               isReservationOwner: false,
-                              profiles: [],
+                              allAttendees: [],
                               isFromChat: true,
                               currentUser: currentUser,
                             );
@@ -267,12 +309,12 @@ Widget getMessengerReservationHeader(BuildContext context, ListingManagerForm li
 
 
 
-Widget getReservationCardItem(BuildContext context, ListingManagerForm listing, ActivityManagerForm activity, ReservationItem reservationItem, DashboardModel model, bool isEnded, bool isSelected, {required Function(ListingManagerForm listing, ReservationItem reservation, ActivityManagerForm activity) didSelectReservation}) {
+Widget getReservationCardItem(BuildContext context, ListingManagerForm listing, ActivityManagerForm activity, ReservationItem reservationItem, AttendeeItem? attendeeItem, List<TicketItem> ticketsCurrentAttendee, DashboardModel model, bool isEnded, bool isSelected, {required Function(ListingManagerForm listing, ReservationItem reservation, ActivityManagerForm activity, AttendeeItem? attendeeItem, List<TicketItem> currentAttendeeTickets) didSelectReservation}) {
 
   final List<ReservationSlotItem> reservationSlots = [];
   reservationSlots.addAll(reservationItem.reservationSlotItem);
   late List<ReservationSlotItem> resSorted = reservationSlots..sort(((a,b) => a.selectedDate.compareTo(b.selectedDate)));
-
+  final bool isPrivate = (activity.rulesService.accessVisibilitySetting.isPrivateOnly == true || activity.rulesService.accessVisibilitySetting.isInviteOnly == true);
 
   return TextButton(
     style: ButtonStyle(
@@ -294,7 +336,7 @@ Widget getReservationCardItem(BuildContext context, ListingManagerForm listing, 
         )
     ),
     onPressed: () {
-      didSelectReservation(listing, reservationItem, activity);
+      didSelectReservation(listing, reservationItem, activity, attendeeItem, ticketsCurrentAttendee);
     },
     child: Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -311,97 +353,85 @@ Widget getReservationCardItem(BuildContext context, ListingManagerForm listing, 
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                if (activity.profileService.activityBackground.activityProfileImages?.isNotEmpty == true) Container(
-                  height: 100,
-                  width: 100,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(15),
-                    child: Image.network(
-                        activity.profileService.activityBackground.activityProfileImages?.first.uriPath ?? '',
-                        errorBuilder: (context, err, stack) {
-                          return getActivityTypeTabOption(
-                              context,
-                              model,
-                              100,
-                              false,
-                              getActivityOptions().firstWhere((element) => element.activityId == reservationItem.reservationSlotItem.first.selectedActivityType)
-                          );
-                        },
-                        fit: BoxFit.cover
-                    ),
-                  ),
-                ) else if (retrieveReservationSpacesFromListing(reservationItem, listing).where((element) => element.photoUri != null).isNotEmpty) Container(
-                  height: 100,
-                  width: 100,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(15),
-                    child: Image(
-                        image: retrieveReservationSpacesFromListing(reservationItem, listing).firstWhere((element) => element.spacePhoto != null).spacePhoto!.image,
-                        errorBuilder: (context, err, stack) {
-                          return getActivityTypeTabOption(
-                              context,
-                              model,
-                              100,
-                              false,
-                              getActivityOptions().firstWhere((element) => element.activityId == reservationItem.reservationSlotItem.first.selectedActivityType)
-                          );
-                        },
-                        fit: BoxFit.cover
-                    ),
-                  ),
-                ) else getActivityTypeTabOption(
-                    context, model,
+                getReservationMediaFrame(
+                    context,
+                    model,
                     100,
-                    false,
-                    getActivityOptions().firstWhere((element) => element.activityId == reservationItem.reservationSlotItem.first.selectedActivityType)
+                    100,
+                    listing,
+                    activity,
+                    reservationItem,
+                    didSelectItem: () {
+                      didSelectReservation(listing, reservationItem, activity, attendeeItem, ticketsCurrentAttendee);
+                    }
                 ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     physics: const NeverScrollableScrollPhysics(),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(activity.profileService.activityBackground.activityTitle.value.fold((l) => listing.listingProfileService.backgroundInfoServices.listingName.getOrCrash(), (r) => r), style: TextStyle(color: model.paletteColor, fontSize: model.secondaryQuestionTitleFontSize, fontWeight: FontWeight.bold, overflow: TextOverflow.ellipsis), maxLines: 1),
-                        const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            Icon(Icons.person_sharp, color: model.paletteColor, size: 14),
-                            const SizedBox(width: 4),
-                            Text((reservationItem.reservationAffiliates?.where((element) => element.contactStatus == ContactStatus.joined).length ?? 0 + 1).toString(), style: TextStyle(color: model.paletteColor)),
-                            const SizedBox(width: 10),
-                            Icon(Icons.favorite, color: model.paletteColor, size: 14),
-                            const SizedBox(width: 4),
-                            Text('1', style: TextStyle(color: model.paletteColor))
-                          ],
-                        ),
-                        const SizedBox(height: 4),
                         Column(
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            if (!isEnded) Text('Starting: ${DateFormat.yMMMd().format(resSorted.first.selectedDate)}', style: TextStyle(color: model.disabledTextColor), maxLines: 1,),
-                            if (resSorted.first.selectedDate != resSorted.last.selectedDate) Text('Ending: ${DateFormat.yMMMd().format(resSorted.last.selectedDate)}', style: TextStyle(color: model.disabledTextColor), maxLines: 1,),
-                            if (isEnded) Text('Ended: ${DateFormat.yMMMd().format(resSorted.last.selectedDate)}', style: TextStyle(color: model.disabledTextColor), maxLines: 1,)
+                            Row(
+                              children: [
+                                Text(activity.profileService.activityBackground.activityTitle.value.fold((l) => listing.listingProfileService.backgroundInfoServices.listingName.getOrCrash(), (r) => r), style: TextStyle(color: model.paletteColor, fontSize: model.secondaryQuestionTitleFontSize, fontWeight: FontWeight.bold, overflow: TextOverflow.ellipsis), maxLines: 1),
+                                if (isPrivate) Padding(
+                                  padding: const EdgeInsets.only(left: 9.0),
+                                  child: Icon(Icons.lock, color: model.paletteColor),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            /// number of attendees
+
+                            Row(
+                              children: [
+                                ///  free
+                                Visibility(
+                                  visible: activity.activityAttendance.isLimitedAttendance == true || activity.activityAttendance.isTicketBased == null || activity.activityAttendance.isPassBased == null || activity.activityAttendance.isLimitedAttendance == null,
+                                  child: getReservationCardActivityAttendees(context, model, activity),
+                                ),
+                                ///  tickets
+                                Visibility(
+                                  visible: activity.activityAttendance.isTicketBased == true,
+                                  child: getReservationCardActivityTicketAttendees(context, model, activity),
+                                ),
+                                Icon(Icons.favorite, color: model.paletteColor, size: 14),
+                                const SizedBox(width: 4),
+                                Text('1', style: TextStyle(color: model.paletteColor))
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (!isEnded) Text('Starting: ${DateFormat.yMMMd().format(resSorted.first.selectedDate)}', style: TextStyle(color: model.disabledTextColor), maxLines: 1,),
+                                if (resSorted.first.selectedDate != resSorted.last.selectedDate) Text('Ending: ${DateFormat.yMMMd().format(resSorted.last.selectedDate)}', style: TextStyle(color: model.disabledTextColor), maxLines: 1,),
+                                if (isEnded) Text('Ended: ${DateFormat.yMMMd().format(resSorted.last.selectedDate)}', style: TextStyle(color: model.disabledTextColor), maxLines: 1,)
+                              ],
+                            ),
                           ],
                         ),
-
+                        Container(
+                            decoration: BoxDecoration(
+                              color: model.paletteColor.withOpacity(0.20),
+                              borderRadius: BorderRadius.circular(25.0),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: (getNumberOfSlotsToGo(reservationItem) == 1) ? Text('${getNumberOfSlotsToGo(reservationItem)} Slot Remaining', style: TextStyle(color: model.paletteColor, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis, maxLines: 1,) : (getNumberOfSlotsToGo(reservationItem) == 0) ? Text('Finished', style: TextStyle(color: model.paletteColor, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis, maxLines: 1,) : Text('${getNumberOfSlotsToGo(reservationItem)} Slots Remaining', style: TextStyle(color: model.paletteColor, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis, maxLines: 1),
+                            )
+                        )
                       ],
                     ),
                   ),
                 ),
-                Container(
-                    decoration: BoxDecoration(
-                      color: model.paletteColor.withOpacity(0.20),
-                      borderRadius: BorderRadius.circular(25.0),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: (getNumberOfSlotsToGo(reservationItem) == 1) ? Text('${getNumberOfSlotsToGo(reservationItem)} Slot Remaining', style: TextStyle(color: model.paletteColor, fontWeight: FontWeight.bold), maxLines: 1,) : (getNumberOfSlotsToGo(reservationItem) == 0) ? Text('Finished', style: TextStyle(color: model.paletteColor, fontWeight: FontWeight.bold), maxLines: 1,) : Text('${getNumberOfSlotsToGo(reservationItem)} Slots Remaining', style: TextStyle(color: model.paletteColor, fontWeight: FontWeight.bold), maxLines: 1),
-                  )
-                )
               ],
             ),
           )
@@ -409,3 +439,311 @@ Widget getReservationCardItem(BuildContext context, ListingManagerForm listing, 
     ),
   );
 }
+
+
+Widget getReservationMediaFrame(BuildContext context, DashboardModel model, double height, double width, ListingManagerForm? listing, ActivityManagerForm activity, ReservationItem reservationItem, {required Function() didSelectItem}) {
+  return InkWell(
+    onTap: didSelectItem,
+    child: Column(
+      children: [
+        if (activity.profileService.activityBackground.activityProfileImages?.isNotEmpty == true) SizedBox(
+          height: height,
+          width: width,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(15),
+            child: Image.network(
+                activity.profileService.activityBackground.activityProfileImages?.first.uriPath ?? '',
+                errorBuilder: (context, err, stack) {
+                  return getActivityTypeTabOption(
+                      context,
+                      model,
+                      height,
+                      false,
+                      getActivityOptions().firstWhere((element) => element.activityId == reservationItem.reservationSlotItem.first.selectedActivityType)
+                  );
+                },
+                fit: BoxFit.cover
+            ),
+          ),
+        ) else if (listing != null && retrieveReservationSpacesFromListing(reservationItem, listing).where((element) => element.photoUri != null).isNotEmpty) SizedBox(
+          height: height,
+          width: width,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(15),
+            child: Image(
+                image: retrieveReservationSpacesFromListing(reservationItem, listing).firstWhere((element) => element.spacePhoto != null).spacePhoto!.image,
+                errorBuilder: (context, err, stack) {
+                  return getActivityTypeTabOption(
+                      context,
+                      model,
+                      height,
+                      false,
+                      getActivityOptions().firstWhere((element) => element.activityId == reservationItem.reservationSlotItem.first.selectedActivityType)
+                  );
+                },
+                fit: BoxFit.cover
+            ),
+          ),
+        ) else getActivityTypeTabOption(
+            context, model,
+            height,
+            false,
+            getActivityOptions().firstWhere((element) => element.activityId == reservationItem.reservationSlotItem.first.selectedActivityType)
+        ),
+      ],
+    ),
+  );
+}
+
+Widget getSearchFooterWidget(BuildContext context, DashboardModel model, UniqueId currentUserId, Color textColor, Color secondaryTextColor, Color backgroundColor, ListingManagerForm? listing, ActivityManagerForm activity, ReservationItem reservationItem, {required Function() didSelectItem}) {
+  final String? listingTitle = listing?.listingProfileService.backgroundInfoServices.listingName.getOrCrash();
+  final String activityTitle = getTitleForActivityOption(context, reservationItem.reservationSlotItem.first.selectedActivityType) ?? 'rent';
+
+  final List<ReservationSlotItem> reservationSlots = [];
+  reservationSlots.addAll(reservationItem.reservationSlotItem);
+  late List<ReservationSlotItem> resSorted = reservationSlots..sort(((a,b) => a.selectedDate.compareTo(b.selectedDate)));
+
+  final bool isEnded = resSorted.last.selectedDate.isBefore(DateTime.now());
+
+  return InkWell(
+    onTap: didSelectItem,
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(
+              width: 15,
+            ),
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        height: 45,
+                        width: 45,
+                        decoration: BoxDecoration(
+                          color: textColor,
+                          borderRadius: const BorderRadius.all(Radius.circular(35)),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(1.25),
+                          child: retrieveUserProfile(
+                            reservationItem.reservationOwnerId.getOrCrash(),
+                            model,
+                            null,
+                            model.paletteColor,
+                            model.secondaryQuestionTitleFontSize,
+                            profileType: UserProfileType.firstLetterOnlyProfile,
+                            trailingWidget: null,
+                            selectedButton: (e) {
+
+                            },
+                          ),
+                        ),
+                      ),
+                      const SizedBox(
+                        width: 15,
+                      ),
+                      Expanded(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(activity.profileService.activityBackground.activityTitle.value.fold((l) => (listing != null) ? '$activityTitle at $listingTitle' : '$activityTitle Activity', (r) => r), style: TextStyle(color: textColor, fontSize: model.secondaryQuestionTitleFontSize, fontWeight: FontWeight.bold, overflow: TextOverflow.ellipsis), maxLines: 1),
+                            const SizedBox(height: 3),
+                            if (listing != null) Text(listing.listingProfileService.backgroundInfoServices.listingName.getOrCrash(), style: TextStyle(color: secondaryTextColor), maxLines: 1),
+                            if (!isEnded) Text('Starts: ${DateFormat.yMMMd().format(resSorted.first.selectedDate)}', style: TextStyle(color: secondaryTextColor), maxLines: 1, overflow: TextOverflow.ellipsis),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 5),
+                  if (reservationItem.reservationState == ReservationSlotState.current) Padding(
+                    padding: const EdgeInsets.only(left: 10.0),
+                    child: Container(
+                      height: 25,
+                      width: 25,
+                      decoration: BoxDecoration(
+                        color: textColor.withOpacity(0.20),
+                        borderRadius: BorderRadius.circular(20)
+                      ),
+                      child: Icon(CupertinoIcons.dot_radiowaves_left_right, size: 15, color: textColor),
+                    ),
+                  )
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            if (Responsive.isMobile(context) == false) Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Container(
+                    decoration: BoxDecoration(
+                      color: textColor.withOpacity(0.20),
+                      borderRadius: BorderRadius.circular(25.0),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: (getNumberOfSlotsToGo(reservationItem) == 1) ? Text('${getNumberOfSlotsToGo(reservationItem)} Slots Booked', style: TextStyle(color: textColor, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis, maxLines: 1,) : (getNumberOfSlotsToGo(reservationItem) == 0) ? Text('Finished', style: TextStyle(color: textColor, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis, maxLines: 1,) : Text('${getNumberOfSlotsToGo(reservationItem)} Slots Booked', style: TextStyle(color: textColor, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis, maxLines: 1),
+                  )
+                ),
+                const SizedBox(height: 5),
+                Visibility(
+                  // visible: isEnded == false,
+                  child: Visibility(
+                    visible: activity.activityAttendance.isLimitedAttendance == true || activity.activityAttendance.isTicketBased == null || activity.activityAttendance.isPassBased == null || activity.activityAttendance.isLimitedAttendance == null,
+                    child: Container(
+                      width: 100,
+                      decoration: BoxDecoration(
+                        color: textColor,
+                        borderRadius: const BorderRadius.all(Radius.circular(40)),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Center(child: Text('Join', style: TextStyle(color: backgroundColor, fontSize: model.secondaryQuestionTitleFontSize, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)),
+                      ),
+                    )
+                  ),
+                ),
+                ///  tickets
+                Visibility(
+                  // visible: isEnded == false,
+                  child: Visibility(
+                    visible: activity.activityAttendance.isTicketBased == true,
+                    child: Container(
+                      width: 160,
+                      decoration: BoxDecoration(
+                        color: textColor,
+                        borderRadius: const BorderRadius.all(Radius.circular(40)),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Center(child: Text('Find Tickets', style: TextStyle(color: backgroundColor, fontSize: model.secondaryQuestionTitleFontSize, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)),
+                      ),
+                    ),
+                  ),
+                ),
+                // const SizedBox(height: 5),
+                // Column(
+                //   mainAxisAlignment: MainAxisAlignment.start,
+                //   crossAxisAlignment: CrossAxisAlignment.start,
+                //   children: [
+                //     if (!isEnded) Text('Starting: ${DateFormat.yMMMd().format(resSorted.first.selectedDate)}', style: TextStyle(color: model.disabledTextColor), maxLines: 1,),
+                //     if (resSorted.first.selectedDate != resSorted.last.selectedDate) Text('Ending: ${DateFormat.yMMMd().format(resSorted.last.selectedDate)}', style: TextStyle(color: model.disabledTextColor), maxLines: 1,),
+                //     if (isEnded) Text('Ended: ${DateFormat.yMMMd().format(resSorted.last.selectedDate)}', style: TextStyle(color: model.disabledTextColor), maxLines: 1,)
+                //   ],
+                // ),
+              ],
+            )
+          ],
+        ),
+        if (Responsive.isMobile(context) == true) Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+
+          children: [
+            Container(
+                decoration: BoxDecoration(
+                  color: textColor.withOpacity(0.20),
+                  borderRadius: BorderRadius.circular(25.0),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: (getNumberOfSlotsToGo(reservationItem) == 1) ? Text('${getNumberOfSlotsToGo(reservationItem)} Slots Booked', style: TextStyle(color: textColor, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis, maxLines: 1,) : (getNumberOfSlotsToGo(reservationItem) == 0) ? Text('Finished', style: TextStyle(color: textColor, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis, maxLines: 1,) : Text('${getNumberOfSlotsToGo(reservationItem)} Slots Booked', style: TextStyle(color: textColor, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis, maxLines: 1),
+                )
+            ),
+            const SizedBox(width: 8),
+            Visibility(
+              // visible: isEnded == false,
+              child: Visibility(
+                  visible: activity.activityAttendance.isLimitedAttendance == true || activity.activityAttendance.isTicketBased == null || activity.activityAttendance.isPassBased == null || activity.activityAttendance.isLimitedAttendance == null,
+                  child: Container(
+                    width: 100,
+                    decoration: BoxDecoration(
+                      color: textColor,
+                      borderRadius: const BorderRadius.all(Radius.circular(40)),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Center(child: Text('Join', style: TextStyle(color: backgroundColor, fontSize: model.secondaryQuestionTitleFontSize, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)),
+                    ),
+                  )
+              ),
+            ),
+            ///  tickets
+            Visibility(
+              // visible: isEnded == false,
+              child: Visibility(
+                visible: activity.activityAttendance.isTicketBased == true,
+                child: Container(
+                  width: 160,
+                  decoration: BoxDecoration(
+                    color: textColor,
+                    borderRadius: const BorderRadius.all(Radius.circular(40)),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Center(child: Text('Find Tickets', style: TextStyle(color: backgroundColor, fontSize: model.secondaryQuestionTitleFontSize, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        )
+      ],
+    ),
+  );
+}
+
+
+Widget getReservationCardActivityAttendees(BuildContext context, DashboardModel model, ActivityManagerForm activityForm) {
+  return BlocProvider(create: (context) =>  getIt<AttendeeManagerWatcherBloc>()..add(AttendeeManagerWatcherEvent.watchAllAttendanceByType(AttendeeType.free.toString(), activityForm.activityFormId.getOrCrash())),
+      child: BlocBuilder<AttendeeManagerWatcherBloc, AttendeeManagerWatcherState>(
+        builder: (context, state) {
+        return state.maybeMap(
+        loadAllAttendanceSuccess: (item) {
+            return Row(
+              children: [
+                Icon(Icons.person_sharp, color: model.paletteColor, size: 14),
+                const SizedBox(width: 4),
+                Text(item.item.length.toString(), style: TextStyle(color: model.paletteColor)),
+                const SizedBox(width: 10),
+              ],
+            );
+          },
+          orElse: () => Container(),
+        );
+      },
+    ),
+  );
+}
+
+
+  Widget getReservationCardActivityTicketAttendees(BuildContext context, DashboardModel model, ActivityManagerForm activityForm) {
+  return BlocProvider(create: (context) =>  getIt<AttendeeManagerWatcherBloc>()..add(AttendeeManagerWatcherEvent.watchAllAttendanceByType(AttendeeType.tickets.toString(), activityForm.activityFormId.getOrCrash())),
+    child: BlocBuilder<AttendeeManagerWatcherBloc, AttendeeManagerWatcherState>(
+        builder: (context, state) {
+          return state.maybeMap(
+            loadAllAttendanceSuccess: (item) {
+              return Row(
+                children: [
+                  Icon(Icons.airplane_ticket_outlined, color: model.paletteColor, size: 14),
+                  const SizedBox(width: 4),
+                  Text(item.item.length.toString(), style: TextStyle(color: model.paletteColor)),
+                  const SizedBox(width: 10),
+                ],
+              );
+            },
+            orElse: () => Container(),
+          );
+        },
+      ),
+    );
+  }

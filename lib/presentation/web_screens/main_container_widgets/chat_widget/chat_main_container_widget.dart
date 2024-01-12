@@ -34,7 +34,7 @@ class ChatMainContainerWidget extends StatelessWidget {
             color: model.accentColor,
             borderRadius: BorderRadius.all(Radius.circular(20))
         ),
-        child:  (ChatHelperCore.selectedRoom != null) ? DirectChatScreen(
+        child:  (room != null) ? DirectChatScreen(
             room: room,
             model: model,
             currentUser: currentUser,

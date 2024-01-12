@@ -114,7 +114,7 @@ class _DirectChatScreenState extends State<DirectChatScreen> {
                 builder: (context, snapshot) {
 
                 if (!snapshot.hasData || snapshot.data!.isEmpty || snapshot.hasError || snapshot.data == null) {
-                  noReservationsFound(
+                  noItemsFound(
                       widget.model,
                       Icons.chat_outlined,
                       'No Chats Yet!',
@@ -141,7 +141,7 @@ class _DirectChatScreenState extends State<DirectChatScreen> {
                   );
                 }
 
-                return noReservationsFound(
+                return noItemsFound(
                     widget.model,
                     Icons.chat_outlined,
                     'No Chats Yet!',
@@ -155,7 +155,7 @@ class _DirectChatScreenState extends State<DirectChatScreen> {
                 );
 
             },
-        ) : noReservationsFound(
+        ) : noItemsFound(
             widget.model,
             Icons.chat_outlined,
             'No Chats Yet!',
@@ -247,7 +247,7 @@ class _DirectChatScreenState extends State<DirectChatScreen> {
 
                   if (reservation != null && widget.currentUser != null) Positioned(
                     top: 0,
-                    child: getReservationCard(
+                    child: getReservationCardListing(
                       context,
                       true,
                       reservation,
@@ -255,7 +255,7 @@ class _DirectChatScreenState extends State<DirectChatScreen> {
                       widget.model,
                       false,
                       false,
-                      didSelectReservation: (listing, res, activity) {
+                      didSelectReservation: (listing, res, activity, attendeeItem, activityTickets) {
                         if (widget.isFromReservation) {
                           return Navigator.of(context).pop();
                         } else {
@@ -266,10 +266,8 @@ class _DirectChatScreenState extends State<DirectChatScreen> {
                                   isReply: false,
                                   listing: listing,
                                   currentUser: widget.currentUser,
-                                  currentUserId: widget.currentUser!.userId
-                                      .getOrCrash(),
-                                  reservationId: reservation.reservationId
-                                      .getOrCrash(),
+                                  currentUserId: widget.currentUser!.userId.getOrCrash(),
+                                  reservationId: reservation.reservationId.getOrCrash(),
                                 );
                               }
                             )

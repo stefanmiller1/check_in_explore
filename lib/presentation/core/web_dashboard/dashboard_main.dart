@@ -1,3 +1,4 @@
+import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/responsive/responsive.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/web_dashboard/dashboard_components/main_menu_container.dart';
@@ -86,6 +87,7 @@ class _WebDashboardMainState extends State<WebDashboardMain> {
   @override
   void initState() {
     currentMarker = widget.dashboardMarker;
+    print(currentMarker);
     super.initState();
   }
 
@@ -93,7 +95,7 @@ class _WebDashboardMainState extends State<WebDashboardMain> {
   @override
   Widget build(BuildContext context) {
 
-    if (widget.dashboardMarker != currentMarker) {
+    if (currentMarker != widget.dashboardMarker) {
       currentMarker = widget.dashboardMarker;
     }
     if (!(subContainerIsHidden(currentMarker!))) _scaffoldKey.currentState?.closeDrawer();
@@ -152,7 +154,7 @@ class _WebDashboardMainState extends State<WebDashboardMain> {
         items: widget.dashboardContainerItems.where((element) => element.isVisible == true).map(
                 (e) => BottomNavigationBarItem(
           label: e.tabTitle,
-          icon: e.imageUrl != null ? CircleAvatar(backgroundImage: Image.network(e.imageUrl!).image) : Icon(e.iconTab)
+          icon: (e.imageUrl != null && e.imageUrl?.isNotEmpty == true) ? CircleAvatar(backgroundImage: Image.network(e.imageUrl?.first ?? '').image) : Icon(e.iconTab)
           )
         ).toList(),
       ) : null,
@@ -176,7 +178,6 @@ class _WebDashboardMainState extends State<WebDashboardMain> {
         ),
         tablet: Row(
           children: [
-
             AnimatedContainer(
                 duration: Duration(milliseconds: 750),
               child: SidePanelContainer(
@@ -227,7 +228,7 @@ class _WebDashboardMainState extends State<WebDashboardMain> {
         ),
         desktop: Row(
           children: [
-            AnimatedContainer(
+            if (!(Responsive.isMobile(context))) AnimatedContainer(
               duration: Duration(milliseconds: 750),
               child: SidePanelContainer(
                 model: widget.model,
@@ -242,7 +243,7 @@ class _WebDashboardMainState extends State<WebDashboardMain> {
                 optionsMarkerItem: widget.optionsMarkerItem
               ),
             ),
-            if (subContainerIsHidden(currentMarker!)) Expanded(
+            if (subContainerIsHidden(currentMarker!) && (!(Responsive.isMobile(context)))) Expanded(
               flex: _size.width > 1340 ? 3 : 6,
               child: AnimatedContainer(
                 duration: Duration(milliseconds: 750),

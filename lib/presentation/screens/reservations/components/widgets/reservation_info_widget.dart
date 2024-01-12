@@ -250,7 +250,8 @@ class ReservationInfoWidget extends StatelessWidget {
               child: Padding(
                   padding: const EdgeInsets.all(4.0),
                   child: (getNumberOfSlotsToGo(reservationItem) == 1) ? Text('${getNumberOfSlotsToGo(reservationItem)} Slot Remaining', style: TextStyle(color: model.disabledTextColor, fontSize: 14, fontWeight: FontWeight.bold,)) : Text('${getNumberOfSlotsToGo(reservationItem)} Slots Remaining', style: TextStyle(color: model.paletteColor, fontSize: 14, fontWeight: FontWeight.bold,))
-              )),
+            )
+          ),
         ),
         // Padding(
         //   padding: const EdgeInsets.symmetric(vertical: 8.0),

@@ -1,6 +1,5 @@
+import 'package:check_in_domain/check_in_domain.dart';
 import 'package:flutter/material.dart';
-
-enum DashboardMarker {home, reservations, chat, profile, settings, resProfile, resAttendees, resSettings}
 
 class DashboardContainerModel {
 
@@ -10,8 +9,10 @@ class DashboardContainerModel {
   final IconData iconTab;
   final String tabTitle;
   late bool? isHovering;
-  late String? imageUrl;
+  late List<String>? imageUrl;
   late bool? isVisible;
+  late bool? isPrivate;
+  late bool? isLive;
 
   DashboardContainerModel({
       required this.mainContainer,
@@ -21,7 +22,9 @@ class DashboardContainerModel {
       required this.tabTitle,
       this.isHovering,
       this.imageUrl,
-      this.isVisible
+      this.isVisible,
+      this.isPrivate,
+      this.isLive
   });
 
 }

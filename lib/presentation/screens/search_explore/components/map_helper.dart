@@ -10,22 +10,28 @@ import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/helper.dart';
 import 'package:fluster/fluster.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:check_in_facade/check_in_facade.dart';
 
 class MapHelper {
+
 
   static late GoogleMapController mapController;
 
   /// [PageController]
   static late PageController pageController;
 
+  /// [ScrollController] for web only side panel scroll view
+  static late ScrollController scrollController;
+
   /// Set of displayed markers and cluster markers on the map
-  static final Set<Marker> marker = Set();
+  static final Set<Marker> markerSet = Set();
 
   /// Current map zoom. Initial zoom will be 15, street level
   static late double currentZoom = 10;
@@ -37,10 +43,11 @@ class MapHelper {
   static Fluster<MapMarker>? _clusterManager;
 
   /// [HashMap] of displayed [MapMarker]s and cluster markers on the map
-  static late HashMap<String, MapMarker> _markers = HashMap<String, MapMarker>();
+  static HashMap<String, MapMarker> _markers = HashMap<String, MapMarker>();
 
   /// [Stream] for handling all listings
   static late Stream<List<ListingManagerForm>> listingStream;
+
 
   static late int _minZoom = 0;
   static late int _maxZoom = 19;
@@ -49,7 +56,7 @@ class MapHelper {
 
   static void initMarkers(BuildContext context, DashboardModel model, List<ListingManagerForm> listings) async {
 
-    marker.clear();
+    markerSet.clear();
     _markers.clear();
     _clusterManager = null;
     context.read<ListingsSearchRequirementsBloc>().add(const ListingsSearchRequirementsEvent.listingsChange([]));
@@ -67,9 +74,11 @@ class MapHelper {
       _markers.putIfAbsent(
           forms.listingServiceId.getOrCrash(),
               () => MapMarker(
+              isSelected: context.read<ListingsSearchRequirementsBloc>().state.selectedListingId?.getOrCrash() == forms.listingServiceId.getOrCrash(),
               childMarkerId: forms.listingServiceId.getOrCrash(),
               markerId: forms.listingServiceId.getOrCrash(),
               onMarkerTap: () {
+
               },
               position: LatLng(
                   forms.listingProfileService.listingLocationSetting.locationPosition?.latitude ?? 0,
@@ -91,18 +100,22 @@ class MapHelper {
     );
 
 
-    Future.delayed(const Duration(seconds: 2), () async {
+    Future.delayed(const Duration(seconds: 1), () async {
       await _updateMarkers(context, model, currentZoom, _clusterManager, _markers);
       context.read<ListingsSearchRequirementsBloc>().add(const ListingsSearchRequirementsEvent.isMarkersLoading(false));
       });
       } catch (e) {
     }
 
-
   }
 
 
-  static Future<void> _updateMarkers(BuildContext context, DashboardModel model, double? updatedZoom, Fluster<MapMarker>? manager, HashMap<String, MapMarker> markers) async {
+  static Future<void> _updateMarkers(
+      BuildContext context,
+      DashboardModel model, double?
+      updatedZoom,
+      Fluster<MapMarker>? manager,
+      HashMap<String, MapMarker> markers) async {
     if (manager == null) return;
 
     if (updatedZoom != null) {
@@ -114,7 +127,6 @@ class MapHelper {
         context,
         markers,
         manager,
-        null,
         currentZoom,
         model.webBackgroundColor,
         model.paletteColor,
@@ -122,14 +134,14 @@ class MapHelper {
 
             /// update camera position - zoom in and center on marker
             if (cluster.longitude != null && cluster.latitude != null) {
-              mapController.animateCamera(
-                  CameraUpdate.newCameraPosition(
-                      CameraPosition(
-                          zoom: 11,
-                          target: LatLng(cluster.latitude! - 0.07, cluster.longitude!)
-                      )
-                  )
-              );
+              // mapController.animateCamera(
+              //     CameraUpdate.newCameraPosition(
+              //         CameraPosition(
+              //             zoom: MapHelper.currentZoom,
+              //             target: kIsWeb ? LatLng(cluster.latitude!, cluster.longitude!) : LatLng(cluster.latitude! - 0.07, cluster.longitude!)
+              //         )
+              //     )
+              // );
             }
 
             context.read<ListingsSearchRequirementsBloc>().add(const ListingsSearchRequirementsEvent.selectedListingIdChanged(null));
@@ -144,47 +156,56 @@ class MapHelper {
 
             /// animate to selected listing in [PageController]
             Future.delayed(const Duration(seconds: 2), () async {
+              if (!(kIsWeb)) {
+                if (pageController.positions.isNotEmpty) {
+                  final int itemPage = context.read<ListingsSearchRequirementsBloc>().state.listings.toList().indexWhere((element) => element.listingServiceId.getOrCrash() == cluster.markerId);
+                  pageController.animateToPage(
+                        itemPage, duration: const Duration(milliseconds: 600),
+                        curve: Curves.easeInOut);
+                }
+              }
+            });
+
+            if (kIsWeb) {
               if (pageController.positions.isNotEmpty) {
                 final int itemPage = context.read<ListingsSearchRequirementsBloc>().state.listings.toList().indexWhere((element) => element.listingServiceId.getOrCrash() == cluster.markerId);
-                pageController.animateToPage(itemPage, duration: const Duration(milliseconds: 600), curve: Curves.easeInOut);
+                pageController.jumpToPage(itemPage);
               }
-          });
+              if (scrollController.positions.isNotEmpty) {
+                final int itemPage = context.read<ListingsSearchRequirementsBloc>().state.listings.toList().indexWhere((element) => element.listingServiceId.getOrCrash() == cluster.markerId);
+                scrollController.jumpTo(itemPage * 550);
+              }
+            }
+
+            markers[cluster.markerId]?.isSelected = !(markers[cluster.markerId]!.isSelected)!;
+            await _updateMarkers(context, model, updatedZoom, manager, markers);
+
+          // final selectedMarkerItem = marker.firstWhere((element) => element.markerId.value == cluster.markerId);
+            // marker.remove(selectedMarkerItem);
+            //
+            // late Marker selectedCluster = selectedMarkerItem;
+            // print(selectedMarkerItem);
+            //
+            //
+            // selectedCluster.icon = await _getClusterMarker(
+            //     cluster.markerTitle ?? '',
+            //     cluster.markerImageUrl,
+            //     (context.read<ListingsSearchRequirementsBloc>().state.selectedListingId?.getOrCrash() == cluster.childMarkerId) ? model.webBackgroundColor : model.paletteColor,
+            //     (context.read<ListingsSearchRequirementsBloc>().state.selectedListingId?.getOrCrash() == cluster.childMarkerId) ? model.paletteColor :  model.webBackgroundColor,
+            //   );
+            //
+            // marker.add(selectedCluster);
+            //
+            // context.read<ListingsSearchRequirementsBloc>().add(ListingsSearchRequirementsEvent.markersDidChange(marker));
+
         });
 
-    marker..clear()
+    markerSet..clear()
       ..addAll(updatedMarkers);
 
-    context.read<ListingsSearchRequirementsBloc>().add(ListingsSearchRequirementsEvent.markersDidChange(marker));
+    context.read<ListingsSearchRequirementsBloc>().add(ListingsSearchRequirementsEvent.markersDidChange(markerSet));
 
   }
-
-
-  // static late UniqueId? selectedMarkerId = null;
-  // static Fluster<MapMarker>? clusterManager;
-  // static late double currentZoom = 5;
-  // static final HashMap<String, MapMarker> markers = HashMap<String, MapMarker>();
-
-  // static bool areMarkersLoading = true;
-  // static final Set<Marker> markers = {};
-  //
-  // static Future<BitmapDescriptor> getMarkerImageFromUrl(
-  //     String url, {
-  //       int? targetWidth,
-  //     }) async {
-  //   final File markerImageFile = await DefaultCacheManager().getSingleFile(url);
-  //
-  //   Uint8List markerImageBytes = await markerImageFile.readAsBytes();
-  //
-  //   if (targetWidth != null) {
-  //     markerImageBytes = await _resizeImageBytes(
-  //       markerImageBytes,
-  //       targetWidth,
-  //     );
-  //   }
-  //
-  //   return BitmapDescriptor.fromBytes(markerImageBytes);
-  // }
-
 
 
   /// Draw a [clusterColor] circle with the [clusterSize] text inside that is [width] wide.
@@ -197,20 +218,8 @@ class MapHelper {
       Color clusterColor,
       Color textColor,
       ) async {
-    final double size = 150;
-    final File markerImageFile = await DefaultCacheManager().getSingleFile(clusterImage ?? '');
-    final Uint8List imageUint8List = await markerImageFile.readAsBytes();
-    final UI.Codec codec = await UI.instantiateImageCodec(imageUint8List);
-    final UI.FrameInfo imageFI = await codec.getNextFrame();
+    final double size = (kIsWeb) ? 65 : 150;
 
-    //make canvas clip path to prevent image drawing over the circle
-    final Path clipPath = Path();
-    clipPath.addRRect(RRect.fromRectAndRadius(
-        Rect.fromLTWH(18.75, 85, size, size),
-        Radius.circular(size)));
-    clipPath.addRRect(RRect.fromRectAndRadius(
-        Rect.fromLTWH(18.75, 85, size, size),
-        Radius.circular(size)));
 
 
     final UI.PictureRecorder pictureRecorder = UI.PictureRecorder();
@@ -221,7 +230,7 @@ class MapHelper {
       text: TextSpan(
         text: topClusterFee,
         style: TextStyle(
-          fontSize: 36,
+          fontSize: (kIsWeb) ? 16 : 36,
           // fontWeight: FontWeight.bold,
           color: textColor,
         )
@@ -229,11 +238,10 @@ class MapHelper {
     )..layout();
 
 
-    const double padding = 40;
-    final rect = Offset.zero & Size(textPainter.width + padding, textPainter.height + padding);
+    const double padding = (kIsWeb) ? 20 : 40;
+    final whiteTextBox = Offset.zero & Size(textPainter.width + padding, textPainter.height + padding);
 
-    canvas.drawRRect(RRect.fromRectAndRadius(rect, Radius.circular(60)), paint);
-    // canvas.drawImage(imageAsset.image, Offset(0,0), paint);
+    canvas.drawRRect(RRect.fromRectAndRadius(whiteTextBox, Radius.circular(60)), paint);
 
     textPainter.layout();
     textPainter.paint(
@@ -241,12 +249,37 @@ class MapHelper {
       const Offset(padding / 2, padding / 2),
     );
 
+    final centerOffset = ((textPainter.width + padding) - size)/2;
+    final rectangle = (kIsWeb) ? Rect.fromLTWH(centerOffset, 50, size, size) : Rect.fromLTWH(centerOffset, 85, size, size);
+    //make canvas clip path to prevent image drawing over the circle
+    final Path clipPath = Path();
+    clipPath.addRRect(RRect.fromRectAndRadius(
+        rectangle,
+        Radius.circular(size)));
+    clipPath.addRRect(RRect.fromRectAndRadius(
+        rectangle,
+        Radius.circular(size)));
+
     canvas.clipPath(clipPath);
-    paintImage(canvas: canvas, rect: Rect.fromLTWH(18.75, 95, size, size), image: imageFI.image, fit: BoxFit.cover);
+
+    if (clusterImage != null) {
+      final File markerImageFile = await DefaultCacheManager().getSingleFile(clusterImage ?? '');
+      final Uint8List imageUint8List = await markerImageFile.readAsBytes();
+      final UI.Codec codec = await UI.instantiateImageCodec(imageUint8List);
+      final UI.FrameInfo imageFI = await codec.getNextFrame();
+      paintImage(canvas: canvas, rect: rectangle, image: imageFI.image, fit: BoxFit.cover);
+    } else {
+      final houseIcon = await _loadUiImage('assets/map_icons/noun-house-5004704.png');
+      final Paint innerCirclePaint = Paint()..color = Colors.black;
+      const double radius = (kIsWeb) ? 75 : 400 / 2;
+      canvas.drawCircle(Offset(radius, radius), radius, innerCirclePaint);
+      paintImage(canvas: canvas, rect: rectangle, image: houseIcon, fit: BoxFit.cover);
+    }
+
 
     final image = await pictureRecorder.endRecording().toImage(
-      (textPainter.width + padding + 150).toInt(),
-      (textPainter.height + padding + 150).toInt(),
+      (textPainter.width + padding + size).toInt(),
+      (textPainter.height + padding + size + padding).toInt(),
     );
 
     final data = await image.toByteData(format: UI.ImageByteFormat.png);
@@ -259,8 +292,7 @@ class MapHelper {
     image.resolve(const ImageConfiguration()).addListener(
         ImageStreamListener((info, _) => completed.complete(info)));
     final imageInfo = await completed.future;
-    final byteData =
-    await imageInfo.image.toByteData(format: UI.ImageByteFormat.png);
+    final byteData = await imageInfo.image.toByteData(format: UI.ImageByteFormat.png);
     return byteData?.buffer.asUint8List();
   }
 
@@ -283,11 +315,12 @@ class MapHelper {
     final Paint paint = Paint()..color = Colors.black.withOpacity(0.15);
     final Paint innerCirclePaint = Paint()..color = Colors.black;
 
-    final double radius = 400 / 2;
+    const double radius = (kIsWeb) ? 75 : 400 / 2;
+    const double imageSize = (kIsWeb) ? 50 : 150;
 
     canvas.drawCircle(Offset(radius, radius), radius, paint);
     canvas.drawCircle(Offset(radius, radius), radius * 0.4, innerCirclePaint);
-    paintImage(canvas: canvas, rect: UI.Rect.fromLTWH(radius - 150 / 2, radius - 150 / 2, 150, 150), image: houseIcon);
+    paintImage(canvas: canvas, rect: const UI.Rect.fromLTWH(radius - imageSize / 2, radius - imageSize / 2, imageSize, imageSize), image: houseIcon);
 
     final image = await pictureRecorder.endRecording().toImage(radius.toInt() * 2, radius.toInt() * 2);
     final data = await image.toByteData(format: UI.ImageByteFormat.png);
@@ -316,8 +349,8 @@ class MapHelper {
       int maxZoom,
       ) async {
     return Fluster<MapMarker>(
-      minZoom: minZoom,
-      maxZoom: maxZoom,
+      minZoom: _minZoom,
+      maxZoom: _maxZoom,
       radius: 150,
       extent: 2048,
       nodeSize: 74,
@@ -329,14 +362,15 @@ class MapHelper {
           ) {
 
         return MapMarker(
-          markerId: cluster?.childMarkerId ?? cluster!.id.toString(),
+          markerId: cluster!.id.toString(),
           position: LatLng(lat!, lng!),
-          isCluster: true,
-          clusterId: cluster?.id,
-          pointsSize: cluster?.pointsSize,
+          isCluster: cluster.isCluster,
+          isSelected: false,
+          clusterId: cluster.id,
+          pointsSize: cluster.pointsSize,
           markerTitle: null,
           onMarkerTap: null,
-          childMarkerId: cluster?.childMarkerId,
+          childMarkerId: cluster.childMarkerId,
         );
       }
     );
@@ -346,7 +380,6 @@ class MapHelper {
       BuildContext context,
       HashMap<String, MapMarker>? listingMarkers,
       Fluster<MapMarker>? clusterManager,
-      String? selectedMarker,
       double currentZoom,
       Color clusterColor,
       Color clusterTextColor,
@@ -362,31 +395,32 @@ class MapHelper {
     ).map((mapMarker) async {
 
       late MapMarker? clusterMarker = listingMarkers?[mapMarker.childMarkerId];
+
       mapMarker.onMarkerTap = () {
         return onMarkerTap(mapMarker);
       };
 
+
       if (mapMarker.isCluster!) {
-
-
           mapMarker.icon = await _getClusterMarker(
             clusterMarker?.markerTitle ?? '',
             clusterMarker?.markerImageUrl,
-            (selectedMarker == mapMarker.childMarkerId) ? clusterTextColor : clusterColor,
-            (selectedMarker == mapMarker.childMarkerId) ? clusterColor :  clusterTextColor,
+            (mapMarker.isSelected ?? false) ? clusterTextColor : clusterColor,
+            (mapMarker.isSelected ?? false) ? clusterColor : clusterTextColor,
           );
-          mapMarker.markerTitle = null;
+          // mapMarker.markerTitle = null;
 
       } else {
 
-        mapMarker.icon = await _getClusterMarker(
+          mapMarker.icon = await _getClusterMarker(
           mapMarker.markerTitle ?? clusterMarker?.markerTitle ?? '',
           clusterMarker?.markerImageUrl,
-          (selectedMarker == mapMarker.childMarkerId) ? clusterTextColor : clusterColor,
-          (selectedMarker == mapMarker.childMarkerId) ? clusterColor :  clusterTextColor,
+          (mapMarker.isSelected ?? false) ? clusterTextColor : clusterColor,
+          (mapMarker.isSelected ?? false) ? clusterColor : clusterTextColor,
         );
-        mapMarker.markerTitle = null;
+        // mapMarker.markerTitle = null;
       }
+
       return mapMarker.toMarker();
     }).toList());
   }
@@ -394,14 +428,15 @@ class MapHelper {
 
   static Future<Position> determineCurrentPosition(BuildContext context, DashboardModel model) async {
     LocationPermission permission;
-
     permission = await Geolocator.checkPermission();
+
     if (permission == LocationPermission.denied) {
       final snackBar = SnackBar(
           backgroundColor: model.paletteColor,
           content: Text('Access to your Location is not allowed', style: TextStyle(color: model.accentColor))
       );
        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+       return Future.error('permission denied');
     }
 
     if (permission == LocationPermission.deniedForever) {
@@ -410,6 +445,7 @@ class MapHelper {
           content: Text('Location permissions are permanently denied, we cannot request permissions.', style: TextStyle(color: model.accentColor))
       );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      return Future.error('permission denied forever');
     }
 
     return await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);

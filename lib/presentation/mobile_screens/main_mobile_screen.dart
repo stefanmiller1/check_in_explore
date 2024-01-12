@@ -1,7 +1,4 @@
-import 'package:badges/badges.dart';
-import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
-import 'package:check_in_web_mobile_explore/presentation/core/notifications/notification_core.dart';
 import 'package:check_in_web_mobile_explore/presentation/mobile_screens/main_mobile_helper.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/chat_inbox/components/direct_chat_archive_rooms_screen.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/chat_inbox/direct_chat_rooms_screen.dart';
@@ -9,14 +6,11 @@ import 'package:check_in_web_mobile_explore/presentation/screens/chat_inbox/dire
 import 'package:check_in_web_mobile_explore/presentation/screens/profile_settings/profile_settings_screen.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/reservations/components/reservation_results_main.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/reservations/reservations_screen.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/map_helper.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/search_explore_header.dart';
+import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/search_components/search_explore_filter.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/search_explore_screen.dart';
 import 'package:check_in_web_mobile_explore/presentation/web_screens/main_container_widgets/chat_widget/chat_helper_core.dart';
 import 'package:flutter/material.dart';
 import 'package:check_in_facade/check_in_facade.dart';
-import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
-import 'package:check_in_facade/check_in_facade.dart' as facade;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 
@@ -63,8 +57,11 @@ class _MainMobileScreenState extends State<MainMobileScreen> {
               backgroundColor: widget.model.mobileBackgroundColor,
               elevation: 0,
                 bottom: PreferredSize(
-                  preferredSize: const Size.fromHeight(64),
-                    child: SearchExploreHeader(model: widget.model)
+                    preferredSize: const Size.fromHeight(64),
+                    child: SearchExploreFilter(
+                        model: widget.model,
+                        didSelectFilterBy: () {},
+                    )
             ),
           ),
         isSelected: false
@@ -74,7 +71,7 @@ class _MainMobileScreenState extends State<MainMobileScreen> {
           mainTitle: 'reservations',
           mainWidgetItem: ReservationScreen(
             model: widget.model,
-            didSelectReservation: (listing, reservation, currentUser, activity) {
+            didSelectReservation: (listing, reservation, currentUser, activity, attendeeItem, currentUsersTickets) {
               Navigator.push(context, MaterialPageRoute(
                   builder: (_) {
                     return ReservationResultMain(
@@ -84,6 +81,7 @@ class _MainMobileScreenState extends State<MainMobileScreen> {
                       currentUser: currentUser,
                       currentUserId: currentUser.userId.getOrCrash(),
                       reservationId: reservation.reservationId.getOrCrash(),
+                      currentUserTicketItems: currentUsersTickets
                     );
                   }
               )

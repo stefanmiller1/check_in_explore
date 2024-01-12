@@ -5,6 +5,7 @@ import 'package:avatar_stack/positions.dart';
 import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_credentials/check_in_credentials.dart';
 import 'package:check_in_domain/check_in_domain.dart';
+import 'package:check_in_domain/domain/misc/attendee_services/attendee_item/attendee_item.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/components/invite_widgets/send_invitation_request.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/components/webview_controller_widget.dart';
@@ -13,7 +14,8 @@ import 'package:check_in_web_mobile_explore/presentation/screens/facility_previe
 import 'package:check_in_web_mobile_explore/presentation/screens/profile_settings/profile_settings_screen_helper.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/reservations/components/reservation_helper.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/helper.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/search_helper.dart';
+import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/search_components/search_helper.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
@@ -25,7 +27,7 @@ class ReservationDetailsWidget extends StatefulWidget {
   final ListingManagerForm listing;
   final ReservationItem reservationItem;
   final bool isReservationOwner;
-  final List<UserProfileModel> profiles;
+  final List<AttendeeItem> allAttendees;
   final UserProfileModel currentUser;
   final bool isFromChat;
 
@@ -35,7 +37,7 @@ class ReservationDetailsWidget extends StatefulWidget {
     required this.listing,
     required this.reservationItem,
     required this.isReservationOwner,
-    required this.profiles,
+    required this.allAttendees,
     required this.currentUser,
     required this.isFromChat
   });
@@ -58,7 +60,7 @@ class _ReservationDetailsWidgetState extends State<ReservationDetailsWidget> {
   Widget build(BuildContext context) {
 
     final Iterable<ContactDetails> affiliatedJoined = widget.reservationItem.reservationAffiliates?.where((element) => element.contactStatus == ContactStatus.joined) ?? [];
-    final affiliatedUsersProfiles = widget.profiles.where((element) => (affiliatedJoined.map((e) => e.contactId).contains(element.userId)));
+    // final affiliatedUsersProfiles = widget.profiles.where((element) => (affiliatedJoined.map((e) => e.contactId).contains(element.userId)));
 
 
     return Scaffold(
@@ -181,33 +183,26 @@ class _ReservationDetailsWidgetState extends State<ReservationDetailsWidget> {
                   /// reservation listing
                   InkWell(
                       onTap: () {
+                        if (kIsWeb) {
+
+                        } else {
                         Navigator.of(context).push(MaterialPageRoute(builder: (_) {
                           return FacilityPreviewScreen(
                             isAutoImplyLeading: true,
                             model: widget.model,
                             listing: widget.listing,
+                            listingId: widget.listing.listingServiceId,
                             selectedReservationsSlots: null,
-                            marker: MapMarker(
-                                    childMarkerId: widget.listing.listingServiceId.getOrCrash(),
-                                    markerId: widget.listing.listingServiceId.getOrCrash(),
-                                    position: LatLng(
-                                        double.parse(widget.listing
-                                            .listingProfileService.listingLocationSetting.longLat
-                                            .split(',')[0]),
-                                        double.parse(widget.listing
-                                            .listingProfileService.listingLocationSetting.longLat
-                                            .split(',')[1])),
-                                    markerTitle: completeTotalPriceWithOutCurrency(
-                                        (widget.listing.listingRulesService.defaultPricingRuleSettings
-                                            .defaultPricingRate ?? 0).toDouble(),
-                                        widget.listing.listingProfileService.backgroundInfoServices
-                                            .currency),
-                                    icon: BitmapDescriptor.defaultMarker
-                                ).toMarker(),
+
+                                didSelectBack: () {},
+                                didSelectReservation: (listing, res) {
+
+                                },
                               );
                             }
                           )
                         );
+                        }
                       },
                       child: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 14.0),
@@ -268,7 +263,7 @@ class _ReservationDetailsWidgetState extends State<ReservationDetailsWidget> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text('Message Host', style: TextStyle(color: widget.model.paletteColor)),
-                                    Text((widget.profiles.where((element) => element.userId == widget.listing.listingProfileService.backgroundInfoServices.listingOwner).isNotEmpty) ? widget.profiles.firstWhere((element) => element.userId == widget.listing.listingProfileService.backgroundInfoServices.listingOwner).legalName.getOrCrash() : '', style: TextStyle(color: widget.model.disabledTextColor))
+                                    // Text((widget.profiles.where((element) => element.userId == widget.listing.listingProfileService.backgroundInfoServices.listingOwner).isNotEmpty) ? widget.profiles.firstWhere((element) => element.userId == widget.listing.listingProfileService.backgroundInfoServices.listingOwner).legalName.getOrCrash() : '', style: TextStyle(color: widget.model.disabledTextColor))
                                   ],
                                 ),
                               ],
@@ -278,7 +273,7 @@ class _ReservationDetailsWidgetState extends State<ReservationDetailsWidget> {
                           Row(
                             children: [
                               // if (widget.profiles.firstWhere((element) => element.userId == widget.listing.listingProfileService.backgroundInfoServices.listingOwner).profileImage != null)
-                              CircleAvatar(radius: 23.5, foregroundImage: (widget.profiles.where((element) => element.userId == widget.listing.listingProfileService.backgroundInfoServices.listingOwner).isNotEmpty) ? widget.profiles.firstWhere((element) => element.userId == widget.listing.listingProfileService.backgroundInfoServices.listingOwner).profileImage?.image ?? Image.asset('assets/profile-avatar.png').image : Image.asset('assets/profile-avatar.png').image),
+                              // CircleAvatar(radius: 23.5, foregroundImage: (widget.profiles.where((element) => element.userId == widget.listing.listingProfileService.backgroundInfoServices.listingOwner).isNotEmpty) ? widget.profiles.firstWhere((element) => element.userId == widget.listing.listingProfileService.backgroundInfoServices.listingOwner).profileImage?.image ?? Image.asset('assets/profile-avatar.png').image : Image.asset('assets/profile-avatar.png').image),
                               const SizedBox(width: 12),
                               Icon(Icons.keyboard_arrow_right_rounded, color: widget.model.paletteColor)
                             ],
@@ -295,7 +290,10 @@ class _ReservationDetailsWidgetState extends State<ReservationDetailsWidget> {
                         return SendInvitationRequest(
                           model: widget.model,
                           currentUser: widget.currentUser,
-                          currentGuests: widget.reservationItem,
+                          attendeeType: AttendeeType.free,
+                          reservationItem: widget.reservationItem,
+                          inviteType: InvitationType.reservation,
+                          didSelectInvite: (contacts) {},
                           );
                         })
                       );
@@ -322,40 +320,40 @@ class _ReservationDetailsWidgetState extends State<ReservationDetailsWidget> {
                               ],
                             ),
                           ),
-
-                          if (widget.profiles.isNotEmpty) Container(
-                            height: 50,
-                            width: 180,
-                            child: InkWell(
-                              onTap: () {
-
-                              },
-                              child: AvatarStack(
-                                  settings: RestrictedPositions(
-                                    maxCoverage: 0.3,
-                                    minCoverage: 0.1,
-                                    laying: StackLaying.first
-                                  ),
-                                  infoWidgetBuilder: (surplus) {
-                                    return Container(
-                                      height: 50,
-                                      width: 50,
-                                      decoration: BoxDecoration(
-                                        color: widget.model.paletteColor,
-                                        borderRadius: BorderRadius.circular(50)
-                                      ),
-                                      child: Center(
-                                        child: Text('+$surplus', style: TextStyle(color: widget.model.accentColor, fontSize: widget.model.secondaryQuestionTitleFontSize)),
-                                      ),
-                                    );
-                                  },
-                                  avatars: [
-                                    if (affiliatedUsersProfiles.isNotEmpty) for (var n = 0; n < affiliatedUsersProfiles.length; n++) (affiliatedUsersProfiles.toList()[n].profileImage != null) ? affiliatedUsersProfiles.toList()[n].profileImage!.image : Image.asset('assets/profile-avatar.png').image
-                                  ]
-                              ),
-                            ),
-                          ),
-                          if (widget.profiles.isEmpty) Icon(Icons.keyboard_arrow_right_rounded, color: widget.model.paletteColor)
+                          //
+                          // if (widget.profiles.isNotEmpty) Container(
+                          //   height: 50,
+                          //   width: 180,
+                          //   child: InkWell(
+                          //     onTap: () {
+                          //
+                          //     },
+                          //     child: AvatarStack(
+                          //         settings: RestrictedPositions(
+                          //           maxCoverage: 0.3,
+                          //           minCoverage: 0.1,
+                          //           laying: StackLaying.first
+                          //         ),
+                          //         infoWidgetBuilder: (surplus) {
+                          //           return Container(
+                          //             height: 50,
+                          //             width: 50,
+                          //             decoration: BoxDecoration(
+                          //               color: widget.model.paletteColor,
+                          //               borderRadius: BorderRadius.circular(50)
+                          //             ),
+                          //             child: Center(
+                          //               child: Text('+$surplus', style: TextStyle(color: widget.model.accentColor, fontSize: widget.model.secondaryQuestionTitleFontSize)),
+                          //             ),
+                          //           );
+                          //         },
+                          //         avatars: [
+                          //           if (affiliatedUsersProfiles.isNotEmpty) for (var n = 0; n < affiliatedUsersProfiles.length; n++) (affiliatedUsersProfiles.toList()[n].profileImage != null) ? affiliatedUsersProfiles.toList()[n].profileImage!.image : Image.asset('assets/profile-avatar.png').image
+                          //         ]
+                          //     ),
+                          //   ),
+                          // ),
+                          if (widget.allAttendees.isEmpty) Icon(Icons.keyboard_arrow_right_rounded, color: widget.model.paletteColor)
                         ],
                       ),
                     ),
@@ -470,9 +468,6 @@ class _ReservationDetailsWidgetState extends State<ReservationDetailsWidget> {
 
                     }
                   ),
-
-
-
                   const SizedBox(height: 20),
                 ],
               ),

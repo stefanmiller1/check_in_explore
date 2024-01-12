@@ -15,8 +15,8 @@ Widget loadingCard(BuildContext context) {
 }
 
 Widget getImageItemSelectionTabWidget(BuildContext context, DashboardModel model, int length, int currentPageIndex) {
-  return Positioned(
-    top: 2,
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8),
     child: Container(
       width: MediaQuery.of(context).size.width,
       child: Row(

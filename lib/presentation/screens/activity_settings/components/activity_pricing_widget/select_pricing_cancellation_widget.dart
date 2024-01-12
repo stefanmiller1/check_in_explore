@@ -1,6 +1,5 @@
 import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_domain/check_in_domain.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_pricing_widget/widget/select_facility_cost_cancellation_widget.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';

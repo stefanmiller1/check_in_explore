@@ -6,6 +6,12 @@ import 'package:intl/intl.dart';
 
 enum SearchWhereWhenMarker {where, when, who}
 
+class SearchExploreCoreHelper {
+
+  static SearchListingType currentSearchListingType = SearchListingType.facilities;
+
+}
+
 final double listingHeaderHeight = 15;
 double searchHeaderHeight(BuildContext context) => 120;
 // double panelHeight(BuildContext context) => MediaQuery.of(context).size.height - searchHeaderHeight(context) - 65;
@@ -16,6 +22,7 @@ class MapMarker extends Clusterable {
 
   final String markerId;
   final LatLng position;
+  bool? isSelected;
   String? markerTitle;
   String? markerImageUrl;
   BitmapDescriptor? icon;
@@ -25,6 +32,7 @@ class MapMarker extends Clusterable {
     required this.markerId,
     required this.position,
     this.icon,
+    this.isSelected,
     this.markerTitle,
     this.markerImageUrl,
     this.onMarkerTap,
@@ -45,9 +53,6 @@ class MapMarker extends Clusterable {
 
   Marker toMarker() => Marker(
     markerId: MarkerId(markerId),
-    infoWindow: InfoWindow(
-        title: markerTitle,
-    ),
     position: LatLng(
       position.latitude,
       position.longitude,

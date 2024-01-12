@@ -1,51 +1,51 @@
-import 'package:avatar_stack/avatar_stack.dart';
-import 'package:check_in_application/auth/update_services/listing_update_create_services/settings_update_create_services/activity_settings/activity_settings_form_bloc.dart';
 import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_domain/check_in_domain.dart';
+import 'package:check_in_domain/domain/misc/attendee_services/attendee_item/attendee_item.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/activity_settings_screen_helper.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_availability_widget/activity_availability_preview.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_background_widget/activity_background_preview.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_background_widget/add_more_activity_background_info.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_presets/activity_presets_preview.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_pricing_widget/add_pricing_requirement_widget.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_pricing_widget/review_pricing_breakdown_widget.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_pricing_widget/select_pricing_cancellation_widget.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_requirements_widget/select_requirement_basics.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_requirements_widget/select_requirement_custom.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_requirements_widget/select_requirement_event_basics.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_requirements_widget/select_requirement_event_provided.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_requirements_widget/select_requirement_event_selling.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_requirements_widget/select_requirements_provided.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_reservation_widget/create_pass_reservation_widget.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_reservation_widget/create_ticket_reservation_widget.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_reservation_widget/review_reservation_overview_widget.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_reservation_widget/select_reservation_overview_widget.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_rules_widget/create_new_activity_game_rule.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_rules_widget/create_new_activity_rule.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_rules_widget/review_activity_rule_preset.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_type_widget/select_activity_type_widget.dart';
-import 'package:collection/collection.dart';
+import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_attendee_widget/create_ticket_attendee_mobile_widget.dart';
+import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_attendee_widget/select_attendee_type_mobile_widget.dart';
+import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_cancellation_widget/select_cancellation_settings_mobile_widget.dart';
+import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_payment_widget/activity_payments_mobile_widget.dart';
+import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_rules_widget/activity_general_rules_mobile_widget.dart';
+import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_rules_widget/activity_general_rules_widget.dart';
+import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_background_mobile_widget/background_info_settings_widget.dart';
+import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_check_in_widget/check_ins_info_widget.dart';
+import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_check_in_widget/chexk_ins_info_mobile_widget.dart';
+import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_custom_rules_widgets/custom_rule_info_mobile_widget.dart';
+import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_custom_rules_widgets/custom_rule_info_widget.dart';
+import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_cancellation_widget/select_cancellation_settings_widget.dart';
+import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_access_visibility_widgets/access_visibility_info_settings_mobile_widget.dart';
+import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_requirements_widget/requirements_settings_mobile_widget.dart';
+import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_requirements_widget/requirements_settings_widget.dart';
+import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_access_visibility_widgets/access_visibility_info_settings_widget.dart';
+import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings_web/settings_helper.dart';
 import 'package:flutter/material.dart';
-import 'package:dartz/dartz.dart' as dart;
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:jumping_dot/jumping_dot.dart';
-import 'package:provider/src/provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:intl/intl.dart';
 
-class ActivitySettingsScreen extends StatefulWidget {
+import 'components/activity_background_mobile_widget/activity_background_preview.dart';
+import 'components/activity_reservation_widget/create_pass_reservation_widget.dart';
+import 'components/activity_reservation_widget/create_ticket_reservation_widget.dart';
+import 'components/activity_reservation_widget/select_reservation_overview_widget.dart';
+import 'components/activity_rules_widget/create_new_activity_rule.dart';
+import 'components/activity_settings_mobile_container.dart';
+
+class ActivitySettingsScreenMobile extends StatefulWidget {
 
   final DashboardModel model;
+  final UserProfileModel currentUser;
   final ReservationItem reservationItem;
+  final ActivityManagerForm? activityManagerForm;
   final ListingManagerForm listing;
 
-  const ActivitySettingsScreen({super.key, required this.model, required this.reservationItem, required this.listing});
+  const ActivitySettingsScreenMobile({super.key, required this.model, required this.reservationItem, required this.listing, this.activityManagerForm, required this.currentUser});
 
   @override
-  State<ActivitySettingsScreen> createState() => _ActivitySettingsScreenState();
+  State<ActivitySettingsScreenMobile> createState() => _ActivitySettingsScreenMobileState();
 }
 
-class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
+class _ActivitySettingsScreenMobileState extends State<ActivitySettingsScreenMobile> {
 
   // TODO: HANDLE SAVING THE WAY SAVING IS HANDLED IN UPDATING PAYMENT SETTINGS...
   // TODO: INCLUDE SETUP FOR ACCEPTING PAYMENTS (IF CHARGING ATTENDEE TYPE IS ANYTHING OTHER THAN FREE)
@@ -60,170 +60,80 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
   }
 
 
-  Widget getMainListTile(BuildContext context, ActivityCreatorFormNav currentNav) {
-    switch (currentNav.creatorSectionNav) {
-      case ActivityCreatorFormNavSection.selectActivityType:
+  /// depending on activity show list of items
 
-        switch (currentNav.activityTypeNav) {
-          case ActivityTypeNav.selectActivityType:
-            /// present current activity type (either experience, game or class etc.) [ActivityTypeNav]
-            /// present activity options offered by listing facility.
-            ///  TODO: include commercial/retail activity
-            ///  TODO: include co-working/office activity
-            // return ListTile(
-            //   onTap: () {
-            //     Navigator.push(context, MaterialPageRoute(
-            //         builder: (_) {
-            //           return SelectActivityTypeWidget(
-            //             model: widget.model,
-            //             activityManagerForm: context.read<UpdateActivityFormBloc>().state.activityManagerForm,
-            //         );
-            //       })
-            //     );
-            //   },
-            //   title: Text('The Activity'),
-            //   subtitle: Text(getActivityTypeOptions().firstWhere((element) => element.activityType == context.read<UpdateActivityFormBloc>().state.activityManagerForm.activityType.activityType).title ?? 'Select an Activity Type'),
-            //   leading: Icon(getActivityTypeOptions().firstWhere((element) => element.activityType == context.read<UpdateActivityFormBloc>().state.activityManagerForm.activityType.activityType).icon ?? Icons.house_outlined, color: widget.model.paletteColor),
-            //   trailing: Icon(Icons.keyboard_arrow_right_rounded, color: widget.model.paletteColor),
-            // );
-          case ActivityTypeNav.selectActivity:
-            return ListTile(
-              onTap: () {
+  Widget getMainListTile(BuildContext context, SettingNavMarker currentNav, ActivityManagerForm activityForm, UserProfileModel activityOwner) {
 
-              },
-              title: const Text('About the Activity'),
-              subtitle: Text(getTitleForActivityOption(context, context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityType.activityId) ?? ''),
-              leading:  Icon(getIconDataForActivity(context, context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityType.activityId), color: widget.model.paletteColor),
-              trailing: Icon(Icons.keyboard_arrow_right_rounded, color: widget.model.paletteColor),
-            );
-        }
-        break;
-      case ActivityCreatorFormNavSection.selectActivityPreset:
+    switch (currentNav) {
+      case SettingNavMarker.backgroundInfo:
+        return Column(
+          children: [
+              ActivityBackgroundPreview(
+                reservation: widget.reservationItem,
+                model: widget.model,
+                currentUser: widget.currentUser,
+                activityManagerForm: activityForm,
+              ),
+              ListTile(
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(
+                      builder: (_) {
+                        return ActivitySettingsMobileEditor(
+                            model: widget.model,
+                            activityManagerForm: activityForm,
+                            reservation: widget.reservationItem,
+                            activityOwner: activityOwner,
+                            mainSettingsWidget: BackgroundInfoSettingsWidget(
+                              model: widget.model,
+                              activityManagerForm: activityForm,
+                              currentUser: widget.currentUser,
+                              reservationItem: widget.reservationItem,
+                            ),
+                            didSave: () {
+                              setState(() {
+                                Navigator.of(context).pop();
+                              });
+                            },
+                        );
+                    })
+                  );
+                },
+                leading: Icon(Icons.more_horiz, color: widget.model.paletteColor),
+                title: const Text('More to Know..'),
+                subtitle: (activityForm.profileService.activityBackground.activityDescription2 != null) ? Text(activityForm.profileService.activityBackground.activityDescription2!.value.fold((l) => 'Add a Description', (r) => r)) : const Text('Add More'),
+                trailing: Icon(Icons.keyboard_arrow_right_rounded, color: widget.model.paletteColor),
+              ),
 
-          switch (currentNav.activityPreSetup) {
-            case ActivityPreSetup.addFacilityActivityContactDetails:
-              // return ActivityPresetContactDetails(
-              //   model: widget.model,
-              // );
-            case ActivityPreSetup.addFacilityActivityOrganizationDetails:
-              /// linking your community...
-              // return ActivityPresetCommunityLinkToPreview(
-              //   model: widget.model,
-              // );
-            case ActivityPreSetup.selectActivitySetupClass:
-              // return ActivityPresetClassPreview(
-              //   model: widget.model,
-              // );
-            case ActivityPreSetup.addClassPlayers:
-              // return ActivityPresetClassPlayersPreview(
-              //   model: widget.model,
-              // );
-            case ActivityPreSetup.selectActivityGameTeams:
-              // return ActivityPresetGamePreview(
-              //   model: widget.model,
-              // );
-          }
-        break;
-      // case ActivityCreatorFormNavSection.selectLocationType:
-      //   // TODO: Handle this case.
-      //   break;
-      // case ActivityCreatorFormNavSection.selectSpaceType:
-      //   // TODO: Handle this case.
-      //   break;
-      case ActivityCreatorFormNavSection.selectBookingDates:
-
-        // if (!(context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAvailability.isActive)) {
-         return  viewListOfSelectedSlots(
-            context,
-            widget.model,
-            [],
-            widget.reservationItem.reservationSlotItem,
-            widget.reservationItem.cancelledSlotItem ?? [],
-            false,
-            AppLocalizations.of(context)!.profileFacilitySlotTime,
-            AppLocalizations.of(context)!.profileFacilitySlotBookingLocation,
-            AppLocalizations.of(context)!.profileFacilitySlotBookingDate,
-            widget.listing,
-            didSelectReservation: (e) {
-            },
-            didSelectCancelResSlot: (e, f) {
-            setState(() {});
-            },
-            didSelectRemoveResSlot: (e, f) {
-
-            }
-          );
-        // } else {
-        //   switch (currentNav.activityAvailableDatesNav) {
-        //     case ActivityAvailableDatesNav.selectDurationType:
-        //       return ActivityAvailabilitySelectDurationTypePreview(
-        //           model: widget.model
-        //       );
-        //     case ActivityAvailableDatesNav.selectOperatingHours:
-        //     // TODO: Handle this case.
-        //       break;
-        //     case ActivityAvailableDatesNav.selectSessionType:
-        //     // TODO: Handle this case.
-        //       break;
-        //     case ActivityAvailableDatesNav.selectPreBookingType:
-        //     // TODO: Handle this case.
-        //       break;
-        //     case ActivityAvailableDatesNav.reviewDateSetup:
-        //     // TODO: Handle this case.
-        //       break;
-        //   }
-        // }
-        break;
-      case ActivityCreatorFormNavSection.selectBackground:
-       switch (currentNav.activityBackgroundNav) {
-         case ActivityBackgroundNav.addActivityNameDescription:
-           /// add profile image for activity, adding a new image will
-           /// are changes to profile image list also a form of uploading a new post?
-           /// or is the profile image just a separate way of starting a new post and previewing your activity calls --- too confusing.
-           /// the point here is can the profile images and posts be consolidated in some way?
-           return ActivityBackgroundPreview(
-               reservation: widget.reservationItem,
-               model: widget.model
-           );
-         case ActivityBackgroundNav.addMoreActivityBackground:
-           return ListTile(
-               onTap: () {
-                 Navigator.push(context, MaterialPageRoute(
-                   builder: (_) {
-                     return ActivityAddMoreBackgroundInfoWidget(
-                       reservation: widget.reservationItem,
-                       model: widget.model,
-                       activityManagerForm: context.read<UpdateActivityFormBloc>().state.activitySettingsForm,
-                     );
-                   })
-                );
-               },
-               leading: Icon(Icons.more_horiz, color: widget.model.paletteColor),
-               title: const Text('More to Know..'),
-               subtitle: (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityBackground.activityDescription2 != null) ? Text(context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityBackground.activityDescription2!.value.fold((l) => 'Add a Description', (r) => r)) : const Text('Add More'),
-               trailing: Icon(Icons.keyboard_arrow_right_rounded, color: widget.model.paletteColor),
-             );
-         case ActivityBackgroundNav.addClassActivityBackground:
-           return ActivityClassBackgroundPreview(
-             reservation: widget.reservationItem,
-             model: widget.model,
-         );
-       }
-       break;
-      case ActivityCreatorFormNavSection.selectRequirements:
-        switch (currentNav.activityRequirementsNav) {
-
-          case ActivityRequirementsNav.selectAgeGenderSkillYearsRequirement:
-            return ListTile(
+              /// for class activities...
+               Visibility(
+                 visible: activityForm.activityType.activityType == ProfileActivityTypeOption.classesLessons,
+                 child: ActivityClassBackgroundPreview(
+                  reservation: widget.reservationItem,
+                  model: widget.model,
+               ),
+             )
+          ],
+        );
+      case SettingNavMarker.requirementsInfo:
+        return Column(
+          children: [
+            ListTile(
               onTap: () {
                 Navigator.push(context, MaterialPageRoute(
                     builder: (_) {
-                      return ActivitySelectRequirementsBasics(
-                        reservation: widget.reservationItem,
+                      return RequirementsSettingsMobileEditor(
                         model: widget.model,
-                        activityManagerForm: context.read<UpdateActivityFormBloc>().state.activitySettingsForm,
+                        activityManagerForm: activityForm,
+                        reservation: widget.reservationItem,
+                        activityOwner: activityOwner,
+                        currentUser: widget.currentUser,
+                        didSave: () {
+                          setState(() {
+                            Navigator.of(context).pop();
+                          });
+                        },
                       );
-                  })
+                    })
                 );
               },
               title: Text('Expectations'),
@@ -231,61 +141,38 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.isSeventeenAndUnder) Text('17 and Under'),
-                  if (!(context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.isSeventeenAndUnder)) Text('Minimum Age: ${context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.minimumAgeRequirement}'),
+                  if (activityForm.profileService.activityRequirements.isSeventeenAndUnder) Text('17 and Under'),
+                  if (!(activityForm.profileService.activityRequirements.isSeventeenAndUnder)) Text('Minimum Age: ${activityForm.profileService.activityRequirements.minimumAgeRequirement}'),
 
-                  if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.isMensOnly ?? false) Text('Mens Only'),
-                  if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.isWomenOnly ?? false) Text('Womens Only'),
-                  if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.isCoEdOnly ?? false) Text('Co-Ed'),
+                  if (activityForm.profileService.activityRequirements.isMensOnly ?? false) Text('Mens Only'),
+                  if (activityForm.profileService.activityRequirements.isWomenOnly ?? false) Text('Womens Only'),
+                  if (activityForm.profileService.activityRequirements.isCoEdOnly ?? false) Text('Co-Ed'),
 
-                  if ((context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.skillLevelExpectation ?? []).isEmpty) Text('Add a Skill Level'),
-                  if ((context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.skillLevelExpectation ?? []).isNotEmpty) Text('Skill Style: '),
-                  if ((context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.skillLevelExpectation ?? []).isNotEmpty) ...context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.skillLevelExpectation?.map(
+                  if ((activityForm.profileService.activityRequirements.skillLevelExpectation ?? []).isEmpty) Text('Add a Skill Level'),
+                  if ((activityForm.profileService.activityRequirements.skillLevelExpectation ?? []).isNotEmpty) Text('Skill Style: '),
+                  if ((activityForm.profileService.activityRequirements.skillLevelExpectation ?? []).isNotEmpty) ...activityForm.profileService.activityRequirements.skillLevelExpectation?.map(
                           (e) => Text(e.name)
                   ).toList() ?? []
                 ],
               ),
               leading: Icon(Icons.add_chart_rounded, color: widget.model.paletteColor),
               trailing: Icon(Icons.keyboard_arrow_right_rounded, color: widget.model.paletteColor),
-            );
-            break;
-          case ActivityRequirementsNav.AddAdditionalCustomDetails:
-            return ListTile(
+            ),
+            ListTile(
               onTap: () {
                 Navigator.push(context, MaterialPageRoute(
                     builder: (_) {
-                      return ActivitySelectCustomRequirement(
-                        reservation: widget.reservationItem,
+                      return RequirementsSettingsMobileEditor(
                         model: widget.model,
-                        activityManagerForm: context.read<UpdateActivityFormBloc>().state.activitySettingsForm,
-                      );
-                    })
-                );
-              },
-              title: Text('Special Requirements'),
-              subtitle: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Add Special Requirements'),
-                  // ...context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.customRequirementOption?.value.fold((l) => [], (r) => r.map(
-                  //         (e) => Text(e.customDetail ?? '')
-                  //   )
-                  // ) ?? []
-                ],
-              ),
-              leading: Icon(Icons.more_horiz_rounded, color: widget.model.paletteColor),
-              trailing: Icon(Icons.keyboard_arrow_right_rounded, color: widget.model.paletteColor),
-            );
-          case ActivityRequirementsNav.selectProvidedItems:
-            return ListTile(
-              onTap: () {
-                Navigator.push(context, MaterialPageRoute(
-                    builder: (_) {
-                      return ActivityRequirementProvided(
+                        activityManagerForm: activityForm,
                         reservation: widget.reservationItem,
-                        model: widget.model,
-                        activityManagerForm: context.read<UpdateActivityFormBloc>().state.activitySettingsForm,
+                        activityOwner: activityOwner,
+                        currentUser: widget.currentUser,
+                        didSave: () {
+                          setState(() {
+                            Navigator.of(context).pop();
+                          });
+                        },
                       );
                     })
                 );
@@ -296,28 +183,33 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text('Add What You Will Provide'),
-                  if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.isFacilityGear ?? false) const Text('Gear/Clothing Will Be Provided'),
-                  if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.isEquipmentProvided ?? false) const Text('Equipment Will Be Provided'),
-                  if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.isAnalyticsProvided ?? false) const Text('Analytics Will Be Provided'),
-                  if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.isOfficiatorProvided ?? false) const Text('Officiators Will Be Provided'),
+                  if (activityForm.profileService.activityRequirements.isFacilityGear ?? false) const Text('Gear/Clothing Will Be Provided'),
+                  if (activityForm.profileService.activityRequirements.isEquipmentProvided ?? false) const Text('Equipment Will Be Provided'),
+                  if (activityForm.profileService.activityRequirements.isAnalyticsProvided ?? false) const Text('Analytics Will Be Provided'),
+                  if (activityForm.profileService.activityRequirements.isOfficiatorProvided ?? false) const Text('Officiators Will Be Provided'),
                 ],
               ),
               leading: Icon(Icons.front_hand_sharp, color: widget.model.paletteColor),
               trailing: Icon(Icons.keyboard_arrow_right_rounded, color: widget.model.paletteColor),
-            );
-          case ActivityRequirementsNav.selectEventOptionItems:
-            return ListTile(
+            ),
+            ListTile(
               onTap: () {
                 Navigator.push(context, MaterialPageRoute(
                     builder: (_) {
-                      return ActivityRequirementEventBasics(
-                        reservation: widget.reservationItem,
+                      return RequirementsSettingsMobileEditor(
                         model: widget.model,
-                        activityManagerForm: context.read<UpdateActivityFormBloc>().state.activitySettingsForm,
-                    );
-                  })
+                        activityManagerForm: activityForm,
+                        reservation: widget.reservationItem,
+                        activityOwner: activityOwner,
+                        currentUser: widget.currentUser,
+                        didSave: () {
+                          setState(() {
+                            Navigator.of(context).pop();
+                          });
+                        },
+                      );
+                    })
                 );
-
               },
               title: Text('Selling Options'),
               subtitle: Column(
@@ -330,18 +222,92 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
               ),
               leading: Icon(Icons.sell_rounded, color: widget.model.paletteColor),
               trailing: Icon(Icons.keyboard_arrow_right_rounded, color: widget.model.paletteColor),
-            );
-          case ActivityRequirementsNav.selectEventSellingOptions:
-            return ListTile(
+            ),
+            ListTile(
               onTap: () {
                 Navigator.push(context, MaterialPageRoute(
                     builder: (_) {
-                      return ActivityRequirementEventSelling(
-                        reservation: widget.reservationItem,
+                      return RequirementsSettingsMobileEditor(
                         model: widget.model,
-                        activityManagerForm: context.read<UpdateActivityFormBloc>().state.activitySettingsForm,
-                    );
-                  })
+                        activityManagerForm: activityForm,
+                        reservation: widget.reservationItem,
+                        activityOwner: activityOwner,
+                        currentUser: widget.currentUser,
+                        didSave: () {
+                          setState(() {
+                            Navigator.of(context).pop();
+                          });
+                        },
+                      );
+                    })
+                );
+              },
+              title: const Text('On The House'),
+              subtitle: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Add What You Will Provide'),
+                  if (activityForm.profileService.activityRequirements.isFacilityGear ?? false) const Text('Gear/Clothing Will Be Provided'),
+                  if (activityForm.profileService.activityRequirements.isEquipmentProvided ?? false) const Text('Equipment Will Be Provided'),
+                  if (activityForm.profileService.activityRequirements.isAnalyticsProvided ?? false) const Text('Analytics Will Be Provided'),
+                  if (activityForm.profileService.activityRequirements.isOfficiatorProvided ?? false) const Text('Officiators Will Be Provided'),
+                ],
+              ),
+              leading: Icon(Icons.front_hand_sharp, color: widget.model.paletteColor),
+              trailing: Icon(Icons.keyboard_arrow_right_rounded, color: widget.model.paletteColor),
+            ),
+            ListTile(
+              onTap: () {
+                Navigator.push(context, MaterialPageRoute(
+                    builder: (_) {
+                      return RequirementsSettingsMobileEditor(
+                        model: widget.model,
+                        activityManagerForm: activityForm,
+                        reservation: widget.reservationItem,
+                        activityOwner: activityOwner,
+                        currentUser: widget.currentUser,
+                        didSave: () {
+                          setState(() {
+                            Navigator.of(context).pop();
+                          });
+                        },
+                      );
+                    })
+                );
+              },
+              title: const Text('On The House (Event)'),
+              subtitle: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Add What You Will Provide'),
+                  if (activityForm.profileService.activityRequirements.isEquipmentProvided ?? false) const Text('Equipment Will be Provided'),
+                  if (activityForm.profileService.activityRequirements.eventActivityRulesRequirement?.isAlcoholProvided ?? false) const Text('Alcohol Will be Provided'),
+                  if (activityForm.profileService.activityRequirements.eventActivityRulesRequirement?.isFoodProvided ?? false) const Text('Food Will be Provided'),
+                  if (activityForm.profileService.activityRequirements.eventActivityRulesRequirement?.isSecurityProvided ?? false) const Text('Security Will be Provided'),
+                ],
+              ),
+              leading: Icon(Icons.front_hand_sharp, color: widget.model.paletteColor),
+              trailing: Icon(Icons.keyboard_arrow_right_rounded, color: widget.model.paletteColor),
+            ),
+            ListTile(
+              onTap: () {
+                Navigator.push(context, MaterialPageRoute(
+                    builder: (_) {
+                      return RequirementsSettingsMobileEditor(
+                        model: widget.model,
+                        activityManagerForm: activityForm,
+                        reservation: widget.reservationItem,
+                        activityOwner: activityOwner,
+                        currentUser: widget.currentUser,
+                        didSave: () {
+                          setState(() {
+                            Navigator.of(context).pop();
+                          });
+                        },
+                      );
+                    })
                 );
               },
               title: const Text('Vendors & Merchants'),
@@ -357,247 +323,270 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
               ),
               leading: Icon(Icons.add_business, color: widget.model.paletteColor),
               trailing: Icon(Icons.keyboard_arrow_right_rounded, color: widget.model.paletteColor),
-            );
-          case ActivityRequirementsNav.selectEventProvidedOptions:
-            return ListTile(
-              onTap: () {
-                Navigator.push(context, MaterialPageRoute(
-                    builder: (_) {
-                      return ActivityRequirementEventProvided(
-                        reservation: widget.reservationItem,
-                        model: widget.model,
-                        activityManagerForm: context.read<UpdateActivityFormBloc>().state.activitySettingsForm,
-                      );
-                  })
-                );
+            ),
 
-              },
-              title: const Text('On The House (Event)'),
-              subtitle: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                    const Text('Add What You Will Provide'),
-                    if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.isEquipmentProvided ?? false) const Text('Equipment Will be Provided'),
-                    if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.eventActivityRulesRequirement?.isAlcoholProvided ?? false) const Text('Alcohol Will be Provided'),
-                    if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.eventActivityRulesRequirement?.isFoodProvided ?? false) const Text('Food Will be Provided'),
-                    if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.eventActivityRulesRequirement?.isSecurityProvided ?? false) const Text('Security Will be Provided'),
-                ],
-              ),
-              leading: Icon(Icons.front_hand_sharp, color: widget.model.paletteColor),
-              trailing: Icon(Icons.keyboard_arrow_right_rounded, color: widget.model.paletteColor),
-            );
-        }
+          ],
+        );
+      case SettingNavMarker.reservation:
+        // TODO: Handle this case.
         break;
-      case ActivityCreatorFormNavSection.selectRules:
+      case SettingNavMarker.activity:
+        return ListTile(
+          onTap: () {
 
-        switch (currentNav.activityRulesNav) {
-          case ActivityRulesNav.reviewActivityPresetRules:
-            return ListTile(
-              onTap: () {
+          },
+          title: const Text('About the Activity'),
+          subtitle: Text(getTitleForActivityOption(context, activityForm.activityType.activityId) ?? ''),
+          leading:  Icon(getIconDataForActivity(context, activityForm.activityType.activityId), color: widget.model.paletteColor),
+          trailing: Icon(Icons.keyboard_arrow_right_rounded, color: widget.model.paletteColor),
+        );
+      case SettingNavMarker.accessAndVisibility:
+        return ListTile(
+          onTap: () {
+            Navigator.push(context, MaterialPageRoute(
+              builder: (_) {
+              return AccessVisibilitySettingsMobile(
+                reservation: widget.reservationItem,
+                model: widget.model,
+                activityManagerForm: activityForm,
+                didSave: () {
+                  setState(() {
+                    Navigator.of(context).pop();
+                  });
+                }
+              );
+            })
+          );
+        },
+        title: const Text('Access and Visibility'),
+        subtitle: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
 
-                Navigator.push(context, MaterialPageRoute(
-                    builder: (_) {
-                      return ActivityRulesToReview(
-                        reservation: widget.reservationItem,
-                        model: widget.model,
-                        activityManagerForm: context.read<UpdateActivityFormBloc>().state.activitySettingsForm,
-                      );
-                    })
+                if (activityForm.rulesService.accessVisibilitySetting.isInviteOnly == true) Text('Invite Required'),
+                if (activityForm.rulesService.accessVisibilitySetting.isPrivateOnly == true) Text('Private Event'),
+                if (activityForm.rulesService.accessVisibilitySetting.isPrivateOnly == false) Text('Public Event')
+
+              ],
+            ),
+            leading: Icon(Icons.remove_red_eye_outlined, color: widget.model.paletteColor),
+          trailing: Icon(Icons.keyboard_arrow_right_rounded, color: widget.model.paletteColor),
+        );
+      case SettingNavMarker.customFields:
+        return ListTile(
+          onTap: () {
+            Navigator.push(context, MaterialPageRoute(
+                builder: (_) {
+                  return CustomRuleInfoMobileEditor(
+                      reservation: widget.reservationItem,
+                      model: widget.model,
+                      activityManagerForm: activityForm,
+                      didSave: () {
+                        setState(() {
+                          Navigator.of(context).pop();
+                        });
+                      }
+                  );
+                })
+            );
+          },
+          title: const Text('Custom Rules'),
+          subtitle: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Add Custom Rules'),
+
+            ],
+          ),
+          leading: Icon(Icons.checklist_rounded, color: widget.model.paletteColor),
+        );
+      case SettingNavMarker.checkIns:
+        return ListTile(
+          onTap: () {
+            Navigator.push(context, MaterialPageRoute(
+                builder: (_) {
+                  return CheckInInfoMobileEditor(
+                      reservation: widget.reservationItem,
+                      model: widget.model,
+                      activityManagerForm: activityForm,
+                      didSave: () {
+                        setState(() {
+                          Navigator.of(context).pop();
+                    });
+                  }
                 );
-
-              },
-              title: Text('Rules'),
-              subtitle: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Review The Rules'),
-                  ...context.read<UpdateActivityFormBloc>().state.activitySettingsForm.rulesService.ruleOption.value.fold((l) => [Text('Add Rules For Attendees')], (r) => r.map(
-                          (e) => (e.active ?? false) ? Text(e.detail ?? '') : Container()).toList())
-                ],
-              ),
-              leading: Icon(Icons.rule_rounded, color: widget.model.paletteColor),
-              trailing: Icon(Icons.keyboard_arrow_right_rounded, color: widget.model.paletteColor),
+              })
             );
-          case ActivityRulesNav.selectActivityRules:
-            return ListTile(
-              onTap: () {
-                Navigator.push(context, MaterialPageRoute(
-                    builder: (_) {
-                      return ActivityRuleToCreate(
-                        reservation: widget.reservationItem,
-                        model: widget.model,
-                        activityManagerForm: context.read<UpdateActivityFormBloc>().state.activitySettingsForm,
-                    );
-                  })
-                );
-              },
-              title: Text('Special Rules'),
-              subtitle: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ...context.read<UpdateActivityFormBloc>().state.activitySettingsForm.rulesService.customRuleOption?.value.fold((l) => [const Text('Add Special Rules')], (r) => r.map(
-                            (e) => Text(e.customDetail ?? ''))
-                    ) ?? [],
-                ],
-              ),
-              leading: Icon(Icons.rule_rounded, color: widget.model.paletteColor),
-              trailing: Icon(Icons.keyboard_arrow_right_rounded, color: widget.model.paletteColor),
+          },
+          title: const Text('Check In Form'),
+          subtitle: Text('Add Check In Forms'),
+          leading: Icon(Icons.sticky_note_2_outlined, color: widget.model.paletteColor),
+        );
+      case SettingNavMarker.activityRules:
+        return ListTile(
+          onTap: () {
+            Navigator.push(context, MaterialPageRoute(
+                builder: (_) {
+                  return ActivityRuleMobileEditor(
+                      reservation: widget.reservationItem,
+                      model: widget.model,
+                      activityManagerForm: activityForm,
+                      didSave: () {
+                        setState(() {
+                          Navigator.of(context).pop();
+                        });
+                      }
+                  );
+                })
             );
-          case ActivityRulesNav.addCustomRules:
-            return ListTile(
-              onTap: () {
-
-              },
-              title: const Text('Custom Rules'),
-              subtitle: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Add Custom Rules'),
-
-                ],
-              ),
-              leading: Icon(Icons.checklist_rounded, color: widget.model.paletteColor),
+          },
+          title: Text('Activity Rules'),
+          subtitle: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (activityForm.rulesService.ruleOption.isValid() && activityForm.rulesService.ruleOption.getOrCrash().isEmpty) Text('Add Rules'),
+              ...activityForm.rulesService.ruleOption.value.fold((l) => [], (r) => r.map((e) => Text(predefinedDetailOptions(context).firstWhere((element) => element.uid == e.uid).detail ?? ''))),
+            ],
+          ),
+          leading: Icon(Icons.rule_rounded, color: widget.model.paletteColor),
+          trailing: Icon(Icons.keyboard_arrow_right_rounded, color: widget.model.paletteColor),
+        );
+      case SettingNavMarker.cancellations:
+        return ListTile(
+          onTap: () {
+            Navigator.push(context, MaterialPageRoute(
+                builder: (_) {
+                  return CancellationSettingsMobileEditor(
+                      reservation: widget.reservationItem,
+                      model: widget.model,
+                      activityManagerForm: activityForm,
+                      didSave: () {
+                        setState(() {
+                          Navigator.of(context).pop();
+                        });
+                      }
+                  );
+                })
             );
-            break;
-          case ActivityRulesNav.addCheckInRules:
-            return ListTile(
-              onTap: () {
-
-              },
-              title: const Text('Check In Form'),
-              subtitle: Text('Add Check In Forms'),
-              leading: Icon(Icons.sticky_note_2_outlined, color: widget.model.paletteColor),
+          },
+          title: const Text('Cancellation'),
+          subtitle: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Add Cancellation Rules'),
+            ]
+          ),
+          leading: Icon(Icons.cancel_outlined, color: widget.model.paletteColor),
+        );
+      case SettingNavMarker.payments:
+        return ListTile(
+          onTap: () {
+            Navigator.push(context, MaterialPageRoute(
+                builder: (_) {
+                  return PaymentMobileEditor(
+                      reservation: widget.reservationItem,
+                      model: widget.model,
+                      activityManagerForm: activityForm,
+                      activityOwner: activityOwner,
+                      didSave: () {
+                        setState(() {
+                          Navigator.of(context).pop();
+                        });
+                      }
+                  );
+                })
             );
-            break;
-          case ActivityRulesNav.addActivityRewardRules:
-            // TODO: Handle this case.
-            break;
-          case ActivityRulesNav.addActivityContributionDonationRules:
-            return ListTile(
-              onTap: () {
-                Navigator.push(context, MaterialPageRoute(
-                    builder: (_) {
-                      return ActivityRuleGameToCreate(
-                        reservation: widget.reservationItem,
-                        model: widget.model,
-                        activityManagerForm: context.read<UpdateActivityFormBloc>().state.activitySettingsForm,
-                      );
-                    })
-                );
-              },
-              title: const Text('Contributions & Donations'),
-              subtitle: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-
-                ],
-              ),
-              leading: Icon(Icons.wallet_giftcard_rounded, color: widget.model.paletteColor),
-              trailing: Icon(Icons.keyboard_arrow_right_rounded, color: widget.model.paletteColor),
+          },
+          title: const Text('Payments'),
+          subtitle: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Handle Payments'),
+              Text('Currency: ${NumberFormat.simpleCurrency(locale: activityForm.rulesService.currency).currencyName}'),
+            ]
+          ),
+          leading: Icon(Icons.payments_outlined, color: widget.model.paletteColor),
+        );
+      case SettingNavMarker.attendanceType:
+        return ListTile(
+          onTap: () {
+            Navigator.push(context, MaterialPageRoute(
+                builder: (_) {
+                  return AttendeeTypeMobileEditor(
+                    reservation: widget.reservationItem,
+                    model: widget.model,
+                    activityManagerForm: activityForm,
+                    didSave: () {
+                      setState(() {
+                        Navigator.of(context).pop();
+                      });
+                    }
+                  );
+                })
             );
-          case ActivityRulesNav.reviewFacilityIncentiveOptions:
-            // TODO: Handle this case.
-            break;
-          case ActivityRulesNav.requestFacilityPartnerSponsorshipOptions:
-            // TODO: Handle this case.
-            break;
-        }
-        break;
-      case ActivityCreatorFormNavSection.selectAttendance:
-        switch (currentNav.activityAttendanceNav) {
-
-          case ActivityAttendanceNav.attendanceOverview:
-            return ListTile(
-              onTap: () {
-                Navigator.push(context, MaterialPageRoute(
-                    builder: (_) {
-                      return ActivityAttendeeSelectType(
-                        reservation: widget.reservationItem,
-                        model: widget.model,
-                        activityManagerForm: context.read<UpdateActivityFormBloc>().state.activitySettingsForm,
-                      );
-                    })
-                );
-              },
-              title: Text('Attendance Overview'),
-              subtitle: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.isLimitedAttendance == null) const Text('Add Attendance Limit'),
-                  if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.isLimitedAttendance ?? false) Text('Attendance Limit: ${context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.attendanceLimit ?? 0}'),
-                  if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.isTicketBased ?? false) const Text('Tickets Holders Only'),
-                  if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityAttendance.isPassBased ?? false) const Text('Pass Holders Only')
-                ],
-              ),
-              leading: Icon(Icons.paste_rounded, color: widget.model.paletteColor),
-              trailing: Icon(Icons.keyboard_arrow_right_rounded, color: widget.model.paletteColor),
+          },
+          title: Text('Attendance Overview'),
+          subtitle: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (activityForm.activityAttendance.isLimitedAttendance == null) const Text('Add Attendance Limit'),
+              if (activityForm.activityAttendance.isLimitedAttendance ?? false) Text('Attendance Limit: ${activityForm.activityAttendance.attendanceLimit ?? 0}'),
+              if (activityForm.activityAttendance.isTicketBased ?? false) const Text('Tickets Holders Only'),
+              if (activityForm.activityAttendance.isPassBased ?? false) const Text('Pass Holders Only')
+            ],
+          ),
+          leading: Icon(Icons.paste_rounded, color: widget.model.paletteColor),
+          trailing: Icon(Icons.keyboard_arrow_right_rounded, color: widget.model.paletteColor),
+        );
+      case SettingNavMarker.ticketBased:
+        return ListTile(
+          onTap: () {
+            Navigator.push(context, MaterialPageRoute(
+                builder: (_) {
+                  return TicketAttendeeMobileEditor(
+                    reservation: widget.reservationItem,
+                    model: widget.model,
+                    activityManagerForm: activityForm,
+                    didSave: () {
+                      setState(() {
+                        Navigator.of(context).pop();
+                      });
+                    }
+                  );
+                })
             );
-          case ActivityAttendanceNav.addTicketAttendance:
-            return ListTile(
-              onTap: () {
-                Navigator.push(context, MaterialPageRoute(
-                    builder: (_) {
-                      return ActivityAttendeeCreateTicket(
-                        reservation: widget.reservationItem,
-                        model: widget.model,
-                        activityManagerForm: context.read<UpdateActivityFormBloc>().state.activitySettingsForm,
-                      );
-                    })
-                );
-              },
-              title: const Text('Ticket Attendees'),
-              leading: Icon(Icons.airplane_ticket_rounded, color: widget.model.paletteColor),
-              trailing: Icon(Icons.keyboard_arrow_right_rounded, color: widget.model.paletteColor),
+          },
+          title: const Text('Ticket Attendees'),
+          leading: Icon(Icons.airplane_ticket_rounded, color: widget.model.paletteColor),
+          trailing: Icon(Icons.keyboard_arrow_right_rounded, color: widget.model.paletteColor),
+        );
+      case SettingNavMarker.passesBased:
+        return ListTile(
+          onTap: () {
+            Navigator.push(context, MaterialPageRoute(
+                builder: (_) {
+                  return ActivityAttendeeCreatePasses(
+                    reservation: widget.reservationItem,
+                    model: widget.model,
+                    activityManagerForm: activityForm,
+                  );
+                })
             );
-          case ActivityAttendanceNav.addPassesAttendance:
-            return ListTile(
-              onTap: () {
-                Navigator.push(context, MaterialPageRoute(
-                    builder: (_) {
-                      return ActivityAttendeeCreatePasses(
-                        reservation: widget.reservationItem,
-                        model: widget.model,
-                        activityManagerForm: context.read<UpdateActivityFormBloc>().state.activitySettingsForm,
-                      );
-                    })
-                );
-              },
-              title: const Text('Pass Attendees'),
-              leading: Icon(Icons.credit_card_rounded, color: widget.model.paletteColor),
-              trailing: Icon(Icons.keyboard_arrow_right_rounded, color: widget.model.paletteColor),
-            );
-          case ActivityAttendanceNav.reviewAttendanceType:
-           return ListTile(
-             onTap: () {
-               Navigator.push(context, MaterialPageRoute(
-                   builder: (_) {
-                     return ActivityAttendeeOverviewReview(
-                       reservation: widget.reservationItem,
-                       model: widget.model,
-                       activityManagerForm: context.read<UpdateActivityFormBloc>().state.activitySettingsForm,
-                   );
-                 })
-               );
-             },
-             title: const Text('Review Attendees'),
-             leading: Icon(Icons.more_horiz_rounded, color: widget.model.paletteColor),
-             trailing: Icon(Icons.keyboard_arrow_right_rounded, color: widget.model.paletteColor),
-           );
-        }
-        break;
-
-
+          },
+          title: const Text('Pass Attendees'),
+          leading: Icon(Icons.credit_card_rounded, color: widget.model.paletteColor),
+          trailing: Icon(Icons.keyboard_arrow_right_rounded, color: widget.model.paletteColor),
+        );
     }
 
-    return ListTile(
-      title: Text(currentNav.title),
-    );
+    return Container();
+
   }
 
 
@@ -610,36 +599,44 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
         backgroundColor: widget.model.paletteColor,
         title: Text('Your Activity', style: TextStyle(color: widget.model.accentColor)),
       ),
-      body: getActivityFromReservation()
+      body: getActivityOwner()
     );
   }
 
-  Widget getActivityFromReservation() {
-    return BlocProvider(create: (context) =>  getIt<ActivityManagerWatcherBloc>()..add(ActivityManagerWatcherEvent.watchAllActivityManagerFormsStarted(true, widget.reservationItem.reservationId.getOrCrash())),
-      child: BlocBuilder<ActivityManagerWatcherBloc, ActivityManagerWatcherState>(
-        builder: (context, state) {
-          return state.maybeMap(
-              loadInProgress: (_) => JumpingDots(color: widget.model.paletteColor, numberOfDots: 3),
-              loadAllActivityManagerFormsFailure: (_) => getMainContainer(ActivityManagerForm.empty()),
-              loadAllActivityManagerFormsSuccess: (item) => item.items.isNotEmpty ? getMainContainer(item.items.first) : getMainContainer(ActivityManagerForm.empty()),
-              orElse: () => getMainContainer(ActivityManagerForm.empty())
-          );
-        },
-      ),
+  Widget getActivityOwner() {
+    return BlocProvider(create: (context) => getIt<UserProfileWatcherBloc>()..add(UserProfileWatcherEvent.watchSelectedUserProfileStarted(widget.reservationItem.reservationOwnerId.getOrCrash())),
+        child: BlocBuilder<UserProfileWatcherBloc, UserProfileWatcherState>(
+            builder: (context, state) {
+              return state.maybeMap(
+                  loadSelectedProfileFailure: (_) => settingsFailureToLoadContainer(widget.model),
+                  loadSelectedProfileSuccess: (item) => getActivityFromReservation(item.profile),
+                  orElse: () => settingsFailureToLoadContainer(widget.model)
+              );
+            }
+        )
     );
   }
-  
-  Widget getMainContainer(ActivityManagerForm activityForm) {
-    return BlocProvider(create: (context) => getIt<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.initializeActivityForm(dart.optionOf(activityForm), dart.optionOf(widget.reservationItem))),
-        child: BlocConsumer<UpdateActivityFormBloc, UpdateActivityFormState>(
-          listenWhen: (p, c) => p.authFailureOrSuccessOptionSaving != c.authFailureOrSuccessOptionSaving || p.authFailureOrSuccessOptionSubmitting != c.authFailureOrSuccessOptionSubmitting,
-          listener: (context, state) {
 
-      },
-      buildWhen: (p, c) => p.authFailureOrSuccessOptionSaving != c.authFailureOrSuccessOptionSaving || p.authFailureOrSuccessOptionSubmitting != c.authFailureOrSuccessOptionSubmitting || p.activitySettingsForm != c.activitySettingsForm,
-      builder: (context, state) {
+  Widget getActivityFromReservation(UserProfileModel activityOwner) {
+    if (widget.activityManagerForm == null) {
+      return BlocProvider(create: (context) =>  getIt<ActivityManagerWatcherBloc>()..add(ActivityManagerWatcherEvent.watchActivityManagerFormStarted(widget.reservationItem.reservationId.getOrCrash())),
+        child: BlocBuilder<ActivityManagerWatcherBloc, ActivityManagerWatcherState>(
+          builder: (context, state) {
+            return state.maybeMap(
+                loadActivityManagerFormSuccess: (item) => getMainContainer(item.item, activityOwner),
+                orElse: () => getMainContainer(ActivityManagerForm.empty(), activityOwner)
+            );
+          },
+        ),
+      );
+    } else {
+      return getMainContainer(widget.activityManagerForm!, activityOwner);
+    }
+  }
 
-        return SingleChildScrollView(
+
+  Widget getMainContainer(ActivityManagerForm activityForm, UserProfileModel activityOwner) {
+    return SingleChildScrollView(
           controller: _scrollController,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 15),
@@ -647,33 +644,29 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-
-                    for (var navItem in groupBy(getMenuItems(context), (menuItem) => menuItem.creatorSectionNav).entries.toList())
-
-                    if (navItem.value.isNotEmpty)
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (navItem.key != ActivityCreatorFormNavSection.selectBackground) const SizedBox(height: 5),
-                          if (navItem.key != ActivityCreatorFormNavSection.selectBackground) Divider(thickness: 0.5, color: widget.model.disabledTextColor),
-                          const SizedBox(height: 5),
-                          Text(getSectionTitle(navItem.key), style: TextStyle(color: widget.model.paletteColor, fontWeight: FontWeight.bold, fontSize: widget.model.questionTitleFontSize), maxLines: 2, overflow: TextOverflow.ellipsis),
-                          const SizedBox(height: 8),
-                          Column(
+                    ...activitySettingsHeader(context).map((e) =>
+                        Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Column(
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: navItem.value.map(
-                                    (menuItem) => getMainListTile(context, menuItem)
-                        ).toList(),
-                      )
-                    ],
-                  )
-                ],
-              ),
-            )
-          );
-        }
+                            children: [
+                              const SizedBox(height: 5),
+                              Text(e.settingTitle, style: TextStyle(color: widget.model.paletteColor, fontWeight: FontWeight.bold, fontSize: widget.model.questionTitleFontSize), maxLines: 2, overflow: TextOverflow.ellipsis),
+                              const SizedBox(height: 5),
+                              Column(
+                                children: subActivitySettingItems(activityForm).where((element) => e.sectionMarker == element.sectionNavItem).map(
+                                        (e) => getMainListTile(context, e.navItem, activityForm, activityOwner)
+                                ).toList()
+                              ),
+                              SizedBox(height: 10),
+                            ],
+                          ),
+                        )
+                    ).toList()
+
+          ],
+        ),
       )
     );
   }

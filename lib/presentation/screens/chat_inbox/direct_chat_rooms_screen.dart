@@ -5,8 +5,6 @@ import 'package:check_in_facade/check_in_facade.dart' as facade;
 import 'package:check_in_web_mobile_explore/presentation/core/components/reservation_card.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/loading_containers/loading_widgets.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/responsive/responsive.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/chat_inbox/components/direct_chat_archive_rooms_screen.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/chat_inbox/direct_chat_screen.dart';
 import 'package:check_in_web_mobile_explore/presentation/web_screens/main_container_widgets/chat_widget/chat_helper_core.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter/material.dart';
@@ -85,10 +83,9 @@ class _DirectChatRoomsScreenState extends State<DirectChatRoomsScreen> {
               stream: facade.FirebaseChatCore.instance.rooms(orderByUpdatedAt: true, isArchived: widget.isArchive),
               builder: (context, snapshot) {
 
-
                 if (!snapshot.hasData || (snapshot.data?.isEmpty ?? false) == true || snapshot.data == null) {
                   if (widget.isArchive) {
-                    noReservationsFound(
+                    noItemsFound(
                         widget.model,
                         Icons.archive_outlined,
                         'No Chats Have been Archived Yet!',
@@ -101,7 +98,7 @@ class _DirectChatRoomsScreenState extends State<DirectChatRoomsScreen> {
                         }
                     );
                   } else {
-                    return noReservationsFound(
+                    return noItemsFound(
                         widget.model,
                         Icons.chat_outlined,
                         'No Chats Yet!',
@@ -141,7 +138,6 @@ class _DirectChatRoomsScreenState extends State<DirectChatRoomsScreen> {
                 //     rooms.addAll(snapshot.data ?? []);
                 //   }
                 // }
-
 
                   return Container(
                     height: MediaQuery.of(context).size.height - 170,

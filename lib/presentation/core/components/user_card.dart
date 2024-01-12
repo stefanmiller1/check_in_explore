@@ -131,7 +131,7 @@ Widget getHostColumn(BuildContext context, UserProfileModel hostProfile, Dashboa
           Icon(Icons.verified_user_rounded, color: model.disabledTextColor),
           const SizedBox(width: 4),
           Expanded(
-              child: Text('To protect all paymentds between you and the host, never send or transfer money outside of the CICO app or website.', style: TextStyle(color: model.disabledTextColor)))
+              child: Text('To protect all payments between you and the host, never send or transfer money outside of the CICO app or website.', style: TextStyle(color: model.disabledTextColor)))
         ],
       ),
     ],

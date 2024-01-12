@@ -50,7 +50,7 @@ class _ReviewCurrentProfileState extends State<ReviewCurrentProfile> {
     if (!(Responsive.isMobile(context))) {
       pageController = PageController(viewportFraction: 0.75);
     }
-    //
+
     // return (!(kIsWeb) && Platform.isIOS) ?
     // Scaffold(
     //   body: CupertinoScaffold(
@@ -98,7 +98,7 @@ class _ReviewCurrentProfileState extends State<ReviewCurrentProfile> {
           body: MultiBlocProvider(
             providers: [
               BlocProvider(create: (_) => getIt<PublicListingWatcherBloc>()..add(const PublicListingWatcherEvent.watchAllPublicListingsStarted(['']))),
-              BlocProvider(create: (_) => getIt<ReservationManagerWatcherBloc>()..add(ReservationManagerWatcherEvent.watchCurrentUsersReservations(widget.currentUser, false)))
+              BlocProvider(create: (_) => getIt<ReservationManagerWatcherBloc>()..add(ReservationManagerWatcherEvent.watchCurrentUsersReservations([ReservationSlotState.current, ReservationSlotState.confirmed, ReservationSlotState.completed], widget.currentUser, false)))
             ],
             child: BlocBuilder<PublicListingWatcherBloc, PublicListingWatcherState>(
                 builder: (context, state) {
@@ -135,7 +135,7 @@ class _ReviewCurrentProfileState extends State<ReviewCurrentProfile> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-              if (!kIsWeb) const SizedBox(height: 120),
+
               if (kIsWeb) const SizedBox(height: 25),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,

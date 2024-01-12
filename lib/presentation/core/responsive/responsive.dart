@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 
 class Responsive extends StatelessWidget {
   final Widget mobile;
@@ -35,8 +36,10 @@ class Responsive extends StatelessWidget {
           return tablet;
         }
         // Or less then that we called it mobile
-        else {
+        else if (!(kIsWeb)) {
           return mobile;
+        } else {
+          return desktop;
         }
       },
     );

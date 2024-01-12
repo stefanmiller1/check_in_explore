@@ -17,12 +17,14 @@ Widget getListingActivityPreviewWidget(BuildContext context, DashboardModel mode
 
   return GestureDetector(
      onTap: () {
-       Navigator.push(context, HeroDialogRoute(
-           barrierLabelString: '',
-           builder: (contexts) {
+
+       Navigator.push(context, MaterialPageRoute(
+           builder: (_) {
              return ActivityPreviewScreen(
-               listing: listing,
                model: model,
+               currentListingId: listing.listingServiceId,
+               currentReservationId: reservationItem.reservationId,
+               listing: listing,
                reservation: reservationItem
              );
            }
@@ -77,7 +79,6 @@ Widget getListingActivityPreviewWidget(BuildContext context, DashboardModel mode
                 },
               ),
             ),
-
           ],
         ),
         const SizedBox(height: 3),

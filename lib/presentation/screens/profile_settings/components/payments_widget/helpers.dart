@@ -1,13 +1,8 @@
-import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
-import 'package:check_in_web_mobile_explore/presentation/core/components/reservation_card.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/search_helper.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
-import 'package:shimmer/shimmer.dart';
 
 
 Widget getPaymentHistoryItemWidget(BuildContext context, DashboardModel model, PaymentIntent paymentIntent, ListingManagerForm listing, ReservationItem reservationItem, {required Function(PaymentIntent) didSelectPayment}) {

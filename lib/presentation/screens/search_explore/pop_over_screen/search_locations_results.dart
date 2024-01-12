@@ -4,6 +4,7 @@ import 'package:check_in_presentation/check_in_presentation.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/map_helper.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/pop_over_screen/search_when_where_helper.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:jumping_dot/jumping_dot.dart';
@@ -14,8 +15,15 @@ import 'package:provider/provider.dart';
 class SearchLocationsResults extends StatefulWidget {
 
   final DashboardModel model;
+  final String locationCityFromMap;
+  final List<LocationSearchLatLngModel> locationHistory;
+  final Function() didFinishSelection;
+  final Function() onTapClearHistory;
+  final Function(List<LocationSearchLatLngModel>) historyDidChange;
+  final Function(LocationSearchLatLngModel) onTapLocationHistory;
+  final Function({String? addressStr, String? cityStr, String? provinceStateStr, String? placeId, double? lat, double? lng}) onSelectionChanged;
 
-  const SearchLocationsResults({super.key, required this.model});
+  const SearchLocationsResults({super.key, required this.model, required this.locationHistory, required this.onSelectionChanged, required this.onTapClearHistory, required this.onTapLocationHistory, required this.locationCityFromMap, required this.historyDidChange, required this.didFinishSelection});
 
   @override
   State<SearchLocationsResults> createState() => _SearchLocationsResultsState();
@@ -30,7 +38,7 @@ class _SearchLocationsResultsState extends State<SearchLocationsResults> {
   @override
   void initState() {
     _isOpen = true;
-    history.addAll(context.read<ListingsSearchRequirementsBloc>().state.historyLocationSearch?.toList() ?? []);
+    history.addAll(widget.locationHistory);
 
     super.initState();
   }
@@ -56,6 +64,7 @@ class _SearchLocationsResultsState extends State<SearchLocationsResults> {
         ],
       ),
       body: Stack(
+        alignment: Alignment.topCenter,
         children: [
           Container(
             height: MediaQuery.of(context).size.height,
@@ -85,70 +94,66 @@ class _SearchLocationsResultsState extends State<SearchLocationsResults> {
             top: 70,
             child: Container(
               width: MediaQuery.of(context).size.width,
+              constraints: (kIsWeb) ? const BoxConstraints(maxWidth: 520) : null,
               // height: MediaQuery.of(context).size.height,
               child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    AddressSearchControllerWidget(
-                      localization: AppLocalizations.of(context)!.localeName,
-                      model: widget.model,
-                      update: () {
+                child: AddressSearchControllerWidget(
+                  localization: AppLocalizations.of(context)!.localeName,
+                  model: widget.model,
+                  update: () {
+                  },
+                  onQueryChanged: (String e) {
+                  },
+                  selectionChanged: ({String? addressStr, String? cityStr, String? provinceStateStr, String? placeId, double? lat, double? lng}) async {
+                    final LocationSearchLatLngModel location = LocationSearchLatLngModel(
+                        addressStr ?? '',
+                        cityStr ?? '',
+                        provinceStateStr ?? '',
+                        lat,
+                        lng
+                    );
 
-                      },
-                      onQueryChanged: (String e) {
+                    setState(() {
+                    history.add(location);
 
-                      },
-                      selectionChanged: ({String? addressStr, String? cityStr, String? provinceStateStr, String? placeId, double? lat, double? lng}) async {
-                        final LocationSearchLatLngModel location = LocationSearchLatLngModel(
-                            addressStr ?? '',
-                            cityStr ?? '',
-                            provinceStateStr ?? '',
-                            lat,
-                            lng
-                        );
-                        history.add(location);
+                    isLoading = true;
 
-                        isLoading = true;
-                        setState(() {
-                          context.read<ListingsSearchRequirementsBloc>().add(ListingsSearchRequirementsEvent.locationIsSomewhereNearChanged(null));
-                          context.read<ListingsSearchRequirementsBloc>().add(const ListingsSearchRequirementsEvent.locationItemIdRequiredChanged(null));
-                          context.read<ListingsSearchRequirementsBloc>().add(ListingsSearchRequirementsEvent.locationCotyFromMapChanged('$addressStr, $cityStr'));
-                          context.read<ListingsSearchRequirementsBloc>().add(ListingsSearchRequirementsEvent.locationSearchHistoryChanged(history));
-
-                          if (lat != null && lng != null) {
-                            MapHelper.mapController.animateCamera(
-                                CameraUpdate.newCameraPosition(
-                                    CameraPosition(
-                                        zoom: 11,
-                                        target: LatLng(lat - 0.07, lng)
-                                    )
+                      widget.onSelectionChanged(addressStr: addressStr, cityStr: cityStr, provinceStateStr: provinceStateStr, placeId: placeId, lat: lat, lng: lng);
+                      widget.historyDidChange(history);
+                      if (lat != null && lng != null) {
+                        MapHelper.mapController.animateCamera(
+                            CameraUpdate.newCameraPosition(
+                                CameraPosition(
+                                    zoom: 11,
+                                    target: LatLng(lat - 0.07, lng)
                                 )
-                            );
-                          }
+                            )
+                        );
+                      }
+
+                    Future.delayed(const Duration(seconds: 2, milliseconds: 0), () {
+                      setState(() {
+                        isLoading = false;
+                        Navigator.of(context).pop();
+                        // widget.didFinishSelection();
                         });
+                      });
+                    });
 
-                        MapHelper.listingStream = FirebaseMapFacade.instance.mapListings(latitude: lat ?? 43.6532, longitude: lng ?? -79.3832, selectedRadius: MapHelper.currentZoom);
-                        MapHelper.currentZoom = 12;
+                    MapHelper.listingStream = FirebaseMapFacade.instance.mapListings(latitude: lat ?? 43.6532, longitude: lng ?? -79.3832, selectedRadius: MapHelper.currentZoom);
+                    MapHelper.currentZoom = 12;
 
-                        final listing = await MapHelper.listingStream.first;
-                        MapHelper.initMarkers(context, widget.model, listing);
+                    final listing = await MapHelper.listingStream.first;
+                    MapHelper.initMarkers(context, widget.model, listing);
 
-
-                        Future.delayed(const Duration(seconds: 3, milliseconds: 300), () async {
-                          isLoading = false;
-                          Navigator.of(context).pop();
-                        });
-                      },
-
-                      currentCountry: '',
-                      currentAddress: context.read<ListingsSearchRequirementsBloc>().state.locationCityFromMap ?? '',
-                      onFocusChanged: (bool focus) {
-                        setState(() {
-                          _isOpen = !focus;
-                        });
-                      },
-                    ),
-                  ],
+                  },
+                  currentCountry: '',
+                  currentAddress: widget.locationCityFromMap,
+                  onFocusChanged: (bool focus) {
+                    setState(() {
+                      _isOpen = !focus;
+                    });
+                  },
                 ),
               ),
             ),
@@ -158,11 +163,12 @@ class _SearchLocationsResultsState extends State<SearchLocationsResults> {
             top: 150,
               child: Container(
                 width: MediaQuery.of(context).size.width,
+                constraints: (kIsWeb) ? const BoxConstraints(maxWidth: 520) : null,
                 child: Column(
                   children: [
                     /// history list
                     Visibility(
-                      visible: context.read<ListingsSearchRequirementsBloc>().state.historyLocationSearch?.isNotEmpty ?? false,
+                      visible: history.isNotEmpty,
                       child: Padding(
                         padding: const EdgeInsets.only(right: 8.0, left: 8.0),
                         child: Row(
@@ -170,29 +176,67 @@ class _SearchLocationsResultsState extends State<SearchLocationsResults> {
                           children: [
                             Text('History', style: TextStyle(color: widget.model.paletteColor, fontWeight: FontWeight.bold)),
                             InkWell(
-                              onTap: () {},
+                              onTap: () {
+                                history.clear();
+                                widget.onTapClearHistory();
+                              },
                               child: Text('Clear', style: TextStyle(color: widget.model.paletteColor, decoration: TextDecoration.underline),),
                             ),
-                            // const SizedBox(width: 1) .
+
                           ],
                         ),
                       ),
                     ),
                     Visibility(
-                        visible: context.read<ListingsSearchRequirementsBloc>().state.historyLocationSearch?.isNotEmpty ?? false,
+                        visible: history.isNotEmpty,
                         child: SingleChildScrollView(
                           child: Column(
-                            children: context.read<ListingsSearchRequirementsBloc>().state.historyLocationSearch?.map(
+                            children: history.map(
                                     (e) => ListTile(
-                                  onTap: () {
+                                  onTap: () async {
+                                    widget.onTapLocationHistory(e);
+
+                                    setState(() {
+
+                                      isLoading = true;
+
+                                      widget.onSelectionChanged;
+                                      widget.historyDidChange(history);
+                                      if (e.lat != null && e.lng != null) {
+                                        MapHelper.mapController.animateCamera(
+                                            CameraUpdate.newCameraPosition(
+                                                CameraPosition(
+                                                    zoom: 11,
+                                                    target: LatLng((e.lat! - 0.07), e.lng!)
+                                                )
+                                            )
+                                        );
+                                      }
+
+                                      Future.delayed(const Duration(seconds: 2, milliseconds: 0), () {
+                                        setState(() {
+                                          isLoading = false;
+                                          Navigator.of(context).pop();
+                                          // widget.didFinishSelection();
+                                        });
+                                      });
+                                    });
+
+                                    if (e.lat != null && e.lng != null) {
+                                      MapHelper.listingStream = FirebaseMapFacade.instance.mapListings(latitude: e.lat ?? 43.6532, longitude: e.lng ?? -79.3832, selectedRadius: MapHelper.currentZoom);
+                                      MapHelper.currentZoom = 12;
+
+                                      final listing = await MapHelper.listingStream.first;
+                                      MapHelper.initMarkers(context, widget.model, listing);
+                                    }
                                   },
                                   title: Text('${e.address}'),
                                   subtitle: Text('${e.city}, ${e.provinceState}'),
                                   trailing: Icon(Icons.history_sharp, color: widget.model.disabledTextColor),
                                 )
-                      ).toList() ?? [],
-                    ),
-                        )
+                        ).toList() ?? [],
+                      ),
+                    )
                   )
                 ],
               ),

@@ -1,3 +1,4 @@
+import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/web_dashboard/dashboard_helper.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/web_dashboard/widgets/menu_marker_item.dart';
@@ -37,6 +38,9 @@ class _SidePanelContainerState extends State<SidePanelContainer> {
 
   @override
   Widget build(BuildContext context) {
+    if (selectedMarker != widget.currentMarker) {
+      selectedMarker = widget.currentMarker;
+    }
     return Container(
       height: MediaQuery.of(context).size.height,
       width: 80,
@@ -50,8 +54,8 @@ class _SidePanelContainerState extends State<SidePanelContainer> {
             height: MediaQuery.of(context).size.height,
           ),
 
-          Positioned(
-            top: 50,
+          Padding(
+            padding: const EdgeInsets.only(top: 50.0, bottom: 80),
             child: Container(
               height: MediaQuery.of(context).size.width,
               width: 80,
@@ -70,6 +74,7 @@ class _SidePanelContainerState extends State<SidePanelContainer> {
                     child: MenuMarkerItem(
                           isActive: (selectedMarker == e.dashboardMarker),
                           isHover: e.isHovering,
+                          isPrivate: e.isPrivate,
                           model: widget.model,
                           didPress: () {
                             setState(() {
@@ -80,6 +85,7 @@ class _SidePanelContainerState extends State<SidePanelContainer> {
                           iconSrc: e.iconTab,
                           imageUrl: e.imageUrl,
                           title: e.tabTitle,
+                          isLive: e.isLive,
                           isLast: e.dashboardMarker == DashboardMarker.profile,
                         ),
                       ),
@@ -107,6 +113,7 @@ class _SidePanelContainerState extends State<SidePanelContainer> {
                   },
                   iconSrc: widget.optionsMarkerItem.iconTab,
                   title: widget.optionsMarkerItem.tabTitle,
+                  isLive: widget.optionsMarkerItem.isLive,
                   isLast: false,
                 ),
               ),

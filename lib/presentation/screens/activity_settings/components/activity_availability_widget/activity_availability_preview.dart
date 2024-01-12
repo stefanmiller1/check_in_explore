@@ -1,7 +1,6 @@
 import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_availability_widget/select_activity_duration_widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

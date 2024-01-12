@@ -48,7 +48,7 @@ class _PaymentHistoryWidgetState extends State<PaymentHistoryWidget> {
             color: widget.model.paletteColor
         ),
       ),
-      body: BlocProvider(create: (_) => getIt<ReservationManagerWatcherBloc>()..add(ReservationManagerWatcherEvent.watchCurrentUsersReservations(widget.profile, false)),
+      body: BlocProvider(create: (_) => getIt<ReservationManagerWatcherBloc>()..add(ReservationManagerWatcherEvent.watchCurrentUsersReservations([ReservationSlotState.confirmed, ReservationSlotState.completed, ReservationSlotState.current], widget.profile, false)),
           child: BlocBuilder<ReservationManagerWatcherBloc, ReservationManagerWatcherState>(
             builder: (context, state) {
               return state.maybeMap(
@@ -72,7 +72,7 @@ class _PaymentHistoryWidgetState extends State<PaymentHistoryWidget> {
         builder: (context, state) {
           return state.maybeMap(
               loadInProgress: (_) => JumpingDots(numberOfDots: 3, color: widget.model.paletteColor),
-              loadAllPaymentIntentsFailure: (_) => noReservationsFound(
+              loadAllPaymentIntentsFailure: (_) => noItemsFound(
                   widget.model,
                   Icons.calendar_today_outlined,
                   'No Reservations Yet!',
@@ -82,7 +82,7 @@ class _PaymentHistoryWidgetState extends State<PaymentHistoryWidget> {
                   }
                 ),
               loadAllPaymentIntentsSuccess: (items) => getAllListings(context, reservation, items.paymentIntent),
-              orElse: () => noReservationsFound(
+              orElse: () => noItemsFound(
                   widget.model,
                   Icons.calendar_today_outlined,
                   'No Reservations Yet!',

@@ -182,9 +182,9 @@ Widget getHostingListings(BuildContext context, UserProfileModel profile, List<L
 
 Widget getUpComingReservations(BuildContext context, UserProfileModel currentUser,  PageController pageController, List<ReservationItem> reservations, DashboardModel model, {required Function(ListingManagerForm listing, ReservationItem res) didSelectReservation}) {
   return Container(
-    height: 150,
+    height: 165,
     child: Column(
-      mainAxisAlignment: MainAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('${currentUser.legalName.getOrCrash()}\'s Reservations', style: TextStyle(color: model.paletteColor, fontWeight: FontWeight.bold, fontSize: model.secondaryQuestionTitleFontSize, overflow: TextOverflow.ellipsis), maxLines: 1,),
@@ -233,7 +233,7 @@ Widget getUpComingReservations(BuildContext context, UserProfileModel currentUse
                     final ReservationItem reservation = reservations[index];
                     return Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: getReservationCard(
+                      child: getReservationCardListing(
                           context,
                           false,
                           reservation,
@@ -241,7 +241,7 @@ Widget getUpComingReservations(BuildContext context, UserProfileModel currentUse
                           model,
                           false,
                           reservation.reservationSlotItem.map((e) => e.selectedDate).where((element) => element.isBefore(DateTime.now())).isNotEmpty,
-                          didSelectReservation: (listing, reservation, activity) {
+                          didSelectReservation: (listing, reservation, activity, attendeeItem, activityTickets) {
                             didSelectReservation(listing, reservation);
                         }
                       ),

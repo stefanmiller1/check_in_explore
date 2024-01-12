@@ -5,6 +5,7 @@ import 'package:check_in_presentation/check_in_presentation.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/components/user_card.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/responsive/responsive.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/facility_preview/components/map_listing_component.dart';
+import 'package:check_in_web_mobile_explore/presentation/screens/reservations/components/reservation_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
@@ -14,6 +15,7 @@ import '../search_explore/components/map_helper.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 enum ActivityCreateNewMarker {activityDetails, additionalDetails, paymentReview}
+enum ActivityPreviewTabs {activity, reservation}
 
 class NewActivityModel {
 
@@ -25,20 +27,34 @@ class NewActivityModel {
 }
 
 /// background info about the activity ///
-Widget getActivityBackgroundColumn(BuildContext context, DashboardModel model, ActivityManagerForm activityForm, UserProfileModel? activityOwner, Widget? getListOfPartners, Widget? getListOfInstructors) {
+Widget getActivityBackgroundColumn(BuildContext context, DashboardModel model, ActivityManagerForm activityForm, UserProfileModel? activityOwner, Widget? getListOfPartners, Widget? getListOfInstructors, ReservationItem reservation) {
+
+  final bool isPrivate = (activityForm.rulesService.accessVisibilitySetting.isPrivateOnly == true || activityForm.rulesService.accessVisibilitySetting.isInviteOnly == true);
+
   return SizedBox(
     width: MediaQuery.of(context).size.width,
     child: Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(activityForm.profileService.activityBackground.activityTitle.value.fold((l) => '${activityOwner?.legalName.getOrCrash()}\'s Activity', (r) => r), style: TextStyle(color: model.paletteColor, fontWeight: FontWeight.bold, fontSize: model.questionTitleFontSize), maxLines: 2, overflow: TextOverflow.ellipsis),
+        Row(
+          children: [
+            Expanded(child: Text(activityForm.profileService.activityBackground.activityTitle.value.fold((l) => '${activityOwner?.legalName.getOrCrash()}\'s Activity', (r) => r), style: TextStyle(color: model.paletteColor, fontWeight: FontWeight.bold, fontSize: model.questionTitleFontSize), maxLines: 2, overflow: TextOverflow.ellipsis)),
+            if (isPrivate) Padding(
+              padding: const EdgeInsets.only(left: 9.0),
+              child: Icon(Icons.lock, color: model.paletteColor),
+            ),
+          ],
+        ),
         const SizedBox(height: 4),
 
         Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(activityForm.profileService.activityBackground.activityDescription1.value.fold((l) => 'This Reservation was made ${getTitleForActivityOption(context, activityForm.activityType.activityId) ?? ''}, send ${activityOwner?.legalName.getOrCrash()} a message if you\'d like to know about how the space will be used.', (r) => r), style: TextStyle(color: model.paletteColor), overflow: TextOverflow.ellipsis, maxLines: 2),
                   const SizedBox(height: 5),
@@ -56,50 +72,211 @@ Widget getActivityBackgroundColumn(BuildContext context, DashboardModel model, A
               ),
             ),
 
-            if (Responsive.isDesktop(context)) Visibility(
-              visible: !(activityForm.profileService.activityBackground.isPartnersInviteOnly ?? false),
-              child: InkWell(
-                onTap: () {
-
-                },
-                child: Container(
-                  width: 250,
-                  height: 60,
-                  decoration: BoxDecoration(
-                    color: model.webBackgroundColor,
-                    borderRadius: const BorderRadius.all(Radius.circular(15)),
-                  ),
-                  child: Align(
-                    child: Text('Request Partnership', style: TextStyle(color: model.paletteColor, fontWeight: FontWeight.bold, fontSize: model.secondaryQuestionTitleFontSize)),
+            if (Responsive.isDesktop(context)) Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Visibility(
+                  visible: activityForm.profileService.activityBackground.isPartnersInviteOnly == true,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4.0),
+                    child: InkWell(
+                      onTap: () {
+                       if (activityOwner != null) {
+                           presentPartnershipRequestAttendee(
+                               context,
+                               model,
+                               reservation,
+                               activityForm,
+                               activityOwner
+                          );
+                        }
+                      },
+                      child: Container(
+                        width: 250,
+                        height: 60,
+                        decoration: BoxDecoration(
+                          color: model.accentColor,
+                          borderRadius: const BorderRadius.all(Radius.circular(15)),
+                        ),
+                        child: Align(
+                          child: Text('Request Partnership', style: TextStyle(color: model.paletteColor, fontWeight: FontWeight.bold, fontSize: model.secondaryQuestionTitleFontSize)),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-              ),
+                Visibility(
+                  visible: activityForm.profileService.activityBackground.isInstructorInviteOnly == true,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4.0),
+                    child: InkWell(
+                      onTap: () {
+                        if (activityOwner != null) {
+                          presentNewInstructorAttendee(
+                              context,
+                              model,
+                              reservation,
+                              activityForm,
+                              activityOwner
+                          );
+                        }
+                      },
+                      child: Container(
+                        width: 250,
+                        height: 60,
+                        decoration: BoxDecoration(
+                          color: model.accentColor,
+                          borderRadius: const BorderRadius.all(Radius.circular(15)),
+                        ),
+                        child: Align(
+                          child: Text('Be an Instructor', style: TextStyle(color: model.paletteColor, fontWeight: FontWeight.bold, fontSize: model.secondaryQuestionTitleFontSize)),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Visibility(
+                  // visible: activityForm.profileService.activityRequirements.eventActivityRulesRequirement?.isMerchantInviteOnly == true,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4.0),
+                    child: InkWell(
+                      onTap: () {
+                        if (activityOwner != null) {
+                          presentNewVendorAttendee(
+                              context,
+                              model,
+                              reservation,
+                              activityForm,
+                              activityOwner
+                          );
+                        }
+                      },
+                      child: Container(
+                        width: 250,
+                        height: 60,
+                        decoration: BoxDecoration(
+                          color: model.accentColor,
+                          borderRadius: const BorderRadius.all(Radius.circular(15)),
+                        ),
+                        child: Align(
+                          child: Text('Be a Vendor or Merchant', style: TextStyle(color: model.paletteColor, fontWeight: FontWeight.bold, fontSize: model.secondaryQuestionTitleFontSize)),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                if (activityForm.profileService.activityRequirements.eventActivityRulesRequirement != null) Visibility(
+                  visible: (activityForm.profileService.activityRequirements.eventActivityRulesRequirement?.merchantLimit != null),
+                  child: Text('Looking for ${activityForm.profileService.activityRequirements.eventActivityRulesRequirement!.merchantLimit} Merchants or Vendors for this Activity', style: TextStyle(color: model.disabledTextColor))
+                ),
+              ],
             ),
           ],
         ),
 
-        if (Responsive.isMobile(context) || Responsive.isTablet(context)) Visibility(
-          visible: !(activityForm.profileService.activityBackground.isPartnersInviteOnly ?? false),
-          child: InkWell(
-            onTap: () {
-
-            },
-            child: Container(
-              width: 625,
-              height: 60,
-              decoration: BoxDecoration(
-                color: model.webBackgroundColor,
-                borderRadius: const BorderRadius.all(Radius.circular(15)),
-              ),
-              child: Align(
-                child: Text('Request Partnership', style: TextStyle(color: model.paletteColor, fontWeight: FontWeight.bold, fontSize: model.secondaryQuestionTitleFontSize)),
+        if (Responsive.isMobile(context) || Responsive.isTablet(context)) Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Visibility(
+              visible: activityForm.profileService.activityBackground.isPartnersInviteOnly == true,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4.0),
+                child: InkWell(
+                  onTap: () {
+                    if (activityOwner != null) {
+                      presentPartnershipRequestAttendee(
+                          context,
+                          model,
+                          reservation,
+                          activityForm,
+                          activityOwner
+                      );
+                    }
+                  },
+                  child: Container(
+                    width: 625,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      color: model.accentColor,
+                      borderRadius: const BorderRadius.all(Radius.circular(15)),
+                    ),
+                    child: Align(
+                      child: Text('Request Partnership', style: TextStyle(color: model.paletteColor, fontWeight: FontWeight.bold, fontSize: model.secondaryQuestionTitleFontSize)),
+                    ),
+                  ),
+                ),
               ),
             ),
-          ),
+            Visibility(
+              visible: activityForm.profileService.activityBackground.isInstructorInviteOnly == true,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4.0),
+                child: InkWell(
+                  onTap: () {
+                    if (activityOwner != null) {
+                      presentNewInstructorAttendee(
+                          context,
+                          model,
+                          reservation,
+                          activityForm,
+                          activityOwner
+                      );
+                    }
+                  },
+                  child: Container(
+                    width: 625,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      color: model.accentColor,
+                      borderRadius: const BorderRadius.all(Radius.circular(15)),
+                    ),
+                    child: Align(
+                      child: Text('Be an Instructor', style: TextStyle(color: model.paletteColor, fontWeight: FontWeight.bold, fontSize: model.secondaryQuestionTitleFontSize)),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Visibility(
+              // visible: activityForm.profileService.activityRequirements.eventActivityRulesRequirement?.isMerchantInviteOnly == true,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4.0),
+                child: InkWell(
+                  onTap: () {
+                    if (activityOwner != null) {
+                      presentNewVendorAttendee(
+                          context,
+                          model,
+                          reservation,
+                          activityForm,
+                          activityOwner
+                      );
+                    }
+                  },
+                  child: Container(
+                    width: 625,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      color: model.accentColor,
+                      borderRadius: const BorderRadius.all(Radius.circular(15)),
+                    ),
+                    child: Align(
+                      child: Text('Be a Vendor or Merchant', style: TextStyle(color: model.paletteColor, fontWeight: FontWeight.bold, fontSize: model.secondaryQuestionTitleFontSize)),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            if (activityForm.profileService.activityRequirements.eventActivityRulesRequirement != null) Visibility(
+                visible: (activityForm.profileService.activityRequirements.eventActivityRulesRequirement?.merchantLimit != null),
+                child: Text('Looking for ${activityForm.profileService.activityRequirements.eventActivityRulesRequirement!.merchantLimit} Merchants or Vendors for this Activity', style: TextStyle(color: model.disabledTextColor))
+            ),
+          ],
         ),
         /// if activity is through an organization check and show associated organization...can also show if activity owner has communities/organization/partner associations.
         const SizedBox(height: 10),
-
 
         Visibility(
           visible: getListOfPartners != null,
@@ -145,7 +322,6 @@ Widget getActivityRequirementsColumn(BuildContext context, DashboardModel model,
             // Text('Need to know More?', style: TextStyle(color: model.paletteColor, fontWeight: FontWeight.bold, fontSize: model.questionTitleFontSize), maxLines: 2, overflow: TextOverflow.ellipsis),
             // const SizedBox(height: 4),
 
-            ///all
             /// expectations...age, age limit,
             Visibility(
               visible: activityForm.profileService.activityRequirements.isSeventeenAndUnder,
@@ -380,30 +556,6 @@ Widget getActivityRequirementsColumn(BuildContext context, DashboardModel model,
             /// offered/provisions, gear, food, drinks, security,
             /// vendors or merchants - invite or allow vendors to join. --- set a fee, contact details, an image (for now...), waiting lists?
             Visibility(
-              visible: (activityForm.profileService.activityRequirements.eventActivityRulesRequirement != null) && !(activityForm.profileService.activityRequirements.eventActivityRulesRequirement?.isMerchantInviteOnly ?? false),
-              child: Column(
-                children: [
-                  const SizedBox(height: 10),
-                  InkWell(
-                    onTap: () {
-
-                    },
-                    child: Container(
-                      width: 675,
-                      height: 60,
-                      decoration: BoxDecoration(
-                        color: model.webBackgroundColor,
-                        borderRadius: const BorderRadius.all(Radius.circular(15)),
-                      ),
-                      child: Align(
-                        child: Text('Join as Vendor', style: TextStyle(color: model.paletteColor, fontWeight: FontWeight.bold, fontSize: model.secondaryQuestionTitleFontSize)),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Visibility(
               visible: getListOfVendors != null,
               child:  Column(
                 mainAxisAlignment: MainAxisAlignment.start,
@@ -460,6 +612,7 @@ Widget getActivityTicketOptionsColumn(
     ReservationItem reservation,
     ActivityManagerForm activityForm,
     bool showFindTicket,
+    ActivityTicketOption? selectedTicket,
     {required Function(ActivityTicketOption) didSelectTicketOption}) {
 
   return Column(
@@ -485,6 +638,7 @@ Widget getActivityTicketOptionsColumn(
                 activityForm.activityAttendance.defaultActivityTickets ?? ActivityTicketOption.empty(),
                 true,
                 showFindTicket,
+                selectedTicket?.ticketId == activityForm.activityAttendance.defaultActivityTickets?.ticketId,
                 didSelectTicket: (ticket) {
                   didSelectTicketOption(ticket);
                 }
@@ -513,6 +667,7 @@ Widget getActivityTicketOptionsColumn(
                           e,
                           showFindTicket,
                           true,
+                          selectedTicket?.ticketId == e.ticketId,
                           didSelectTicket: (ticket) {
                             didSelectTicketOption(ticket);
                           },
@@ -537,6 +692,7 @@ Widget getActivityTicketOptionsColumn(
                     e,
                     showFindTicket,
                     true,
+                    selectedTicket?.ticketId == e.ticketId,
                     didSelectTicket: (ticket) {
                       didSelectTicketOption(ticket);
                     },
@@ -582,206 +738,180 @@ Widget flagOrReportActivityColumn(DashboardModel model, {required Function() did
   );
 }
 
-Widget getVendorAttendees(DashboardModel model, ActivityManagerForm activityForm, {required Function(AttendeeItem) didSelectAttendee}) {
-  return BlocProvider(create: (context) =>  getIt<AttendeeManagerWatcherBloc>()..add(AttendeeManagerWatcherEvent.watchAllAttendanceByType(AttendeeType.vendor.toString(), activityForm.activityFormId.getOrCrash())),
-    child: BlocBuilder<AttendeeManagerWatcherBloc, AttendeeManagerWatcherState>(
-      builder: (context, state) {
-        return state.maybeMap(
-          attLoadInProgress: (_) => JumpingDots(color: model.paletteColor, numberOfDots: 3),
-          loadAllAttendanceFailure: (_) => Container(),
-          loadAllAttendanceSuccess: (item) {
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Vendors', style: TextStyle(color: model.paletteColor)),
-                const SizedBox(height: 15),
-                Container(
-                  height: 165,
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    children: item.item.map(
-                            (attendee) => Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 6.0),
-                          child: getVendorAttendeeType(
-                              context,
-                              model,
-                              attendee: attendee,
-                              didSelectAttendee: (attendee) {
-                                didSelectAttendee(attendee);
-                              }
-                          ),
-                        )
-                    ).toList(),
-                  ),
-                ),
-              ],
-            );
-          },
-          orElse: () => Container(),
-        );
-      },
-    ),
-  );
-}
-
-
-Widget getPartnerAttendees(DashboardModel model, ActivityManagerForm activityForm, {required Function(AttendeeItem) didSelectAttendee}) {
-  return BlocProvider(create: (context) =>  getIt<AttendeeManagerWatcherBloc>()..add(AttendeeManagerWatcherEvent.watchAllAttendanceByType(AttendeeType.partner.toString(), activityForm.activityFormId.getOrCrash())),
-    child: BlocBuilder<AttendeeManagerWatcherBloc, AttendeeManagerWatcherState>(
-      builder: (context, state) {
-        return state.maybeMap(
-          attLoadInProgress: (_) => JumpingDots(color: model.paletteColor, numberOfDots: 3),
-          loadAllAttendanceFailure: (_) => Container(),
-          loadAllAttendanceSuccess: (item) {
-            return ListTile(
-              leading: Icon(Icons.handshake_outlined, color: model.paletteColor),
-              title: Text('Partners', style: TextStyle(color: model.paletteColor)),
-              subtitle: Padding(
-                padding: const EdgeInsets.only(top: 6.0),
-                child: SingleChildScrollView(
-                  child: Row(
-                    children: item.item.map(
-                            (attendee) => Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 6.0),
-                          child: getPartnerAttendeeType(context,
-                              model,
-                              attendee: attendee,
-                              didSelectAttendee: (attendee) {
-
-                              }
-                          ),
-                        )
-                    ).toList(),
-                  ),
-                ),
-              ),
-            );
-          },
-          orElse: () => Container(),
-        );
-      },
-    ),
-  );
-}
-
-Widget getInstructorAttendees(DashboardModel model, ActivityManagerForm activityForm, {required Function(AttendeeItem) didSelectAttendee}) {
-  return BlocProvider(create: (context) =>  getIt<AttendeeManagerWatcherBloc>()..add(AttendeeManagerWatcherEvent.watchAllAttendanceByType(AttendeeType.instructor.toString(), activityForm.activityFormId.getOrCrash())),
-    child: BlocBuilder<AttendeeManagerWatcherBloc, AttendeeManagerWatcherState>(
-      builder: (context, state) {
-        return state.maybeMap(
-          attLoadInProgress: (_) => JumpingDots(color: model.paletteColor, numberOfDots: 3),
-          loadAllAttendanceFailure: (_) => Container(),
-          loadAllAttendanceSuccess: (item) {
-            return ListTile(
-              leading: Icon(Icons.people_outline, color: model.paletteColor),
-              title: Text('Instructors', style: TextStyle(color: model.paletteColor)),
-              subtitle: Padding(
-                  padding: const EdgeInsets.only(top: 6.0),
-                  child: SingleChildScrollView(
-                  child: Column(
-                    children: item.item.map(
-                            (attendee) => Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 4.0),
-                          child: getInstructorAttendeeType(
-                              context,
-                              model,
-                              attendee: attendee,
-                              didSelectAttendee: (attendee) {
-
-                              }
-                          ),
-                        )
-                    ).toList(),
-                  ),
+Widget getVendorAttendees(BuildContext context, DashboardModel model, ActivityManagerForm activityForm, List<AttendeeItem> attendees, {required Function(AttendeeItem) didSelectAttendee}) {
+    if (attendees.isEmpty) {
+      return Container();
+    }
+    return ListTile(
+      leading: Icon(Icons.storefront_sharp, color: model.paletteColor),
+      title: Text('Vendors', style: TextStyle(color: model.paletteColor)),
+      subtitle: Container(
+        height: 320,
+        child: ListView(
+          scrollDirection: Axis.horizontal,
+          children: attendees.map(
+                  (attendee) => Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                child: getVendorAttendeeType(
+                    context,
+                    model,
+                    attendee: attendee,
+                    didSelectAttendee: (attendee) {
+                      didSelectAttendee(attendee);
+                    }
                 ),
               )
-            );
-          },
-          orElse: () => Container(),
-        );
-      },
-    ),
-  );
+          ).toList(),
+        ),
+      ),
+    );
 }
 
-Widget getAttendeesForTicketActivity(DashboardModel model, ActivityManagerForm activityForm) {
-  return BlocProvider(create: (context) =>  getIt<AttendeeManagerWatcherBloc>()..add(AttendeeManagerWatcherEvent.watchAllAttendanceByType(AttendeeType.tickets.toString(), activityForm.activityFormId.getOrCrash())),
-    child: BlocBuilder<AttendeeManagerWatcherBloc, AttendeeManagerWatcherState>(
-      builder: (context, state) {
-        return state.maybeMap(
-          attLoadInProgress: (_) => JumpingDots(color: model.paletteColor, numberOfDots: 3),
-          loadAllAttendanceFailure: (_) => Container(),
-          loadAllAttendanceSuccess: (item) {
-            return Row(
-              children: [
-                Container(
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(width: 1, color: model.disabledTextColor)
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Row(
-                        children: [
-                          Icon(Icons.airplane_ticket_outlined),
-                          const SizedBox(width: 8),
-                          Text('Attending: ${item.item.length}', style: TextStyle(color: model.disabledTextColor, fontSize: model.secondaryQuestionTitleFontSize, fontWeight: FontWeight.bold), maxLines: 1,),
-                      ],
+
+Widget getPartnerAttendees(BuildContext context, DashboardModel model, ActivityManagerForm activityForm, List<AttendeeItem> attendees, {required Function(AttendeeItem) didSelectAttendee}) {
+    if (attendees.isEmpty) {
+      return Container();
+    }
+    return ListTile(
+      leading: Icon(Icons.handshake_outlined, color: model.paletteColor),
+      title: Text('Partners', style: TextStyle(color: model.paletteColor)),
+      subtitle: Padding(
+        padding: const EdgeInsets.only(top: 6.0),
+        child: Container(
+          width: MediaQuery.of(context).size.width,
+          height: 85,
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: attendees.map(
+                      (attendee) => Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                    child: getPartnerAttendeeType(context,
+                        model,
+                        attendee: attendee,
+                        didSelectAttendee: (attendee) {
+
+                      }
                     ),
                   )
-                ),
-                const SizedBox(width: 8),
-                if (activityForm.activityAttendance.isTicketFixed == true) IconButton(onPressed: () {
-                }, icon: Icon(Icons.info_outline_rounded, color: model.disabledTextColor), tooltip: 'Tickets are limited to ${activityForm.activityAttendance.defaultActivityTickets?.ticketQuantity ?? 1} for this activity',),
-              ],
-            );
-          },
-          orElse: () => Container(),
-        );
-      },
-    ),
-  );
+              ).toList(),
+            ),
+          ),
+        ),
+      ),
+    );
 }
 
+Widget getInstructorAttendees(BuildContext context, DashboardModel model, ActivityManagerForm activityForm, List<AttendeeItem> attendees, {required Function(AttendeeItem) didSelectAttendee}) {
+    if (attendees.isEmpty) {
+      return Container();
+    }
+    return Container(
+          width: MediaQuery.of(context).size.width,
+          child: ListTile(
+            leading: Icon(Icons.people_outline, color: model.paletteColor),
+            title: Text('Instructors', style: TextStyle(color: model.paletteColor)),
+            subtitle: Padding(
+                padding: const EdgeInsets.only(top: 6.0),
+                child: SingleChildScrollView(
+                child: Column(
+                  children: attendees.map(
+                          (attendee) => Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 4.0),
+                        child: getInstructorAttendeeType(
+                            context,
+                            model,
+                            attendee: attendee,
+                            didSelectAttendee: (attendee) {
 
-Widget getAttendeesForFreeActivity(DashboardModel model, ActivityManagerForm activityForm) {
-  return BlocProvider(create: (context) =>  getIt<AttendeeManagerWatcherBloc>()..add(AttendeeManagerWatcherEvent.watchAllAttendanceByType(AttendeeType.free.toString(), activityForm.activityFormId.getOrCrash())),
-    child: BlocBuilder<AttendeeManagerWatcherBloc, AttendeeManagerWatcherState>(
-      builder: (context, state) {
-        return state.maybeMap(
-          attLoadInProgress: (_) => JumpingDots(color: model.paletteColor, numberOfDots: 3),
-          loadAllAttendanceFailure: (_) => Container(),
-          loadAllAttendanceSuccess: (item) {
-            return Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(width: 1, color: model.disabledTextColor)
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Row(
-                        children: [
-                          Icon(Icons.people_outline),
-                          const SizedBox(width: 8),
-                          Text('Attending: ${item.item.length}', style: TextStyle(color: model.disabledTextColor, fontSize: model.secondaryQuestionTitleFontSize, fontWeight: FontWeight.bold), maxLines: 1,),
-                      ],
-                    ),
-                  )
-                ),
-                const SizedBox(width: 8),
-                if (activityForm.activityAttendance.isLimitedAttendance == true) IconButton(onPressed: () {
-                }, icon: Icon(Icons.info_outline_rounded, color: model.disabledTextColor), tooltip: 'Attendance is limited to ${activityForm.activityAttendance.attendanceLimit ?? 1} for this activity',),
-              ],
-            );
-          },
-          orElse: () => Container(),
-        );
-      },
-    ),
-  );
+                    }
+                  ),
+                )
+              ).toList(),
+            ),
+          ),
+        )
+      ),
+    );
+
 }
+//
+// Widget getAttendeesForTicketActivity(DashboardModel model, ActivityManagerForm activityForm) {
+//   return BlocProvider(create: (context) =>  getIt<AttendeeManagerWatcherBloc>()..add(AttendeeManagerWatcherEvent.watchAllAttendanceByType(AttendeeType.tickets.toString(), activityForm.activityFormId.getOrCrash())),
+//     child: BlocBuilder<AttendeeManagerWatcherBloc, AttendeeManagerWatcherState>(
+//       builder: (context, state) {
+//         return state.maybeMap(
+//           loadAllAttendanceFailure: (_) => Container(),
+//           loadAllAttendanceSuccess: (item) {
+//             return Row(
+//               children: [
+//                 Container(
+//                     decoration: BoxDecoration(
+//                         borderRadius: BorderRadius.circular(8),
+//                         border: Border.all(width: 1, color: model.disabledTextColor)
+//                     ),
+//                     child: Padding(
+//                       padding: const EdgeInsets.all(8.0),
+//                       child: Row(
+//                         children: [
+//                           Icon(Icons.airplane_ticket_outlined),
+//                           const SizedBox(width: 8),
+//                           Text('Attending: ${item.item.length}', style: TextStyle(color: model.paletteColor, fontSize: model.secondaryQuestionTitleFontSize, fontWeight: FontWeight.bold), maxLines: 1,),
+//                       ],
+//                     ),
+//                   )
+//                 ),
+//                 const SizedBox(width: 8),
+//                 if (activityForm.activityAttendance.isTicketFixed == true) IconButton(onPressed: () {
+//                 }, icon: Icon(Icons.info_outline_rounded, color: model.disabledTextColor), tooltip: 'Tickets are limited to ${activityForm.activityAttendance.defaultActivityTickets?.ticketQuantity ?? 1} for this activity',),
+//               ],
+//             );
+//           },
+//           orElse: () => Container(),
+//         );
+//       },
+//     ),
+//   );
+// }
+
+
+// Widget getAttendeesForFreeActivity(DashboardModel model, ActivityManagerForm activityForm) {
+//   return BlocProvider(create: (context) =>  getIt<AttendeeManagerWatcherBloc>()..add(AttendeeManagerWatcherEvent.watchAllAttendanceByType(AttendeeType.free.toString(), activityForm.activityFormId.getOrCrash())),
+//     child: BlocBuilder<AttendeeManagerWatcherBloc, AttendeeManagerWatcherState>(
+//       builder: (context, state) {
+//         return state.maybeMap(
+//           attLoadInProgress: (_) => JumpingDots(color: model.paletteColor, numberOfDots: 3),
+//           loadAllAttendanceFailure: (_) => Container(),
+//           loadAllAttendanceSuccess: (item) {
+//             return Row(
+//               mainAxisSize: MainAxisSize.min,
+//               children: [
+//                 Container(
+//                     decoration: BoxDecoration(
+//                         borderRadius: BorderRadius.circular(8),
+//                         border: Border.all(width: 1, color: model.disabledTextColor)
+//                     ),
+//                     child: Padding(
+//                       padding: const EdgeInsets.all(8.0),
+//                       child: Row(
+//                         children: [
+//                           Icon(Icons.people_outline),
+//                           const SizedBox(width: 8),
+//                           Text('Attending: ${item.item.length}', style: TextStyle(color: model.paletteColor, fontSize: model.secondaryQuestionTitleFontSize, fontWeight: FontWeight.bold), maxLines: 1,),
+//                       ],
+//                     ),
+//                   )
+//                 ),
+//                 const SizedBox(width: 8),
+//                 if (activityForm.activityAttendance.isLimitedAttendance == true) IconButton(onPressed: () {
+//                 }, icon: Icon(Icons.info_outline_rounded, color: model.disabledTextColor), tooltip: 'Attendance is limited to ${activityForm.activityAttendance.attendanceLimit ?? 1} for this activity',),
+//               ],
+//             );
+//           },
+//           orElse: () => Container(),
+//         );
+//       },
+//     ),
+//   );
+// }
 

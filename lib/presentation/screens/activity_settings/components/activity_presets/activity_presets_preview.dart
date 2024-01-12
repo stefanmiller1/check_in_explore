@@ -2,9 +2,6 @@ import 'package:avatar_stack/avatar_stack.dart';
 import 'package:check_in_application/auth/update_services/listing_update_create_services/settings_update_create_services/activity_settings/activity_settings_form_bloc.dart';
 import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_presets/activity_presetup_classes_widget.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_presets/activity_presetup_experience_widget.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_presets/activity_presetup_game_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/src/provider.dart';
 

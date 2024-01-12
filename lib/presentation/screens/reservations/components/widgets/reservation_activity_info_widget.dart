@@ -1,5 +1,6 @@
 import 'package:check_in_application/un_auth/watcher_services/attendee_watcher_service/attendee_manager_watcher_bloc.dart';
 import 'package:check_in_domain/check_in_domain.dart';
+import 'package:check_in_domain/domain/misc/attendee_services/attendee_item/attendee_item.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/components/user_card.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/responsive/responsive.dart';
@@ -15,6 +16,7 @@ class ReservationActivityInfoWidget extends StatelessWidget {
   final ReservationItem reservation;
   final UserProfileModel? activityOwner;
   final ListingManagerForm listing;
+  final List<AttendeeItem> allAttendees;
   final Function(ActivityTicketOption) didSelectActivityTicket;
 
   const ReservationActivityInfoWidget({super.key,
@@ -23,7 +25,8 @@ class ReservationActivityInfoWidget extends StatelessWidget {
     required this.activityOwner,
     required this.reservation,
     required this.listing,
-    required this.didSelectActivityTicket
+    required this.didSelectActivityTicket,
+    required this.allAttendees
   });
 
   @override
@@ -32,7 +35,8 @@ class ReservationActivityInfoWidget extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 80),
+        if (kIsWeb) const SizedBox(height: 80),
+        if (!(kIsWeb)) const SizedBox(height: 155),
         SizedBox(
           height: 285,
           child: ClipRRect(
@@ -67,8 +71,9 @@ class ReservationActivityInfoWidget extends StatelessWidget {
               model,
               activityForm,
               activityOwner,
-              getPartnerAttendees(model, activityForm, didSelectAttendee: (attendee) {}),
-              getInstructorAttendees(model, activityForm, didSelectAttendee: (attendee) {})
+              getPartnerAttendees(context, model, activityForm, allAttendees.where((element) => element.attendeeType == AttendeeType.partner && element.contactStatus == ContactStatus.joined).toList(), didSelectAttendee: (attendee) {}),
+              getInstructorAttendees(context, model, activityForm, allAttendees.where((element) => element.attendeeType == AttendeeType.instructor && element.contactStatus == ContactStatus.joined).toList(), didSelectAttendee: (attendee) {}),
+              reservation
           ),
         ),
 
@@ -80,7 +85,7 @@ class ReservationActivityInfoWidget extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 2.0),
           child: ListTile(
-              title: Text(getTitleForActivityOption(context, activityForm.activityType.activityId) ?? '', style: TextStyle(color: model.paletteColor, fontWeight: FontWeight.bold)),
+              title: Text(getTitleForActivityOption(context, activityForm.activityType.activityId) ?? 'To Rent', style: TextStyle(color: model.paletteColor, fontWeight: FontWeight.bold)),
               leading: getActivityFromReservationId(
                   context,
                   model,
@@ -101,11 +106,13 @@ class ReservationActivityInfoWidget extends StatelessWidget {
           child: getActivityRequirementsColumn(
               context,
               model,
-            activityOwner,
+              activityOwner,
               activityForm,
               getVendorAttendees(
+                  context,
                   model,
                   activityForm,
+                  allAttendees.where((element) => element.attendeeType == AttendeeType.vendor && element.contactStatus == ContactStatus.joined).toList(),
                   didSelectAttendee: (attendee) {
 
                   }
@@ -133,7 +140,8 @@ class ReservationActivityInfoWidget extends StatelessWidget {
                         didSelectTicketOption: (e) {
                           didSelectActivityTicket(e);
                         },
-                        true && (Responsive.isDesktop(context) == true)
+                        true && (Responsive.isDesktop(context) == true),
+                        null,
                     ),
                   ),
                 ),
@@ -153,7 +161,7 @@ class ReservationActivityInfoWidget extends StatelessWidget {
 
           }
         ),
-        const SizedBox(height: 80),
+        const SizedBox(height: 100),
       ],
     );
   }

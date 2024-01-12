@@ -1,3 +1,4 @@
+import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/web_dashboard/dashboard_components/side_panel_container.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/web_dashboard/dashboard_helper.dart';
@@ -50,7 +51,8 @@ class _SubContainerState extends State<SubContainer> {
       body: SafeArea(
         child: Container(
           color: widget.model.disabledTextColor.withOpacity(0.25),
-            child: widget.subWidget),
+          child: widget.subWidget
+        ),
       ),
     );
   }

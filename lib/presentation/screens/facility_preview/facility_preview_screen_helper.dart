@@ -2,24 +2,33 @@ import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
 import 'package:flutter/material.dart';
 
+enum ListingOverviewMarker {listing, activities}
+enum FacilityPreviewState {listing, reservation}
+
+
+
 Widget loadingListingProfile(ListingManagerForm listing) {
   return Container();
 }
 
 Widget couldNotRetrieveListingProfile() {
-  return Container();
+  return Container(
+    child: Center(
+      child: Text('This Activity Might be Over!'),
+    )
+  );
 }
 
 Widget loadingConfirmReservation() {
   return Container();
 }
 
-String getAppBarTitle(ReservationMobileCreateNewMarker state) {
+String getAppBarTitle(ReservationMobileCreateNewMarker state, String listingName,) {
   switch (state) {
     case ReservationMobileCreateNewMarker.listingDetails:
-      return 'Listing';
+      return listingName;
     case ReservationMobileCreateNewMarker.additionalDetails:
-      return '';
+      return 'More Details';
     case ReservationMobileCreateNewMarker.paymentReview:
       return 'Confirm & Pay';
     case ReservationMobileCreateNewMarker.listingNoLongerAvailable:

@@ -38,7 +38,7 @@ dependencies:
   firebase_storage: ^11.0.10
   firebase_messaging: ^14.3.0
   cupertino_icons: ^1.0.2
-  google_maps_flutter: ^2.2.1
+  google_maps_flutter: ^2.5.0
   phone_form_field:
     path: /Users/stefanmiller/AndroidStudioProjects/phone_form_field
   geoflutterfire:
@@ -61,8 +61,8 @@ dependencies:
   geocoding: ^2.0.5
   fluster: ^1.2.0
   url_launcher: ^6.0.2
-  flutter_stripe: ^9.3.0
-  flutter_stripe_web: ^4.3.0
+  flutter_stripe: ^9.5.0+1
+  flutter_stripe_web: ^4.5.0
   flutter_cache_manager: ^3.3.0
   auth_buttons:
     git:
@@ -76,7 +76,7 @@ dependencies:
   flutter_switch: ^0.3.2
   any_link_preview: ^3.0.0
   avatar_stack: ^1.1.2
-  add_2_calendar: ^2.1.2
+#  add_2_calendar: ^2.1.2
   share_plus: ^6.3.1
   flutter_contacts: ^1.1.6
   firebase_dynamic_links: ^5.0.17
@@ -87,6 +87,10 @@ dependencies:
   material_floating_search_bar_2: ^0.5.0
   timeago: ^3.2.2
   image_picker_web: ^3.0.0+1
+  pass_flutter: ^2.0.2
+  flutter_wallet_card: ^3.0.3
+  pointer_interceptor: ^0.9.3+5
+  beamer: ^1.5.6
   lottie: ^2.5.0
   check_in_domain:
     path: /Users/stefanmiller/AndroidStudioProjects/check_in_domain
@@ -146,6 +150,8 @@ flutter:
     - assets/icons_svg/search_explore/noun-people-sitting-in-a-circle-1584737.svg
     - assets/icons_svg/search_explore/noun-crowd-with-banner-655212.svg
     - assets/icons_svg/search_explore/noun-friends-drinking-882137.svg
+    - assets/icons_svg/search_explore/noun-event-planner-977765.svg
+    - assets/icons_svg/search_explore/noun-hawker-977700.svg
     - assets/map_icons/noun-house-5004704.png
     - assets/payment_icons/alipay.svg
     - assets/payment_icons/amex.svg
@@ -164,8 +170,10 @@ flutter:
     - assets/payment_icons/unionpay.svg
     - assets/payment_icons/verve.svg
     - assets/payment_icons/visa.svg
+    - assets/icons_svg/add_to_wallet/US-UK_Add_to_Apple_Wallet_RGB_101421.svg
     - assets/profile-avatar.png
     - assets/html/checkout.html
+    - assets/images/facility_creator/activity_subscription_get_started_bw.png
     - assets/images/activity_creator/provider_options/provided_activity_options_Alcohol.png
     - assets/images/activity_creator/provider_options/provided_activity_options_Equipment.png
     - assets/images/activity_creator/provider_options/provided_activity_options_Food_Drinks.png
@@ -200,3 +208,7 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+
+dependency_overrides:
+  test_api: 0.5.2
+  matcher: 0.12.16

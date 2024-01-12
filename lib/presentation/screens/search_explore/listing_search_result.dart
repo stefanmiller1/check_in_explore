@@ -1,7 +1,7 @@
 import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/listing_result_main_card.dart';
+import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/listing_components/listing_result_main_card.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/map_helper.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
@@ -11,7 +11,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
-import 'components/listing_result_main.dart';
+import 'components/listing_components/listing_result_main.dart';
 
 class ListingSearchResult extends StatefulWidget {
 
@@ -147,7 +147,17 @@ class _ListingSearchResultState extends State<ListingSearchResult> {
             child: ListingResultMainCard(
               listing: e,
               model: widget.model,
+              showReservations: true,
               isLoading: isLoading,
+              didSelectMainImage: (listing) {
+
+              },
+              didSelectFooter: (ListingManagerForm listing) {
+
+              },
+              didSelectEmbeddedRes: (listing, res) {
+
+              },
             ),
           ),
         )
