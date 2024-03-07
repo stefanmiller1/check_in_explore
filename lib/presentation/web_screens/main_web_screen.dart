@@ -26,7 +26,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:jumping_dot/jumping_dot.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
+import 'package:check_in_facade/auth/notification_facade/notification_core_config.dart';
 import 'focused_main_container_widgets/activity_attendee_ticket_settings_widget/activity_attendee_ticket_settings_container_widget.dart';
 import 'focused_main_container_widgets/activity_ticket_settings_widget/activity_ticket_helper.dart';
 import 'sub_container_widgets/activity_settings_widget/activity_settings_sub_main_widget.dart';
@@ -59,7 +59,7 @@ class _MainWebScreenState extends State<MainWebScreen> {
         builder: (context, authState) {
           return authState.maybeMap(
               loadInProgress: (_) => JumpingDots(color: widget.model.paletteColor, numberOfDots: 3),
-              loadProfileFailure: (_) => retrieveAuthenticationState(null, [], []),
+              loadProfileFailure: (_) => retrieveAuthenticationState(null, [], [], []),
               loadUserProfileSuccess: (item) => retrieveCurrentReservations(item.profile),
               orElse: () {
                 return JumpingDots(color: widget.model.paletteColor, numberOfDots: 3);
@@ -71,19 +71,17 @@ class _MainWebScreenState extends State<MainWebScreen> {
   }
 
 
-
   Widget retrieveCurrentReservations(UserProfileModel currentUser) {
     return BlocProvider(create: (_) => getIt<ReservationManagerWatcherBloc>()..add(ReservationManagerWatcherEvent.watchCurrentUsersReservations([ReservationSlotState.current], currentUser, false)),
       child: BlocBuilder<ReservationManagerWatcherBloc, ReservationManagerWatcherState>(
         builder: (context, state) {
           return state.maybeMap(
               loadCurrentUserReservationsSuccess: (e) {
-                if (e.item.isEmpty) {
-                  return retrieveAuthenticationState(currentUser, [], []);
-                }
                 return retrieveActivityManagerForms(currentUser, e.item);
               },
-            orElse: () => retrieveAuthenticationState(currentUser, [], [])
+            orElse: () {
+                return retrieveActivityManagerForms(currentUser, []);
+            }
           );
         },
       ),
@@ -95,8 +93,10 @@ class _MainWebScreenState extends State<MainWebScreen> {
       child: BlocBuilder<ActivityManagerWatcherBloc, ActivityManagerWatcherState>(
         builder: (context, state) {
           return state.maybeMap(
-              loadActivityManagerFromResSuccess: (items) => retrieveAuthenticationState(currentUser, currentResList, items.items),
-              orElse: () => retrieveAuthenticationState(currentUser, currentResList, [])
+              loadActivityManagerFromResSuccess: (items) {
+                return retrieveNotifications(currentUser, currentResList, items.items);
+              },
+              orElse: () => retrieveNotifications(currentUser, currentResList, [])
           );
         },
       ),
@@ -104,8 +104,25 @@ class _MainWebScreenState extends State<MainWebScreen> {
   }
 
 
+  Widget retrieveNotifications(UserProfileModel? currentUser, List<ReservationItem> reservations, List<ActivityManagerForm> activities) {
+    return BlocProvider(create: (_) => getIt<NotificationWatcherBloc>()..add(NotificationWatcherEvent.watchAllAccountNotificationAmountByType([AccountNotificationType.invite, AccountNotificationType.request, AccountNotificationType.activityPost, AccountNotificationType.joined, AccountNotificationType.message, AccountNotificationType.resSlot], null)),
+        child: BlocBuilder<NotificationWatcherBloc, NotificationWatcherState>(
+            builder: (context, authState) {
+              return authState.maybeMap(
+                  loadAllAccountNotificationByTypeSuccess: (item) {
+                    return retrieveAuthenticationState(currentUser, reservations, activities, item.notifications);
+                  },
+            orElse: () {
+              return retrieveAuthenticationState(currentUser, reservations, activities, []);
+            }
+          );
+        }
+      )
+    );
+  }
 
-  Widget retrieveAuthenticationState(UserProfileModel? currentUser, List<ReservationItem> reservations, List<ActivityManagerForm> activities) {
+
+  Widget retrieveAuthenticationState(UserProfileModel? currentUser, List<ReservationItem> reservations, List<ActivityManagerForm> activities, List<AccountNotificationItem> notifications) {
     final searchExploreContainer = SearchExploreMainContainerWidget(
         model: widget.model,
         didUpdate: () {setState(() {
@@ -118,6 +135,7 @@ class _MainWebScreenState extends State<MainWebScreen> {
     );
     final reservationSubContainer = ReservationSubContainerWidget(
       model: widget.model,
+      notifications: notifications,
       initialReservationId: widget.initialReservationId,
       didSelectReservation: () {
         setState(() {
@@ -281,6 +299,7 @@ class _MainWebScreenState extends State<MainWebScreen> {
           dashboardMarker: DashboardMarker.reservations,
           iconTab: Icons.calendar_today_outlined,
           tabTitle: 'Reservations',
+          notificationCount: notifications.where((element) => element.notificationType != AccountNotificationType.review || element.notificationType != AccountNotificationType.message).length,
           isVisible: true,
       ),
       DashboardContainerModel(
@@ -295,6 +314,7 @@ class _MainWebScreenState extends State<MainWebScreen> {
           iconTab: Icons.chat_bubble_outline_outlined,
           tabTitle: 'Chats',
           isVisible: true,
+          notificationCount: notifications.where((element) => element.notificationType == AccountNotificationType.message).length
       ),
       DashboardContainerModel(
         mainContainer: DashboardMainContainerModel(
@@ -348,6 +368,10 @@ class _MainWebScreenState extends State<MainWebScreen> {
           dashboardMarker: DashboardMarker.resAttendees,
           iconTab: Icons.people_outline_rounded,
           tabTitle: 'Attendees',
+          notificationCount: notifications.where((e) =>
+            e.notificationType == AccountNotificationType.request && ReservationHelperCore.selectedReservationItem?.reservationId == e.reservationId ||
+            e.notificationType == AccountNotificationType.joined && ReservationHelperCore.selectedReservationItem?.reservationId == e.reservationId
+          ).length,
           isVisible: (ReservationHelperCore.selectedReservationItem != null && !Responsive.isMobile(context))
       ),
       if (currentUser != null && currentUser.userId == ReservationHelperCore.selectedReservationItem?.reservationOwnerId) DashboardContainerModel(
@@ -398,7 +422,6 @@ class _MainWebScreenState extends State<MainWebScreen> {
           /// show if is reservation owner or if is joined reservation attendee
           isVisible: ((ReservationHelperCore.selectedReservationItem != null && ReservationHelperCore.selectedReservationItem?.reservationOwnerId == currentUser?.userId) || (ReservationHelperCore.selectedReservationAttendeeItem?.contactStatus == ContactStatus.joined)) && !Responsive.isMobile(context)
       ),
-
     ];
 
     final DashboardContainerModel optionsDashboardItem = DashboardContainerModel(
@@ -416,12 +439,12 @@ class _MainWebScreenState extends State<MainWebScreen> {
         tabTitle: 'Settings'
     );
 
-    return retrieveMainDashboardContainer(context, dashboardContent(currentUser, reservations, activities), reservations, activities, optionsDashboardItem);
+    return retrieveMainDashboardContainer(context, dashboardContent(currentUser, reservations, activities), reservations, activities, notifications, optionsDashboardItem);
 
   }
 
 
-  Widget retrieveMainDashboardContainer(BuildContext context, List<DashboardContainerModel> dashboardContainerModel, List<ReservationItem> currentRes, List<ActivityManagerForm> currentAct, DashboardContainerModel optionsDashboardItem) {
+  Widget retrieveMainDashboardContainer(BuildContext context, List<DashboardContainerModel> dashboardContainerModel, List<ReservationItem> currentRes, List<ActivityManagerForm> currentAct, List<AccountNotificationItem> notifications, DashboardContainerModel optionsDashboardItem) {
     return WebDashboardMain(
     model: widget.model,
       dashboardMarker: context.read<ListingsSearchRequirementsBloc>().state.currentDashboardMarker,
@@ -433,7 +456,7 @@ class _MainWebScreenState extends State<MainWebScreen> {
             case DashboardMarker.resProfile:
               Beamer.of(context).update(
                   configuration: RouteInformation(
-                      location: '/${marker.toString()}/'
+                      location: '/${marker.name.toString()}/'
                   ),
                 rebuild: false
               );
@@ -441,7 +464,13 @@ class _MainWebScreenState extends State<MainWebScreen> {
             case DashboardMarker.resCurrent:
               break;
             case DashboardMarker.resAttendees:
-              // TODO: Handle this case.
+              // update notification count for attendees joined or requests
+              LocalNotificationCore.updateNotificationToRead(context, notifications.where((e) =>
+                e.notificationType == AccountNotificationType.request && ReservationHelperCore.selectedReservationItem?.reservationId == e.reservationId ||
+                e.notificationType == AccountNotificationType.joined && ReservationHelperCore.selectedReservationItem?.reservationId == e.reservationId).map((e) => e.notificationId).toList(),
+                widget.model.paletteColor,
+                widget.model.accentColor
+              );
               break;
             case DashboardMarker.resTicket:
               // TODO: Handle this case.
@@ -456,7 +485,7 @@ class _MainWebScreenState extends State<MainWebScreen> {
 
           Beamer.of(context).update(
             configuration: RouteInformation(
-              location: '/${marker.toString()}'
+              location: '/${marker.name.toString()}'
             ),
             rebuild: false
           );

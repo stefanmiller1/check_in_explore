@@ -12,8 +12,8 @@ class ReservationHelperCore {
   static List<TicketItem>? currentAttendeeTicketItems = [];
   static UserProfileModel? currentUserProfile;
   static bool isLoading = false;
-  static bool didPresentSidePanel = false;
-
+  static bool didPresentSidePanel = true;
+  static double previewerWidth = 470;
   static SettingsItemModel currentSettingsItemModel = subActivitySettingItems(null)[0];
 
 }

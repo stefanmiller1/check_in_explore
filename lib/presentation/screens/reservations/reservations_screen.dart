@@ -4,13 +4,17 @@ import 'package:check_in_domain/domain/misc/attendee_services/attendee_item/atte
 import 'package:check_in_presentation/check_in_presentation.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/components/reservation_card.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/loading_containers/loading_widgets.dart';
+import 'package:check_in_web_mobile_explore/presentation/core/notifications/notification_core.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/responsive/responsive.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/facility_preview/facility_preview_screen_helper.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/reservations/components/reservation_results_main.dart';
+import 'package:check_in_web_mobile_explore/presentation/screens/reservations/components/widgets/reservation_notification_helper.dart';
 import 'package:check_in_web_mobile_explore/presentation/web_screens/main_container_widgets/reservations_widget/reservation_helper_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jumping_dot/jumping_dot.dart';
+import 'package:check_in_facade/auth/notification_facade/notification_core_config.dart';
+
 
 class ReservationScreen extends StatelessWidget {
 
@@ -50,16 +54,7 @@ class ReservationScreen extends StatelessWidget {
           return authState.maybeMap(
               loadInProgress: (_) => emptyLoadingListView(context, isBrowser),
               loadProfileFailure: (_) => (isBrowser) ? GetLoginSignUpWidget(model: model) : emptyLoadingListView(context, true),
-              loadUserProfileSuccess: (item) => SingleChildScrollView(child: Column(
-                children: [
-                    getCurrentReservations(context, item.profile),
-                    getInvitationBasedReservations(context, item.profile),
-                    Divider(color: model.accentColor),
-                    getConfirmedReservations(context, item.profile),
-                    getCompletedReservations(context, item.profile),
-                  ],
-                )
-              ),
+              loadUserProfileSuccess: (item) => getNotificationsForAllReservations(context, item.profile),
               orElse: () {
                 return emptyLoadingListView(context, isBrowser);
             }
@@ -69,30 +64,57 @@ class ReservationScreen extends StatelessWidget {
     );
   }
 
+  Widget getNotificationsForAllReservations(BuildContext context, UserProfileModel currentUser) {
+      return BlocProvider(create: (_) => getIt<NotificationWatcherBloc>()..add(NotificationWatcherEvent.watchAllAccountNotificationAmountByType([AccountNotificationType.invite, AccountNotificationType.request, AccountNotificationType.joined, AccountNotificationType.activityPost, AccountNotificationType.resSlot], null)),
+        child: BlocBuilder<NotificationWatcherBloc, NotificationWatcherState>(
+            builder: (context, authState) {
+              return authState.maybeMap(
+                loadAllAccountNotificationByTypeSuccess: (item) {
+                  return listOfReservations(context, currentUser, item.notifications);
+                },
+              orElse: () => listOfReservations(context, currentUser, [])
+          );
+        }
+      )
+    );
+  }
 
-  Widget getInvitationBasedReservations(BuildContext context, UserProfileModel currentUser) {
+
+  Widget listOfReservations(BuildContext context, UserProfileModel currentUser, List<AccountNotificationItem> notifications) {
+    return SingleChildScrollView(
+        child: Column(
+          children: [
+            getCurrentReservations(context, currentUser, notifications),
+            getInvitationBasedReservations(context, currentUser, notifications),
+            Divider(color: model.accentColor),
+            getConfirmedReservations(context, currentUser, notifications),
+            getCompletedReservations(context, currentUser, notifications),
+          ],
+        )
+    );
+  }
+
+  Widget getInvitationBasedReservations(BuildContext context, UserProfileModel currentUser, List<AccountNotificationItem> notifications) {
     return BlocProvider(create: (_) => getIt<UserProfileWatcherBloc>()..add(const UserProfileWatcherEvent.watchProfileAllAttendingResStarted()),
       child: BlocBuilder<UserProfileWatcherBloc, UserProfileWatcherState>(
         builder: (context, state) {
           return state.maybeMap(
               loadProfileAttendingResSuccess: (e) {
 
-                final List<AttendeeItem> invitedRes = e.attending.where((e) => e.contactStatus == ContactStatus.invited).toList();
-                final List<AttendeeItem> joinedRes = e.attending.where((e) => e.contactStatus == ContactStatus.joined).toList();
 
                 return Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Visibility(
-                        visible: joinedRes.isNotEmpty,
+                        visible: e.attending.where((e) => e.contactStatus == ContactStatus.joined).isNotEmpty,
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const SizedBox(height: 15),
                             Text('Joined', style: TextStyle(color: model.paletteColor, fontWeight: FontWeight.bold, fontSize: model.questionTitleFontSize)),
-                            ...joinedRes.map(
+                            ...e.attending.where((e) => e.contactStatus == ContactStatus.joined).map(
                                     (f) {
                                   return BlocProvider(create: (_) => getIt<ReservationManagerWatcherBloc>()..add(ReservationManagerWatcherEvent.watchReservationItem(f.reservationId.getOrCrash())),
                                       child: BlocBuilder<ReservationManagerWatcherBloc, ReservationManagerWatcherState>(
@@ -108,12 +130,14 @@ class ReservationScreen extends StatelessWidget {
                                                     model,
                                                     res.reservationState == ReservationSlotState.completed,
                                                     initialReservationId == res.reservationId || ReservationHelperCore.selectedReservationItem == res,
+                                                    notifications.where((element) => element.reservationId == res.reservationId).toList(),
                                                     didSelectReservation: (
                                                         ListingManagerForm listing,
                                                         ReservationItem reservation,
                                                         ActivityManagerForm activity,
                                                         AttendeeItem? attendeeItem,
                                                         List<TicketItem> currentUsersTickets) {
+
 
                                                       didSelectReservation(listing, reservation, currentUser, activity, attendeeItem, currentUsersTickets);
                                                 },
@@ -134,14 +158,14 @@ class ReservationScreen extends StatelessWidget {
                     ),
 
                     Visibility(
-                        visible: invitedRes.isNotEmpty,
+                        visible: e.attending.where((e) => e.contactStatus == ContactStatus.invited).isNotEmpty,
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const SizedBox(height: 8),
-                            Text('Invites', style: TextStyle(color: model.paletteColor, fontWeight: FontWeight.bold, fontSize: model.questionTitleFontSize)),
-                            ...invitedRes.map(
+                             Text('Invites', style: TextStyle(color: model.paletteColor, fontWeight: FontWeight.bold, fontSize: model.questionTitleFontSize)),
+                              ...e.attending.where((e) => e.contactStatus == ContactStatus.invited).map(
                                     (f) {
                                   return BlocProvider(create: (_) => getIt<ReservationManagerWatcherBloc>()..add(ReservationManagerWatcherEvent.watchReservationItem(f.reservationId.getOrCrash())),
                                       child: BlocBuilder<ReservationManagerWatcherBloc, ReservationManagerWatcherState>(
@@ -156,14 +180,18 @@ class ReservationScreen extends StatelessWidget {
                                                   model,
                                                   res.reservationState == ReservationSlotState.completed,
                                                   initialReservationId == res.reservationId || ReservationHelperCore.selectedReservationItem == res,
+                                                  notifications.where((element) => element.reservationId == res.reservationId).toList(),
                                                   didSelectReservation: (
                                                       ListingManagerForm listing,
                                                       ReservationItem reservation,
                                                       ActivityManagerForm activity,
                                                       AttendeeItem? attendeeItem,
                                                       List<TicketItem> currentUsersTickets) {
-
-                                                    didSelectReservation(listing, reservation, currentUser, activity, attendeeItem, currentUsersTickets);
+                                                        /// change invite notification isRead to true
+                                                        /// change all invite notifications to read for current reservation
+                                                        LocalNotificationCore.updateNotificationToRead(context, notifications.where((element) => element.reservationId == reservation.reservationId && element.notificationType == AccountNotificationType.invite).map((e) => e.notificationId).toList(), model.paletteColor, model.accentColor);
+                                                        // updateNotificationToRead
+                                                        didSelectReservation(listing, reservation, currentUser, activity, attendeeItem, currentUsersTickets);
                                               },
                                             );
                                           },
@@ -187,7 +215,7 @@ class ReservationScreen extends StatelessWidget {
     );
   }
 
-  Widget getCurrentReservations(BuildContext context, UserProfileModel currentUser) {
+  Widget getCurrentReservations(BuildContext context, UserProfileModel currentUser, List<AccountNotificationItem> notifications) {
     return BlocProvider(create: (_) => getIt<ReservationManagerWatcherBloc>()..add(ReservationManagerWatcherEvent.watchCurrentUsersReservations([ReservationSlotState.current], currentUser, false)),
         child: BlocBuilder<ReservationManagerWatcherBloc, ReservationManagerWatcherState>(
         builder: (context, state) {
@@ -232,6 +260,7 @@ class ReservationScreen extends StatelessWidget {
                                 model,
                                 false,
                                 initialReservationId == e.reservationId || ReservationHelperCore.selectedReservationItem == e,
+                                notifications.where((element) => element.reservationId == e.reservationId).toList(),
                                 didSelectReservation: (
                                     ListingManagerForm listing,
                                     ReservationItem reservation,
@@ -267,7 +296,7 @@ class ReservationScreen extends StatelessWidget {
   }
 
 
-  Widget getConfirmedReservations(BuildContext context, UserProfileModel currentUser) {
+  Widget getConfirmedReservations(BuildContext context, UserProfileModel currentUser, List<AccountNotificationItem> notifications) {
     return BlocProvider(create: (_) => getIt<ReservationManagerWatcherBloc>()..add(ReservationManagerWatcherEvent.watchCurrentUsersReservations([ReservationSlotState.confirmed], currentUser, false)),
         child: BlocBuilder<ReservationManagerWatcherBloc, ReservationManagerWatcherState>(
         builder: (context, state) {
@@ -287,6 +316,7 @@ class ReservationScreen extends StatelessWidget {
                         model,
                         false,
                         initialReservationId == e.reservationId || ReservationHelperCore.selectedReservationItem == e,
+                        notifications.where((element) => element.reservationId == e.reservationId).toList(),
                         didSelectReservation: (
                             ListingManagerForm listing,
                             ReservationItem reservation,
@@ -309,7 +339,7 @@ class ReservationScreen extends StatelessWidget {
 
 
   // ReservationHelperCore.selectedReservationItem
-  Widget getCompletedReservations(BuildContext context, UserProfileModel currentUser) {
+  Widget getCompletedReservations(BuildContext context, UserProfileModel currentUser, List<AccountNotificationItem> notifications) {
       return BlocProvider(create: (_) => getIt<ReservationManagerWatcherBloc>()..add(ReservationManagerWatcherEvent.watchCurrentUsersReservations([ReservationSlotState.completed], currentUser, false)),
         child: BlocBuilder<ReservationManagerWatcherBloc, ReservationManagerWatcherState>(
           builder: (context, state) {
@@ -320,7 +350,6 @@ class ReservationScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
 
-                    Divider(color: model.disabledTextColor),
                     const SizedBox(height: 8),
                     Text('Where You Went', style: TextStyle(color: model.paletteColor, fontWeight: FontWeight.bold, fontSize: model.questionTitleFontSize)),
                     const SizedBox(height: 6),
@@ -332,6 +361,7 @@ class ReservationScreen extends StatelessWidget {
                       model,
                       true,
                       initialReservationId == e.reservationId || ReservationHelperCore.selectedReservationItem == e,
+                      notifications.where((element) => element.reservationId == e.reservationId).toList(),
                       didSelectReservation: (
                           ListingManagerForm listing,
                           ReservationItem reservation,

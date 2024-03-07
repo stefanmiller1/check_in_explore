@@ -87,6 +87,7 @@ class _SidePanelContainerState extends State<SidePanelContainer> {
                           title: e.tabTitle,
                           isLive: e.isLive,
                           isLast: e.dashboardMarker == DashboardMarker.profile,
+                          notifications: e.notificationCount,
                         ),
                       ),
                     ),

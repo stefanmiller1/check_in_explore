@@ -34,6 +34,7 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
+				<string>fb1080456166365843</string>
 				<string>com.googleusercontent.apps.686667962875-66o2aal7hsm9pcf34o15qu839tqgkqpd</string>
 			</array>
 		</dict>
@@ -57,13 +58,24 @@
 		<string>sms</string>
 		<string>tel</string>
 		<string>instagram-stories</string>
+		<string>fbauth2</string>
+		<string>fbshareextension</string>
+		<string>fb-messenger-share-api</string>
+		<string>facebook-reels</string>
 		<string>facebook-stories</string>
-		<string>facebook</string>
+		<string>fb</string>
+		<string>fbapi</string>
 		<string>instagram</string>
 		<string>twitter</string>
 		<string>whatsapp</string>
 		<string>tg</string>
 	</array>
+	<key>FacebookAppID</key>
+  	<string>1080456166365843</string>
+  	<key>FacebookClientToken</key>
+  	<string>f27b68c225bac206bd8ebc6dd819fdcf</string>
+  	<key>FacebookDisplayName</key>
+  	<string>Circle</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>

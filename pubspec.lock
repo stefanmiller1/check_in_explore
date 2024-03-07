@@ -86,10 +86,10 @@ packages:
     dependency: "direct main"
     description:
       name: badges
-      sha256: d33d4e07197d6e61ddc940640f2b4dc303d3c80887011344940e24d7522f8d26
+      sha256: a7b6bbd60dce418df0db3058b53f9d083c22cdb5132a052145dc267494df0b84
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.3"
+    version: "3.1.2"
   beamer:
     dependency: "direct main"
     description:
@@ -734,26 +734,26 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_local_notifications
-      sha256: "293995f94e120c8afce768981bd1fa9c5d6de67c547568e3b42ae2defdcbb4a0"
+      sha256: "73fb902a1676450a6fe5ecca8d562a317614d40315e8a08b3b0cd483475996f6"
       url: "https://pub.dev"
     source: hosted
-    version: "13.0.0"
+    version: "16.3.1"
   flutter_local_notifications_linux:
     dependency: transitive
     description:
       name: flutter_local_notifications_linux
-      sha256: ccb08b93703aeedb58856e5637450bf3ffec899adb66dc325630b68994734b89
+      sha256: "33f741ef47b5f63cc7f78fe75eeeac7e19f171ff3c3df054d84c1e38bedb6a03"
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.0+1"
+    version: "4.0.0+1"
   flutter_local_notifications_platform_interface:
     dependency: transitive
     description:
       name: flutter_local_notifications_platform_interface
-      sha256: "5ec1feac5f7f7d9266759488bc5f76416152baba9aa1b26fe572246caa00d1ab"
+      sha256: "7cf643d6d5022f3baed0be777b0662cce5919c0a7b86e700299f22dc4ae660ef"
       url: "https://pub.dev"
     source: hosted
-    version: "6.0.0"
+    version: "7.0.0+1"
   flutter_localizations:
     dependency: "direct main"
     description: flutter
@@ -779,18 +779,18 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_stripe
-      sha256: "7ad314650f6b794e7006a6f906ddbde548fff4e4cff7ad618452728c6b895d1e"
+      sha256: dfa4f0cf2f64cf82fde57357283819688c3b985c6cd10c26f50dd4a5476e4924
       url: "https://pub.dev"
     source: hosted
-    version: "9.5.0+1"
+    version: "10.1.0"
   flutter_stripe_web:
     dependency: "direct main"
     description:
       name: flutter_stripe_web
-      sha256: e9defb45eefe7489fc1f4e9077e381ed5754509e7509c737b12820236ba95701
+      sha256: bcadbce717cacae1c9ade225394c08a15eda682b3579e50adab7f04fcd16d837
       url: "https://pub.dev"
     source: hosted
-    version: "4.5.0"
+    version: "5.1.0"
   flutter_svg:
     dependency: "direct main"
     description:
@@ -829,10 +829,10 @@ packages:
     dependency: transitive
     description:
       name: freezed_annotation
-      sha256: aeac15850ef1b38ee368d4c53ba9a847e900bb2c53a4db3f6881cbb3cb684338
+      sha256: c3fd9336eb55a38cc1bbd79ab17573113a8deccd0ecbbf926cca3c62803b5c2d
       url: "https://pub.dev"
     source: hosted
-    version: "2.2.0"
+    version: "2.4.1"
   frontend_server_client:
     dependency: transitive
     description:
@@ -930,6 +930,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.1"
+  glowy_borders:
+    dependency: "direct main"
+    description:
+      name: glowy_borders
+      sha256: a0ace5b193047deab00ed2646065b0ef91bf1efef5b3579851bcc6bc7e0748b4
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.2"
   google_fonts:
     dependency: transitive
     description:
@@ -950,10 +958,10 @@ packages:
     dependency: "direct main"
     description:
       name: google_maps_flutter
-      sha256: d4914cb38b3dcb62c39c085d968d434de0f8050f00f4d9f5ba4a7c7e004934cb
+      sha256: ae66fef3e71261d7df2eff29b2a119e190b2884325ecaa55321b1e17b5504066
       url: "https://pub.dev"
     source: hosted
-    version: "2.5.0"
+    version: "2.5.3"
   google_maps_flutter_android:
     dependency: transitive
     description:
@@ -1155,7 +1163,7 @@ packages:
     source: hosted
     version: "1.5.4"
   intl:
-    dependency: "direct main"
+    dependency: "direct overridden"
     description:
       name: intl
       sha256: "3bc132a9dbce73a7e4a21a17d06e1878839ffbf975568bc875c60537824b0c4d"
@@ -1270,10 +1278,10 @@ packages:
     dependency: transitive
     description:
       name: material_color_utilities
-      sha256: d92141dc6fe1dad30722f9aa826c7fbc896d021d792f80678280601aff8cf724
+      sha256: "9528f2f296073ff54cb9fee677df673ace1218163c3bc7628093e7eed5203d41"
       url: "https://pub.dev"
     source: hosted
-    version: "0.2.0"
+    version: "0.5.0"
   material_floating_search_bar_2:
     dependency: "direct main"
     description:
@@ -1286,10 +1294,10 @@ packages:
     dependency: transitive
     description:
       name: meta
-      sha256: d584fa6707a52763a52446f02cc621b077888fb63b93bbcb1143a7be5a0c0c04
+      sha256: a6e590c838b18133bb482a2745ad77c5bb7715fb0451209e1a7567d416678b8e
       url: "https://pub.dev"
     source: hosted
-    version: "1.11.0"
+    version: "1.10.0"
   mime:
     dependency: transitive
     description:
@@ -1469,10 +1477,10 @@ packages:
     dependency: transitive
     description:
       name: plugin_platform_interface
-      sha256: dbf0f707c78beedc9200146ad3cb0ab4d5da13c246336987be6940f026500d3a
+      sha256: "4820fbfdb9478b1ebae27888254d445073732dae3d6ea81f0b7e06d5dedc3f02"
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.3"
+    version: "2.1.8"
   pointer_interceptor:
     dependency: "direct main"
     description:
@@ -1724,6 +1732,14 @@ packages:
       relative: false
     source: path
     version: "2.0.0+1"
+  social_share:
+    dependency: "direct main"
+    description:
+      name: social_share
+      sha256: eb19a0f6f5a29c7bb71e5bb1991145eb52472184363b6e2da70695befd8be041
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.3.1"
   source_span:
     dependency: transitive
     description:
@@ -1792,58 +1808,58 @@ packages:
     dependency: transitive
     description:
       name: stripe_android
-      sha256: c3a4398a777e4378bbc528e7244a73bcd3e6c6d807fce5bb8bcabc21d31abe8c
+      sha256: a1ba929247d9accd9d8b201740cc005f66ad2f739ce5323679fa408d5296338c
       url: "https://pub.dev"
     source: hosted
-    version: "9.5.0+1"
+    version: "10.1.0"
   stripe_ios:
     dependency: transitive
     description:
       name: stripe_ios
-      sha256: "2756ea9bb3ced403bb7bd97b8bfd3ff2d44e481d613f6150fedb38f70947af11"
+      sha256: "67994171a29301d12d6a557177d02b12f0d400edd3041ecbdad5fd5c25b43569"
       url: "https://pub.dev"
     source: hosted
-    version: "9.5.0+1"
+    version: "10.1.0"
   stripe_js:
     dependency: transitive
     description:
       name: stripe_js
-      sha256: "6b57069395b6e9551aa531090a6c77b2d7c3edc585ce390abb433bf03d869206"
+      sha256: d203b48167a9a533bbf72049b40c8227bf0557d79e28a7f016e77dddcac8b19b
       url: "https://pub.dev"
     source: hosted
-    version: "3.2.0"
+    version: "3.4.0"
   stripe_platform_interface:
     dependency: transitive
     description:
       name: stripe_platform_interface
-      sha256: "078142b37e3b7a40f7f9f30428bc3fd3234c493b9b4269ae6f298b7fcfa40f33"
+      sha256: "78d7f0b8d39df3b296283dd5eebbe936b1bd82a4b7252be4dbcbddb02a2175e1"
       url: "https://pub.dev"
     source: hosted
-    version: "9.5.0+1"
+    version: "10.1.0"
   syncfusion_flutter_calendar:
     dependency: "direct main"
     description:
       name: syncfusion_flutter_calendar
-      sha256: "92222782241c32dbe1ad166afd785deac84109a60d535eb6ad87b14ebcf5e2db"
+      sha256: f6e5e11948c35bcd291a52e41e1f6ffeef4a8f3e063256ef1f550a6f7244a568
       url: "https://pub.dev"
     source: hosted
-    version: "20.3.59"
+    version: "24.1.46"
   syncfusion_flutter_core:
     dependency: transitive
     description:
       name: syncfusion_flutter_core
-      sha256: c38cb76853bb6f0f77cc5b1318f602bb2acbd71196053696c2b27c0b95e20641
+      sha256: "205a4dda469ffd1b579cc9400a9b6df266c049cf9401da53944060c0515ea91e"
       url: "https://pub.dev"
     source: hosted
-    version: "20.3.59"
+    version: "24.1.46"
   syncfusion_flutter_datepicker:
     dependency: "direct main"
     description:
       name: syncfusion_flutter_datepicker
-      sha256: a239a4b8ceda8f42e02c87cc267f72fcadf73b4d6f5318d4a7a4380844f598e0
+      sha256: "019e72f74f93c0f66e646e59328ad6deb5f2bcfc0059bd533f9e4b4e79211915"
       url: "https://pub.dev"
     source: hosted
-    version: "20.3.59"
+    version: "24.1.46"
   synchronized:
     dependency: transitive
     description:
@@ -1880,10 +1896,10 @@ packages:
     dependency: transitive
     description:
       name: timezone
-      sha256: "2e59efc48e9f684c327c0498ac0b81411aee18b10c82f2db2c08f7f052493569"
+      sha256: "1cfd8ddc2d1cfd836bc93e67b9be88c3adaeca6f40a00ca999104c30693cdca0"
       url: "https://pub.dev"
     source: hosted
-    version: "0.9.0"
+    version: "0.9.2"
   timing:
     dependency: transitive
     description:
@@ -2028,6 +2044,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.2"
+  web:
+    dependency: transitive
+    description:
+      name: web
+      sha256: afe077240a270dcfd2aafe77602b4113645af95d0ad31128cc02bce5ac5d5152
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.0"
   web_socket_channel:
     dependency: transitive
     description:
@@ -2068,6 +2092,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.2"
+  widget_to_marker:
+    dependency: "direct main"
+    description:
+      name: widget_to_marker
+      sha256: "44df9d5e2cf9418108eaf635e54b0a34a2eeb7f8959aeab7f69f3015e13baadd"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.4"
   win32:
     dependency: transitive
     description:
@@ -2101,5 +2133,5 @@ packages:
     source: hosted
     version: "3.1.1"
 sdks:
-  dart: ">=3.0.0 <4.0.0"
+  dart: ">=3.2.0-194.0.dev <4.0.0"
   flutter: ">=3.10.0"

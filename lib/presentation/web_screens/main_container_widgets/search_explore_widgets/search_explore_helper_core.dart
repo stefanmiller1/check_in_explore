@@ -24,7 +24,7 @@ class ExploreWebHelperCore {
 
     Beamer.of(context).update(
         configuration: RouteInformation(
-            location: '/${DashboardMarker.home.toString()}/${SearchExploreHelperMarker.map.toString()}/listing/${listing.listingServiceId.getOrCrash()}'
+            location: '/${DashboardMarker.home.name.toString()}/${SearchExploreHelperMarker.map.toString()}/listing/${listing.listingServiceId.getOrCrash()}'
         ),
         rebuild: false
     );
@@ -41,7 +41,7 @@ class ExploreWebHelperCore {
 
     Beamer.of(context).update(
         configuration: RouteInformation(
-            location: '/${DashboardMarker.home.toString()}/${SearchExploreHelperMarker.map.toString()}/listing/${listing.listingServiceId.getOrCrash()}/reservation/${reservation.reservationId.getOrCrash()}'
+            location: '/${DashboardMarker.home.name.toString()}/${SearchExploreHelperMarker.map.toString()}/listing/${listing.listingServiceId.getOrCrash()}/reservation/${reservation.reservationId.getOrCrash()}'
         ),
 
         rebuild: false

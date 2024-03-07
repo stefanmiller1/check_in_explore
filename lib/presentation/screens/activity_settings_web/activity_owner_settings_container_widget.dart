@@ -3,6 +3,7 @@ import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_application/un_auth/watcher_services/attendee_watcher_service/attendee_manager_watcher_bloc.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
+import 'package:check_in_web_mobile_explore/presentation/core/responsive/responsive.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/activity_preview/activity_preview_screen_helper.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_access_visibility_widgets/access_visibility_info_settings_widget.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_rules_widget/activity_general_rules_widget.dart';
@@ -11,15 +12,19 @@ import 'package:check_in_web_mobile_explore/presentation/screens/activity_settin
 import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_attendee_widget/create_ticket_attendee_type.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_custom_rules_widgets/custom_rule_info_widget.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_requirements_widget/requirements_settings_widget.dart';
+import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/pop_over_screen/activity_onboarding_widget.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings_web/reservations_settings_widget.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_attendee_widget/select_attendee_type_widget.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_cancellation_widget/select_cancellation_settings_widget.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings_web/settings_helper.dart';
+import 'package:check_in_web_mobile_explore/presentation/screens/reservations/components/reservation_helper.dart';
+import 'package:check_in_web_mobile_explore/presentation/screens/reservations/components/widgets/reservation_activity_info_widget.dart';
 import 'package:check_in_web_mobile_explore/presentation/web_screens/main_container_widgets/reservations_widget/reservation_helper_core.dart';
 import 'package:check_in_web_mobile_explore/presentation/web_screens/side_panel_container/activity_settings_widget/activity_settings_side_panel_container.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:jumping_dot/jumping_dot.dart';
+import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:dartz/dartz.dart' as bloc;
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -44,6 +49,18 @@ class SettingsMainContainerWidget extends StatefulWidget {
 class _SettingsMainContainerWidgetState extends State<SettingsMainContainerWidget> {
 
 
+  late ActivityManagerForm? initActivityManagerForm = null;
+  late bool needsOnBoarding = false;
+  late bool didCreateNewActivity = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    initActivityManagerForm = widget.activityForm;
+    needsOnBoarding = activitySetupComplete(widget.activityForm) == false;
+
+  }
 
   Widget getMainSettingsContainer(BuildContext context, SettingsItemModel? navItem, UserProfileModel activityOwner) {
 
@@ -124,15 +141,61 @@ class _SettingsMainContainerWidgetState extends State<SettingsMainContainerWidge
     return Container();
   }
 
-  Widget getSideSettingsContainer(BuildContext context, SettingsItemModel? navItem) {
+  Widget getSideSettingsContainer(BuildContext context, SettingsItemModel? navItem, UserProfileModel reservationOwner) {
     switch (navItem?.navItem) {
-
       case SettingNavMarker.backgroundInfo:
-        // TODO: Handle this case.
-        break;
+        return SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            physics: const NeverScrollableScrollPhysics(),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.vertical,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: SizedBox(
+                  width: 440,
+                  child: Column(
+                    children: [
+                      getActivityBackgroundForPreview(
+                          context,
+                          widget.model,
+                          true,
+                          true,
+                          widget.activityForm,
+                          widget.reservationItem,
+                          [],
+                          reservationOwner
+                    ),
+                  ],
+                ),
+              ),
+            )
+          )
+        );
       case SettingNavMarker.requirementsInfo:
-        // TODO: Handle this case.
-        break;
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          physics: NeverScrollableScrollPhysics(),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            physics: NeverScrollableScrollPhysics(),
+            child: SizedBox(
+              width: 440,
+              child: Column(
+                children: [
+                  getActivityRequirementsColumn(
+                    context,
+                    widget.model,
+                    true,
+                    false,
+                    null,
+                    widget.activityForm,
+                    null
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
       case SettingNavMarker.locationInfo:
         // TODO: Handle this case.
         break;
@@ -191,7 +254,7 @@ class _SettingsMainContainerWidgetState extends State<SettingsMainContainerWidge
         return SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Container(
-              width: 350,
+              width: 400,
               child: getActivityTicketOptionsColumn(
                   context,
                   widget.model,
@@ -250,6 +313,7 @@ class _SettingsMainContainerWidgetState extends State<SettingsMainContainerWidge
                           () {},
                           (either) => either.fold(
                               (failure) {
+
                             final snackBar = SnackBar(
                                 backgroundColor: widget.model.webBackgroundColor,
                                 content: failure.maybeMap(
@@ -259,6 +323,18 @@ class _SettingsMainContainerWidgetState extends State<SettingsMainContainerWidge
                             );
                             ScaffoldMessenger.of(context).showSnackBar(snackBar);
                           }, (_) {
+
+                        if ((initActivityManagerForm != null) && activitySetupComplete(initActivityManagerForm!) == false && activitySetupComplete(state.activitySettingsForm)) {
+                          didCreateNewActivity = true;
+                          Future.delayed(const Duration(seconds: 3), () {
+                            if (mounted) {
+                              setState(() {
+                                didCreateNewActivity = false;
+                              });
+                            }
+                          });
+                        }
+
                         final snackBar = SnackBar(
                             elevation: 4,
                             backgroundColor: widget.model.paletteColor,
@@ -268,6 +344,8 @@ class _SettingsMainContainerWidgetState extends State<SettingsMainContainerWidge
                             authFailureOrSuccessOptionSaving: bloc.none()
                         );
                         ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+
                         // Navigator.of(context).pop();
                       }
                     )
@@ -276,12 +354,49 @@ class _SettingsMainContainerWidgetState extends State<SettingsMainContainerWidge
                 buildWhen: (p,c) => p.showErrorMessages != c.showErrorMessages || p.isSaving != c.isSaving || p.isEditingForm != c.isEditingForm || p.activitySettingsForm != c.activitySettingsForm,
                 builder: (context, state) {
 
+                  bool showPreviewer = widget.currentNavItem?.navItem == SettingNavMarker.backgroundInfo || widget.currentNavItem?.navItem == SettingNavMarker.requirementsInfo || widget.currentNavItem?.navItem == SettingNavMarker.ticketBased;
+
                   return Stack(
                     children: [
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width,
+                        height: MediaQuery.of(context).size.height,
+                      ),
                       getMainSettingsContainer(
                           context,
                           widget.currentNavItem,
                           activityOwner
+                      ),
+
+                      if (showPreviewer) Positioned(
+                        right: 0,
+                          child: AnimatedContainer(
+                            width: (ReservationHelperCore.didPresentSidePanel && Responsive.isDesktop(context)) ? ReservationHelperCore.previewerWidth : 0,
+                            duration: const Duration(milliseconds: 650),
+                            curve: Curves.easeInOut,
+                            child: Visibility(
+                              visible: ReservationHelperCore.didPresentSidePanel,
+                              child: Container(
+                                  decoration: BoxDecoration(
+                                      color: widget.model.webBackgroundColor,
+                                      borderRadius: BorderRadius.circular(25),
+                                      boxShadow: [
+                                        BoxShadow(
+                                            color: widget.model.disabledTextColor.withOpacity(0.35),
+                                            spreadRadius: 5,
+                                            blurRadius: 13,
+                                            offset: const Offset(5,0)
+                                      )
+                                    ]
+                                  ),
+                                  width: ReservationHelperCore.previewerWidth,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: getSideSettingsContainer(context, widget.currentNavItem, activityOwner),
+                                )
+                              ),
+                            ),
+                          )
                       ),
                       Positioned(
                         bottom: 10,
@@ -298,7 +413,7 @@ class _SettingsMainContainerWidgetState extends State<SettingsMainContainerWidge
                             ),
 
 
-                            if (state.isEditingForm && state.isSaving == false) InkWell(
+                            if ((state.activitySettingsForm != initActivityManagerForm) && activitySetupComplete(state.activitySettingsForm) == false && ((initActivityManagerForm != null) && activitySetupComplete(initActivityManagerForm!) == false) && state.isSaving == false) InkWell(
                               onTap: () {
                                 // widget.didFinishEditing();
                                 context.read<UpdateActivityFormBloc>().add(const UpdateActivityFormEvent.isSavingChanged(true));
@@ -307,61 +422,76 @@ class _SettingsMainContainerWidgetState extends State<SettingsMainContainerWidge
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 4.0),
                                 child: Container(
-                                  height: 55,
+                                  height: 45,
                                   decoration: BoxDecoration(
                                     color: widget.model.paletteColor,
-                                    borderRadius: BorderRadius.circular(15),
+                                    borderRadius: BorderRadius.circular(25),
                                   ),
                                   child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
+                                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
                                     child: Center(
-                                      child: Text('Save\nChanges', style: TextStyle(color: widget.model.accentColor, fontWeight: FontWeight.bold),
+                                      child: Text('Save Draft', style: TextStyle(color: widget.model.accentColor, fontSize: widget.model.secondaryQuestionTitleFontSize, fontWeight: FontWeight.bold),
                                       ),
                                     ),
                                   ),
                                 ),
                               ),
                             ),
+                            const SizedBox(height: 8),
+
+                            /// will un-publish if saving (from init published) but incomplete.
+                            if (state.activitySettingsForm != initActivityManagerForm && activitySetupComplete(state.activitySettingsForm) == false && (initActivityManagerForm != null) && activitySetupComplete(initActivityManagerForm!)) InkWell(
+                              onTap: () {
+                                context.read<UpdateActivityFormBloc>().add(const UpdateActivityFormEvent.isSavingChanged(true));
+                                context.read<UpdateActivityFormBloc>().add(const UpdateActivityFormEvent.createActivityFinished());
+                              },
+                              child: Column(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                                    child: Container(
+                                      height: 45,
+                                      decoration: BoxDecoration(
+                                        color: widget.model.paletteColor,
+                                        borderRadius: BorderRadius.circular(25),
+                                      ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                        child: Center(
+                                          child: Text('Un-Publish & Save Draft', style: TextStyle(color: widget.model.accentColor, fontSize: widget.model.secondaryQuestionTitleFontSize, fontWeight: FontWeight.bold),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8)
+                                ],
+                              ),
+                            ),
+
+
+
+                            /// Publish is not published on load
+                            AnimatedBorderButton(
+                                buttonText: ((initActivityManagerForm != null) && activitySetupComplete(initActivityManagerForm!) == false) ? 'Publish Activity' : 'Update Activity',
+                                isActivated: (state.isEditingForm && state.activitySettingsForm != initActivityManagerForm && activitySetupComplete(state.activitySettingsForm) && (initActivityManagerForm != null)),
+                                model: widget.model,
+                                didSelectButton: () {
+                                    context.read<UpdateActivityFormBloc>().add(const UpdateActivityFormEvent.isSavingChanged(true));
+                                    context.read<UpdateActivityFormBloc>().add(const UpdateActivityFormEvent.createActivityFinished());
+                              }
+                            ),
                           ],
                         ),
                       ),
 
-                      Positioned(
-                        right: 0,
-                        top: 120,
-                        child: AnimatedContainer(
-                          width: (ReservationHelperCore.didPresentSidePanel) ? 350 : 0,
-                          duration: const Duration(milliseconds: 650),
-                          curve: Curves.easeInOut,
-                          child: Visibility(
-                            visible: ReservationHelperCore.didPresentSidePanel,
-                            child: Container(
-                                decoration: BoxDecoration(
-                                    color: widget.model.webBackgroundColor,
-                                    borderRadius: BorderRadius.circular(25),
-                                    boxShadow: [
-                                      BoxShadow(
-                                          color: widget.model.disabledTextColor.withOpacity(0.35),
-                                          spreadRadius: 5,
-                                          blurRadius: 13,
-                                          offset: const Offset(5,0)
-                                      )
-                                    ]
-                                ),
-                                width: 350,
-                                // height: MediaQuery.of(context).size.height - 120,
-                                child: getSideSettingsContainer(context, widget.currentNavItem)
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      Positioned(
-                          right: 0,
+                      if (showPreviewer) Positioned(
+                          top: 8,
+                          right: 8,
                           child: InkWell(
                             onTap: () {
                               setState(() {
-                                ReservationHelperCore.didPresentSidePanel = !ReservationHelperCore.didPresentSidePanel;
+                                widget.didPresentSidePanel();
                               });
                             },
                             child: Container(
@@ -384,6 +514,29 @@ class _SettingsMainContainerWidgetState extends State<SettingsMainContainerWidge
                           ),
                         )
                       ),
+
+
+                      if (needsOnBoarding) OnBoardingPopOverWidget(
+                          popOverWidget: ActivityOnBoardingWidget(
+                            model: widget.model,
+                            didSelectClose: () {
+                              setState(() {
+                                needsOnBoarding = false;
+                              });
+                            },
+                          ),
+                          model: widget.model
+                      ),
+
+                      if (didCreateNewActivity) Container(
+                        height: MediaQuery.of(context).size.height,
+                        width: MediaQuery.of(context).size.width,
+                        child: Lottie.asset(
+                            height: MediaQuery.of(context).size.height - 200,
+                            'assets/lottie_animations/animation_700434682245.json'
+                        ),
+                      ),
+
                     ],
                   );
                 },

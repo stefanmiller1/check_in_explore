@@ -14,7 +14,7 @@
     This is a placeholder for base href that will be replaced by the value of
     the `--base-href` argument provided to `flutter build`.
   -->
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDVUnLwyBIGX81bXp7NpKOH6XrPUXnxKeo"></script>
+  <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDVUnLwyBIGX81bXp7NpKOH6XrPUXnxKeo&loading=async"></script>
   <base href="$FLUTTER_BASE_HREF">
 
   <meta charset="UTF-8">
@@ -35,33 +35,116 @@
 
   <script>
     // The value below is injected by flutter build, do not touch.
-    var serviceWorkerVersion = null;
+    const serviceWorkerVersion = null;
   </script>
   <!-- This script adds the flutter initialization JS code -->
   <script src="flutter.js" defer></script>
 </head>
 <body>
-  <script>
-    window.addEventListener('load', function(ev) {
-      // Download main.dart.js
-      _flutter.loader.loadEntrypoint({
-        serviceWorker: {
-          serviceWorkerVersion: serviceWorkerVersion,
-        }
-      }).then(function(engineInitializer) {
-        return engineInitializer.initializeEngine();
-      }).then(function(appRunner) {
-        return appRunner.runApp();
-      });
-    });
-  </script>
+<!--  <script>-->
+<!--    window.addEventListener('load', function(ev) {-->
+<!--      // Download main.dart.js-->
+<!--      _flutter.loader.loadEntrypoint({-->
+<!--        entrypointUrl: "/main.dart.js",-->
+<!--        serviceWorker: {-->
+<!--          serviceWorkerVersion: serviceWorkerVersion,-->
+<!--          serviceWorkerUrl: "/flutter_service_worker.js?v=",-->
+<!--        }-->
+<!--      }).then(function(engineInitializer) {-->
+<!--        return engineInitializer.initializeEngine();-->
+<!--      }).then(function(appRunner) {-->
+<!--        return appRunner.runApp();-->
+<!--      });-->
+<!--    });-->
+<!--  </script>-->
   <script src="main.dart.js" type="application/javascript"></script>
-  <script>
-  if ("serviceWorker" in navigator) {
-      window.addEventListener("load", function () {
-        navigator.serviceWorker.register("/firebase-messaging-sw.js");
-      });
-    }
-  <script>
+<script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/firebase-messaging-sw.js')
+                    .then(function(registration) {
+                        console.log('Service worker registered successfully:', registration);
+
+                        // Attempt subscription to push notifications here
+                        return registration.pushManager.subscribe({
+                            userVisibleOnly: true,
+                            applicationServerKey: 'BCc_cyT2apphC8NxosVIQTC42C6IfaF4mh0xkJ2ZJgUC0YXJMS3FuxMQfVWomEmN4wqtSy6g4AhuI7m8fG52fVI'
+                        });
+                    })
+                    .then(function(subscription) {
+                        console.log('Push subscription successful:', subscription);
+                    })
+                    .catch(function(error) {
+                        console.error('Service worker registration or push subscription failed:', error);
+                    });
+            });
+        } else {
+            console.log('Service workers are not supported.');
+        }
+    </script>
+<!--  <script>-->
+<!--  if ('serviceWorker' in navigator) {-->
+<!--    window.addEventListener('load', function() {-->
+<!--      navigator.serviceWorker.register('/firebase-messaging-sw.js').then(async function(registrations) {-->
+<!--          console.log('ServiceWorker registration successful with scope: ', registrations.scope);-->
+<!--        }).catch(function(err) {-->
+<!--          console.error('ServiceWorker registration failed: ', err);-->
+<!--        });-->
+<!--     });-->
+<!--  }-->
+
+<!--  function askPermission() {-->
+<!--    return new Promise(function(resolve, reject) {-->
+<!--      const permissionResult = Notification.requestPermission(function(result) {-->
+<!--        resolve(result);-->
+<!--      });-->
+
+<!--      if (permissionResult) {-->
+<!--        permissionResult.then(resolve, reject);-->
+<!--      }-->
+<!--    })-->
+<!--    .then(function(permissionResult) {-->
+<!--      if (permissionResult !== 'granted') {-->
+<!--        throw new Error('We weren\'t granted permission.');-->
+<!--      }-->
+<!--    });-->
+<!--  }-->
+
+
+<!--  function urlBase64ToUint8Array(base64String) {-->
+<!--      const padding = '='.repeat((4 - base64String.length % 4) % 4);-->
+<!--      const base64 = (base64String + padding)-->
+<!--          .replace(/\-/g, '+')-->
+<!--          .replace(/_/g, '/');-->
+
+<!--      const rawData = window.atob(base64);-->
+<!--      const outputArray = new Uint8Array(rawData.length);-->
+
+<!--      for (let i = 0; i < rawData.length; ++i) {-->
+<!--          outputArray[i] = rawData.charCodeAt(i);-->
+<!--      }-->
+<!--      return outputArray;-->
+<!--  }-->
+
+
+<!--  function subscribeUserToPush() {-->
+<!--    return navigator.serviceWorker.register('/firebase-messaging-sw.js')-->
+<!--    .then(function(registration) {-->
+<!--      const subscribeOptions = {-->
+<!--        userVisibleOnly: true,-->
+<!--        applicationServerKey: "BCc_cyT2apphC8NxosVIQTC42C6IfaF4mh0xkJ2ZJgUC0YXJMS3FuxMQfVWomEmN4wqtSy6g4AhuI7m8fG52fVI"-->
+<!--      };-->
+<!--      return registration.pushManager.subscribe(subscribeOptions);-->
+<!--    })-->
+<!--    .then(function(pushSubscription) {-->
+<!--        console.log("never called");-->
+<!--        console.log('Received PushSubscription: ', JSON.stringify(pushSubscription));-->
+<!--        return pushSubscription;-->
+<!--    });-->
+<!--  }-->
+
+<!--  askPermission();-->
+<!--  subscribeUserToPush();-->
+<!--  </script>-->
 </body>
 </html>

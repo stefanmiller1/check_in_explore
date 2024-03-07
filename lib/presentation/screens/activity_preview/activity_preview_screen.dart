@@ -7,26 +7,16 @@ import 'package:check_in_facade/check_in_facade.dart' as facade;
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_domain/domain/misc/attendee_services/attendee_item/attendee_item.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
-import 'package:check_in_web_mobile_explore/presentation/core/components/listing_activity_preview_widget.dart';
-import 'package:check_in_web_mobile_explore/presentation/core/components/listing_card.dart';
-import 'package:check_in_web_mobile_explore/presentation/core/components/user_card.dart';
-import 'package:check_in_web_mobile_explore/presentation/core/responsive/responsive.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/activity_preview/activity_preview_screen_helper.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/activity_tickets/activity_attendee_ticket_results_main.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/facility_preview/components/facility_overview_info_widget.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/facility_preview/facility_preview_screen_helper.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/reservations/components/reservation_helper.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/reservations/components/widgets/reservation_activity_info_widget.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/reservations/components/widgets/reservation_footer_widget.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/reservations/components/widgets/reservation_info_widget.dart';
-import 'package:dismissible_page/dismissible_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:intl/intl.dart';
 import 'package:jumping_dot/jumping_dot.dart';
-import 'package:provider/provider.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dartz/dartz.dart' as bloc;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -72,7 +62,8 @@ class _ActivityPreviewScreenState extends State<ActivityPreviewScreen> with Sing
       ListingManagerForm listing,
       ReservationItem reservation,
       UserProfileModel activityOwner,
-      List<AttendeeItem> allAttendees
+      List<AttendeeItem> allAttendees,
+      List<UniqueId> linkedCommunities,
       ) {
 
     final String currentUser = facade.FirebaseChatCore.instance.firebaseUser?.uid ?? '';
@@ -91,7 +82,8 @@ class _ActivityPreviewScreenState extends State<ActivityPreviewScreen> with Sing
                     activityForm,
                     listing,
                     activityOwner,
-                    allAttendees
+                    allAttendees,
+                    linkedCommunities
                 ),
               ),
             )
@@ -232,7 +224,7 @@ class _ActivityPreviewScreenState extends State<ActivityPreviewScreen> with Sing
     );
   }
 
-  Widget mainContainerPageView(BuildContext context, ReservationItem reservation, ActivityManagerForm activityManagerForm, ListingManagerForm listing, UserProfileModel activityOwner, List<AttendeeItem> allAttendees) {
+  Widget mainContainerPageView(BuildContext context, ReservationItem reservation, ActivityManagerForm activityManagerForm, ListingManagerForm listing, UserProfileModel activityOwner, List<AttendeeItem> allAttendees, List<UniqueId> linkedCommunities) {
     return PageView.builder(
         controller: _pageController,
         itemCount: 2,
@@ -258,8 +250,10 @@ class _ActivityPreviewScreenState extends State<ActivityPreviewScreen> with Sing
                               activityForm: activityManagerForm,
                               activityOwner: activityOwner,
                               reservation: reservation,
-                              listing: listing,
                               allAttendees: allAttendees,
+                              showSuggestions: false,
+                              activitySetupComplete: true,
+                              linkedCommunities: linkedCommunities,
                               didSelectActivityTicket: (ticket) {
                                 setState(() {
                                   presentNewTicketAttendeeJoin(
@@ -270,7 +264,9 @@ class _ActivityPreviewScreenState extends State<ActivityPreviewScreen> with Sing
                                       activityOwner
                                   );
                             });
-                          }),
+                          },
+                            isOwner: false,
+                        ),
                       ),
                     )
                   ),
@@ -319,6 +315,7 @@ class _ActivityPreviewScreenState extends State<ActivityPreviewScreen> with Sing
       height: 40,
       width: MediaQuery.of(context).size.width,
       child: TabBar(
+        indicatorSize: TabBarIndicatorSize.tab,
         controller: _tabController,
         onTap: (index) {
           setState(() {
@@ -356,6 +353,7 @@ class _ActivityPreviewScreenState extends State<ActivityPreviewScreen> with Sing
                             color: widget.model.accentColor.withOpacity(0.35)
                         ),
                         child: TabBar(
+                          indicatorSize: TabBarIndicatorSize.tab,
                           controller: _tabController,
                           onTap: (index) {
                             setState(() {
@@ -472,16 +470,28 @@ class _ActivityPreviewScreenState extends State<ActivityPreviewScreen> with Sing
       child: BlocBuilder<AttendeeManagerWatcherBloc, AttendeeManagerWatcherState>(
         builder: (context, state) {
           return state.maybeMap(
-              loadAllAttendanceActivitySuccess: (item) => retrieveMainContainerForAttendee(listing, reservation, activityForm, activityOwnerProfile, item.item),
-              orElse: () => retrieveMainContainerForAttendee(listing, reservation, activityForm, activityOwnerProfile, [])
+              loadAllAttendanceActivitySuccess: (item) => retrieveAllLinkedCommunityIds(listing, reservation, activityForm, activityOwnerProfile, item.item),
+              orElse: () => retrieveAllLinkedCommunityIds(listing, reservation, activityForm, activityOwnerProfile, [])
           );
         },
       ),
     );
   }
 
+  Widget retrieveAllLinkedCommunityIds(ListingManagerForm listing, ReservationItem reservation, ActivityManagerForm activityForm, UserProfileModel activityOwnerProfile, List<AttendeeItem> allAttendees) {
+    return BlocProvider(create: (_) => getIt<CommunityManagerWatcherBloc>()..add(CommunityManagerWatcherEvent.watchReservationLinkedCommunity(reservation.reservationId)),
+        child: BlocBuilder<CommunityManagerWatcherBloc, CommunityManagerWatcherState>(
+            builder: (context, authState) {
+              return authState.maybeMap(
+                  loadReservationLinkedCommunitiesSuccess: (item) => retrieveMainContainerForAttendee(listing, reservation, activityForm, activityOwnerProfile, allAttendees, item.communityIds),
+                  orElse: () => retrieveMainContainerForAttendee(listing, reservation, activityForm, activityOwnerProfile, allAttendees, [])
+          );
+        }
+      )
+    );
+  }
 
-  Widget retrieveMainContainerForAttendee(ListingManagerForm listing, ReservationItem reservation, ActivityManagerForm activityForm, UserProfileModel activityOwnerProfile, List<AttendeeItem> allAttendees) {
+  Widget retrieveMainContainerForAttendee(ListingManagerForm listing, ReservationItem reservation, ActivityManagerForm activityForm, UserProfileModel activityOwnerProfile, List<AttendeeItem> allAttendees, List<UniqueId> linkedCommunities) {
     return BlocProvider(create: (_) => getIt<AttendeeFormBloc>()..add(AttendeeFormEvent.initializeAttendeeForm(bloc.optionOf(AttendeeItem(
         attendeeId: AttendeeItem.empty().attendeeId,
         attendeeOwnerId: UniqueId.fromUniqueString(facade.FirebaseChatCore.instance.firebaseUser?.uid ?? ''),
@@ -530,7 +540,8 @@ class _ActivityPreviewScreenState extends State<ActivityPreviewScreen> with Sing
                     listing,
                     reservation,
                     activityOwnerProfile,
-                    allAttendees
+                    allAttendees,
+                    linkedCommunities
               )
             ),
 

@@ -1,19 +1,15 @@
-import 'dart:async';
-
+import 'package:beamer/beamer.dart';
 import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/activity_attendees/activity_attendees_list_helper.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/map_helper.dart';
-import 'package:check_in_web_mobile_explore/presentation/web_screens/main_container_widgets/reservations_widget/reservation_helper_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:check_in_facade/check_in_facade.dart' as facade;
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../core/responsive/responsive.dart';
 import '../mobile_screens/main_mobile_screen.dart';
-import '../tablet_screens/main_tablet_screen.dart';
 import '../web_screens/main_web_screen.dart';
+import 'package:check_in_facade/auth/notification_facade/notification_core_config.dart';
 
 
 class MainScreen extends StatefulWidget {
@@ -35,6 +31,32 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
 
     dashboardModel = DashboardModel.instance;
+
+    /// foreground work to call local notification
+    FirebaseMessaging.onMessage.listen((event) {
+      /// TODO: update current user with new notification
+      /// TODO: on selecting notification - update notification status to isRead = true
+      if (kIsWeb) {
+        LocalNotificationCore.showFlutterNotificationWeb(
+            context,
+            dashboardModel.paletteColor,
+            dashboardModel.accentColor,
+            event,
+          didSelectNotification: (link) {
+            Beamer.of(context).update(
+                configuration: RouteInformation(
+                    location: link,
+                    // '/${DashboardMarker.reservations.toString()}/reservation/${ReservationHelperCore.selectedReservationItem?.reservationId.getOrCrash().toString()}'
+                ),
+                rebuild: true
+            );
+          }
+        );
+      } else {
+        LocalNotificationCore.showFlutterNotificationMobile(event);
+      }
+    });
+
     super.initState();
 
   }
@@ -73,7 +95,13 @@ class _MainScreenState extends State<MainScreen> {
               p.currentDashboardMarker != c.currentDashboardMarker,
               // p.searchType != c.searchType,
           builder: (context, state) {
-            return retrieveMainResponsiveScreen(model: model);
+            return Theme(
+              data: dashboardModel.systemTheme.copyWith(
+                  colorScheme: dashboardModel.systemTheme.colorScheme.copyWith(
+                    surfaceVariant: Colors.transparent
+                  )
+                ),
+              child: retrieveMainResponsiveScreen(model: model));
           }
         ),
       )

@@ -7,13 +7,15 @@ class MainMobileScreenModel {
   final String mainTitle;
   final Widget mainWidgetItem;
   final AppBar? appBarWidgetItem;
+  final int? notifications;
 
   MainMobileScreenModel({
   required this.iconItem,
   required this.mainTitle,
   required this.mainWidgetItem,
   required this.isSelected,
-  required this.appBarWidgetItem
+  required this.appBarWidgetItem,
+  this.notifications,
   });
 
 }

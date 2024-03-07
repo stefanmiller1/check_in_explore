@@ -72,6 +72,7 @@ class _SearchExploreFilterState extends State<SearchExploreFilter> with SingleTi
             child: RotatedBox(
               quarterTurns: 1,
               child: TabBar(
+                  indicatorSize: TabBarIndicatorSize.tab,
                   controller: _tabController,
                   onTap: (index) {
                       context.read<ListingsSearchRequirementsBloc>().add(const ListingsSearchRequirementsEvent.selectedListingIdChanged(null));

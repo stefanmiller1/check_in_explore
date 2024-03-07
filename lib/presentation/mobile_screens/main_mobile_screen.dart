@@ -84,7 +84,7 @@ class _MainMobileScreenState extends State<MainMobileScreen> {
                       currentUserTicketItems: currentUsersTickets
                     );
                   }
-              )
+                )
               );
             },
           ),

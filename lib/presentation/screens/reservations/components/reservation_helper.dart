@@ -1,5 +1,3 @@
-import 'package:check_in_application/auth/update_services/booked_reservation_services/booked_reservation_form_bloc.dart';
-import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_domain/domain/auth/reservation_manager/post.dart';
 import 'package:check_in_domain/domain/auth/reservation_manager/reservation_post/system_post.dart';
@@ -7,26 +5,21 @@ import 'package:check_in_domain/domain/misc/attendee_services/attendee_item/atte
 import 'package:check_in_presentation/check_in_presentation.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/components/reservation_details_widget.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/components/invite_widgets/send_invitation_request.dart';
+import 'package:check_in_web_mobile_explore/presentation/core/components/tabHelper.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/components/webview_controller_widget.dart';
-import 'package:check_in_web_mobile_explore/presentation/core/web_dashboard/dashboard_helper.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/activity_attendees/activity_attendees_list_screen.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/activity_settings_screen.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/chat_inbox/direct_chat_screen.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/facility_preview/facility_preview_screen.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/profile_settings/components/review_current_profile.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/profile_settings/profile_settings_screen_helper.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/reservations/components/widgets/reservation_new_attendee_onboarding.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/helper.dart';
 import 'package:check_in_web_mobile_explore/presentation/web_screens/focused_main_container_widgets/activity_ticket_settings_widget/activity_ticket_settings_container_widget.dart';
-import 'package:check_in_web_mobile_explore/presentation/web_screens/main_web_screen_helper.dart';
 import 'package:check_in_web_mobile_explore/presentation/web_screens/sub_container_widgets/activity_ticket_settings_widget/activity_ticket_sub_container_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:check_in_facade/auth/notification_facade/notification_core_config.dart';
 
 
 
@@ -37,6 +30,7 @@ enum ResOverViewTabs {activity, reservation, discussion}
 class ReservationCoreHelper {
 
   static ResOverViewTabs resOverViewTabs = ResOverViewTabs.discussion;
+  static late bool showSuggestions = true;
   static late PageController? pageController = null;
 }
 
@@ -87,6 +81,23 @@ bool showAffiliateOnBoarding(AttendeeType type) {
   }
 }
 
+bool activitySetupComplete(ActivityManagerForm activityForm) => (activityForm.profileService.activityBackground.activityProfileImages != null && activityForm.profileService.activityBackground.activityProfileImages?.isNotEmpty == true && activityForm.profileService.activityBackground.activityTitle.isValid() && activityForm.profileService.activityBackground.activityDescription1.isValid());
+
+/// tab items for top tab controller
+List<TabBadge> tabItems(List<AccountNotificationItem> notifications) {
+  final List<TabBadge> tabs = [];
+
+  for (ResOverViewTabs tab in ResOverViewTabs.values) {
+    if (tab == ResOverViewTabs.activity) {
+      tabs.add(TabBadge(notifications.where((element) => element.notificationType == AccountNotificationType.activity).isNotEmpty, notifications.where((element) => element.notificationType == AccountNotificationType.activity).length.toString(), tab.name.toString(), tab));
+    } else if (tab == ResOverViewTabs.discussion) {
+      tabs.add(TabBadge(notifications.where((element) => element.notificationType == AccountNotificationType.activityPost).isNotEmpty, notifications.where((element) => element.notificationType == AccountNotificationType.activityPost).length.toString(), tab.name.toString(), tab));
+    } else if (tab == ResOverViewTabs.reservation) {
+      tabs.add(TabBadge(notifications.where((element) => element.notificationType == AccountNotificationType.reservation).isNotEmpty, notifications.where((element) => element.notificationType == AccountNotificationType.reservation).length.toString(), tab.name.toString(), tab));
+    }
+  }
+  return tabs;
+}
 
 Widget loadReservations(BuildContext context) {
   return Shimmer.fromColors(
@@ -150,6 +161,34 @@ List<ReservationSettingListModel> resSettingsList(BuildContext context, Activity
     ReservationSettingListModel(title: 'Show Listing', icon: Icons.home_outlined, marker: ResSettingMarker.showListing),
     if (!isOwner) ReservationSettingListModel(title: 'Leave Listing', icon: Icons.cancel_outlined, marker: ResSettingMarker.leaveReservation),
   ];
+}
+
+void updateNotifications(BuildContext context, DashboardModel model, ResOverViewTabs tab, List<AccountNotificationItem> notifications) {
+
+  switch (tab) {
+
+    case ResOverViewTabs.activity:
+      LocalNotificationCore.updateNotificationToRead(context, notifications.where((e) =>
+      e.notificationType == AccountNotificationType.activity).map((e) => e.notificationId).toList(),
+          model.paletteColor,
+          model.accentColor
+      );
+      break;
+    case ResOverViewTabs.reservation:
+      LocalNotificationCore.updateNotificationToRead(context, notifications.where((e) =>
+      e.notificationType == AccountNotificationType.reservation).map((e) => e.notificationId).toList(),
+          model.paletteColor,
+          model.accentColor
+      );
+      break;
+    case ResOverViewTabs.discussion:
+      LocalNotificationCore.updateNotificationToRead(context, notifications.where((e) =>
+          e.notificationType == AccountNotificationType.activityPost).map((e) => e.notificationId).toList(),
+          model.paletteColor,
+          model.accentColor
+      );
+      break;
+  }
 }
 
 void presentNewAttendeeJoin(BuildContext context, DashboardModel model, ReservationItem reservation, ActivityManagerForm activity, UserProfileModel reservationOwner) {
@@ -440,7 +479,7 @@ void presentNewVendorAttendee(BuildContext context, DashboardModel model, Reserv
             isFromInvite: false,
           );
         }
-    )
+      )
     );
   }
 

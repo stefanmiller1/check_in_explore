@@ -37,7 +37,6 @@ class _ActivityResultMainState extends State<ActivityResultMain> with TickerProv
   late AnimationController _animationController;
   late AnimationController _progressAnimationController;
 
-  late Animation<double> _nextPage;
   int _currentPage = 0;
   late final PageController _activityPageController = PageController(initialPage: 0);
   late final Future<List<ReservationPreviewer>> getReservationList;
@@ -122,7 +121,6 @@ class _ActivityResultMainState extends State<ActivityResultMain> with TickerProv
     //Start at the controller and set the time to switch pages
     _animationController = AnimationController(vsync: this, duration: Duration(seconds: randomNumber));
     _progressAnimationController = AnimationController(vsync: this, duration: Duration(seconds: randomNumber), value: 1.0);
-    _nextPage = Tween(begin: 0.0, end: 1.0).animate(_animationController);
 
     //Add listener to AnimationController for know when end the count and change to the next page
     _animationController.addListener(() {
@@ -132,8 +130,6 @@ class _ActivityResultMainState extends State<ActivityResultMain> with TickerProv
         final int page = widget.reservations.length; //Number of pages in your PageView
         if (_currentPage < page - 1) {
           _currentPage++;
-
-
           _activityPageController.animateToPage(_currentPage,
               duration: const Duration(milliseconds: 800), curve: Curves.easeInOut);
 
@@ -309,7 +305,7 @@ class _ActivityResultMainState extends State<ActivityResultMain> with TickerProv
                                   ),
                                 ),
 
-                                Container(
+                                if (reservationList.length != 1) Container(
                                   height: 3,
                                   width: MediaQuery.of(context).size.width,
                                   child: TweenAnimationBuilder<double>(
@@ -329,7 +325,7 @@ class _ActivityResultMainState extends State<ActivityResultMain> with TickerProv
                                 ),
                               )
                             ],
-                            );
+                          );
                         }
                       ),
                     ),

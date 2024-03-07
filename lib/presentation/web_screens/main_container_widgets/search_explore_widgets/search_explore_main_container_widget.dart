@@ -110,7 +110,7 @@ class _SearchExploreMainContainerWidgetState extends State<SearchExploreMainCont
 
                               return Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 25.0, vertical: 7.0),
-                                child: Container(
+                                child: SizedBox(
                                   height: 550,
                                   width: 400,
                                   child: ListingResultMainCard(
@@ -167,32 +167,30 @@ class _SearchExploreMainContainerWidgetState extends State<SearchExploreMainCont
                       width: (kIsWeb && Responsive.isDesktop(context)) ? 300 : 0,
                       duration: const Duration(milliseconds: 300),
                       curve: Curves.bounceInOut,
-                      child: Container(
+                      child: Center(
                         child: SingleChildScrollView(
                           scrollDirection: Axis.horizontal,
-                          child: Center(
-                              child: context.read<ListingsSearchRequirementsBloc>().state.isMarkersLoading ? Shimmer.fromColors(
-                                enabled: context.read<ListingsSearchRequirementsBloc>().state.isMarkersLoading,
-                                baseColor: Colors.grey.shade400,
-                                highlightColor: Colors.grey.shade100,
-                                child: Container(
-                                  height: 35,
-                                  width: 300,
-                                  decoration: BoxDecoration(
-                                    color: widget.model.accentColor.withOpacity(0.15),
-                                    borderRadius: const BorderRadius.all(Radius.circular(8)),
-                                  ),
-                                ),
-                              ) : Container(
-                                width: 300,
-                                child: Chip(
-                                    backgroundColor: widget.model.paletteColor,
-                                    label: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Text('${context.read<ListingsSearchRequirementsBloc>().state.listings.length} Listings Found', style: TextStyle(color: widget.model.accentColor, fontWeight: FontWeight.bold)),
-                                    )),
+                          child: context.read<ListingsSearchRequirementsBloc>().state.isMarkersLoading ? Shimmer.fromColors(
+                            enabled: context.read<ListingsSearchRequirementsBloc>().state.isMarkersLoading,
+                            baseColor: Colors.grey.shade400,
+                            highlightColor: Colors.grey.shade100,
+                            child: Container(
+                              height: 35,
+                              width: 190,
+                              decoration: BoxDecoration(
+                                color: widget.model.accentColor.withOpacity(0.15),
+                                borderRadius: const BorderRadius.all(Radius.circular(8)),
+                              ),
+                            ),
+                          ) : Chip(
+                              side: BorderSide.none,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
+                              backgroundColor: widget.model.paletteColor,
+                              label: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text('${context.read<ListingsSearchRequirementsBloc>().state.listings.length} Listings Found', style: TextStyle(color: widget.model.accentColor, fontWeight: FontWeight.bold)),
                           ),
-                        ),
+                        )
                       ),
                     ),
                   ),
@@ -296,7 +294,7 @@ class _SearchExploreMainContainerWidgetState extends State<SearchExploreMainCont
                         setState(() {
                           Beamer.of(context).update(
                               configuration: RouteInformation(
-                                  location: '/${DashboardMarker.home.toString()}'
+                                  location: '/${DashboardMarker.home.name.toString()}'
                               ),
                               rebuild: false
                           );
@@ -367,7 +365,7 @@ class _SearchExploreMainContainerWidgetState extends State<SearchExploreMainCont
 
                         Beamer.of(context).update(
                             configuration: RouteInformation(
-                                location: '/${DashboardMarker.home.toString()}'
+                                location: '/${DashboardMarker.home.name.toString()}'
                             ),
                             rebuild: false
                         );
@@ -389,6 +387,8 @@ class _SearchExploreMainContainerWidgetState extends State<SearchExploreMainCont
                         padding: const EdgeInsets.symmetric(horizontal: 3.0),
                         child: Center(
                           child: Chip(
+                              side: BorderSide.none,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                               backgroundColor: widget.model.paletteColor,
                               label: Text('Back',
                                   style: TextStyle(color: widget.model.accentColor, fontWeight: FontWeight.bold)),
@@ -427,7 +427,7 @@ class _SearchExploreMainContainerWidgetState extends State<SearchExploreMainCont
                     setState(() {
                       Beamer.of(context).update(
                           configuration: RouteInformation(
-                              location: '/${DashboardMarker.home.toString()}/${SearchExploreHelperMarker.map.toString()}/search'
+                              location: '/${DashboardMarker.home.name.toString()}/${SearchExploreHelperMarker.map.toString()}/search'
                           ),
 
                           rebuild: false
@@ -437,7 +437,7 @@ class _SearchExploreMainContainerWidgetState extends State<SearchExploreMainCont
                   },
                   child: Container(
                     height: 55,
-                    width: (Responsive.isMobile(context)) ? 300 : 390,
+                    width: 300,
                     decoration: BoxDecoration(
                       color: widget.model.accentColor,
                       borderRadius: BorderRadius.circular(30),
@@ -471,49 +471,51 @@ class _SearchExploreMainContainerWidgetState extends State<SearchExploreMainCont
                     ),
                   ),
                 ),
-                Positioned(
-                  right: 10,
-                  child: InkWell(
-                    onTap: () {
-                      setState(() {
-                        switch (ExploreWebHelperCore.searchExploreMarker) {
-                          case SearchExploreHelperMarker.map:
-                            ExploreWebHelperCore.searchExploreMarker = SearchExploreHelperMarker.list;
-                            break;
-                          case SearchExploreHelperMarker.list:
-                            Beamer.of(context).update(
-                                configuration: RouteInformation(
-                                    location: '/${DashboardMarker.home.toString()}'
-                                ),
-                                rebuild: false
-                            );
-                            ExploreWebHelperCore.searchExploreMarker = SearchExploreHelperMarker.map;
-                            break;
-                          default:
-                            break;
-                        }
-                      });
-                    },
-                    child: Container(
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: widget.model.paletteColor,
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 3.0),
-                        child: Center(
-                          child: Chip(
-                              backgroundColor: widget.model.paletteColor,
-                              label: Text(getTitleForExploreType(ExploreWebHelperCore.searchExploreMarker),
-                                  style: TextStyle(color: widget.model.accentColor, fontWeight: FontWeight.bold)),
-                              avatar: Icon(getIconForExploreType(ExploreWebHelperCore.searchExploreMarker), color: widget.model.accentColor)
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+                // Positioned(
+                //   right: 10,
+                //   child: InkWell(
+                //     onTap: () {
+                //       setState(() {
+                //         switch (ExploreWebHelperCore.searchExploreMarker) {
+                //           case SearchExploreHelperMarker.map:
+                //             ExploreWebHelperCore.searchExploreMarker = SearchExploreHelperMarker.list;
+                //             break;
+                //           case SearchExploreHelperMarker.list:
+                //             Beamer.of(context).update(
+                //                 configuration: RouteInformation(
+                //                     location: '/${DashboardMarker.home.toString()}'
+                //                 ),
+                //                 rebuild: false
+                //             );
+                //             ExploreWebHelperCore.searchExploreMarker = SearchExploreHelperMarker.map;
+                //             break;
+                //           default:
+                //             break;
+                //         }
+                //       });
+                //     },
+                //     child: Container(
+                //       height: 40,
+                //       decoration: BoxDecoration(
+                //         color: widget.model.paletteColor,
+                //         borderRadius: BorderRadius.circular(30),
+                //       ),
+                //       child: Padding(
+                //         padding: const EdgeInsets.symmetric(horizontal: 3.0),
+                //         child: Center(
+                //           child: Chip(
+                //               side: BorderSide.none,
+                //               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                //               backgroundColor: widget.model.paletteColor,
+                //               label: Text(getTitleForExploreType(ExploreWebHelperCore.searchExploreMarker),
+                //                   style: TextStyle(color: widget.model.accentColor, fontWeight: FontWeight.bold)),
+                //               avatar: Icon(getIconForExploreType(ExploreWebHelperCore.searchExploreMarker), color: widget.model.accentColor)
+                //           ),
+                //         ),
+                //       ),
+                //     ),
+                //   ),
+                // ),
               ],
             ),
           ),

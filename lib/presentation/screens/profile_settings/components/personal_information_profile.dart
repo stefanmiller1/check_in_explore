@@ -95,8 +95,6 @@ class _PersonalInformationProfileState extends State<PersonalInformationProfile>
                       child: TextButton(
                           onPressed: () async {
 
-                            print(_contactPhoneController?.value);
-
                             if (!state.isSubmitting) {
                               context.read<UpdateUserProfileAccountBloc>().add(UpdateUserProfileAccountEvent.didSelectIsSubmitting(true));
 

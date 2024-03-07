@@ -1,7 +1,7 @@
-import 'package:avatar_stack/avatar_stack.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:badges/badges.dart' as badges;
 
 class MenuMarkerItem extends StatefulWidget {
 
@@ -14,6 +14,7 @@ class MenuMarkerItem extends StatefulWidget {
   final IconData iconSrc;
   final bool isLast;
   final bool? isLive;
+  final int? notifications;
 
   const MenuMarkerItem({
     super.key,
@@ -28,7 +29,8 @@ class MenuMarkerItem extends StatefulWidget {
     required this.iconSrc,
     required this.isLast,
     this.imageUrl,
-    this.isLive
+    this.isLive,
+    this.notifications
   });
 
   @override
@@ -39,7 +41,6 @@ class _MenuMarkerItemState extends State<MenuMarkerItem> {
 
   @override
   Widget build(BuildContext context) {
-    print(widget.imageUrl?.length);
     return InkWell(
       onTap: () {
         setState(() {
@@ -58,120 +59,125 @@ class _MenuMarkerItemState extends State<MenuMarkerItem> {
                 semanticLabel: widget.title,
               ),
             ),
-            Container(
-              height: (widget.isPrivate == true) ? 80 : (widget.isLive == true) ? 60 : 40,
-              width: 80,
-              child: Stack(
-                alignment: Alignment.bottomCenter,
-                children: [
-                  if (widget.imageUrl == null || widget.imageUrl?.isEmpty == true) Icon(
-                    widget.iconSrc,
-                    semanticLabel: widget.title,
-                    color: ((widget.isActive ?? false) || (widget.isHover ?? false)) ? widget.model.paletteColor : widget.model.disabledTextColor,
-                  ),
-                  if (widget.imageUrl != null && widget.imageUrl?.length == 1 && widget.imageUrl?.isNotEmpty == true) Container(
-                    height: 40,
-                    width: 40,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(40),
-                      border: Border.all(color: (widget.isActive ?? false) || (widget.isHover ?? false) ? widget.model.paletteColor : Colors.transparent, width: 1.5)
+            badges.Badge(
+              showBadge: widget.notifications != null && widget.notifications != 0,
+              badgeContent: widget.notifications != 0 ? Text(widget.notifications.toString(), style: TextStyle(color: widget.model.accentColor)) : null,
+              badgeAnimation: const badges.BadgeAnimation.scale(animationDuration: Duration(milliseconds: 700)),
+              child: Container(
+                height: (widget.isPrivate == true) ? 80 : (widget.isLive == true) ? 60 : 40,
+                width: 80,
+                child: Stack(
+                  alignment: Alignment.bottomCenter,
+                  children: [
+                    if (widget.imageUrl == null || widget.imageUrl?.isEmpty == true) Icon(
+                      widget.iconSrc,
+                      semanticLabel: widget.title,
+                      color: ((widget.isActive ?? false) || (widget.isHover ?? false)) ? widget.model.paletteColor : widget.model.disabledTextColor,
                     ),
-                    child: CircleAvatar(
-                      backgroundColor: widget.model.webBackgroundColor,
-                      radius: 40,
-                      backgroundImage: Image.asset('assets/profile-avatar.png').image,
-                      foregroundImage: (widget.imageUrl?[0] != '') ? Image.network(widget.imageUrl?[0] ?? '').image : null,
+                    if (widget.imageUrl != null && widget.imageUrl?.length == 1 && widget.imageUrl?.isNotEmpty == true) Container(
+                      height: 40,
+                      width: 40,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(40),
+                        border: Border.all(color: (widget.isActive ?? false) || (widget.isHover ?? false) ? widget.model.paletteColor : Colors.transparent, width: 1.5)
+                      ),
+                      child: CircleAvatar(
+                        backgroundColor: widget.model.webBackgroundColor,
+                        radius: 40,
+                        backgroundImage: Image.asset('assets/profile-avatar.png').image,
+                        foregroundImage: (widget.imageUrl?[0] != '') ? Image.network(widget.imageUrl?[0] ?? '').image : null,
+                      ),
                     ),
-                  ),
-                  if (widget.imageUrl != null && (widget.imageUrl?.length ?? 0) > 1) Stack(
-                    children: [
-                      if ((widget.imageUrl?.length ?? 0) >= 3) Positioned(
-                        top: 24,
-                        child: Container(
-                          height: 40,
-                          width: 40,
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(40),
-                              border: Border.all(color: widget.model.paletteColor, width: 0.75),
-                          ),
-                          child: CircleAvatar(
-                            backgroundColor: widget.model.webBackgroundColor,
-                            radius: 40,
-                            backgroundImage: Image.asset('assets/profile-avatar.png').image,
-                            foregroundImage: (widget.imageUrl?[2] != '') ? Image.network(widget.imageUrl?[2] ?? '').image : null,
-                          ),
-                        ),
-                      ),
-                      if ((widget.imageUrl?.length ?? 0) >= 2) Positioned(
-                        top: 12,
-                        child: Container(
-                          height: 40,
-                          width: 40,
-                          decoration: BoxDecoration(
-                              boxShadow: [
-                                if ((widget.imageUrl?.length ?? 0) >= 3) BoxShadow(
-                                    color: Colors.black.withOpacity(0.11),
-                                    spreadRadius: 1,
-                                    blurRadius: 15,
-                                    offset: Offset(0, 2)
-                                )
-                              ],
-                            border: Border.all(color: widget.model.paletteColor, width: 0.75),
-                            borderRadius: BorderRadius.circular(40),
-                          ),
-                          child: CircleAvatar(
-                            backgroundColor: widget.model.webBackgroundColor,
-                            radius: 40,
-                            backgroundImage: Image.asset('assets/profile-avatar.png').image,
-                            foregroundImage: (widget.imageUrl?[1] != '') ? Image.network(widget.imageUrl?[1] ?? '').image : null,
-                          ),
-                        ),
-                      ),
-                      if ((widget.imageUrl?.length ?? 0) > 1) Positioned(
-                          top: 0,
-                          child: Column(
-                            children: [
-                              Container(
-                                height: 40,
-                                width: 40,
-                                decoration: BoxDecoration(
-                                  boxShadow: [
-                                    BoxShadow(
-                                        color: Colors.black.withOpacity(0.23),
-                                        spreadRadius: 1,
-                                        blurRadius: 3,
-                                        offset: Offset(0, 2)
-                                    )
-                                  ],
-                                    borderRadius: BorderRadius.circular(40),
-                                    border: Border.all(color: (widget.isActive ?? false) || (widget.isHover ?? false) ? widget.model.paletteColor : Colors.transparent, width: 1.5)
-                                ),
-                                child: CircleAvatar(
-                                  backgroundColor: widget.model.webBackgroundColor,
-                                  radius: 40,
-                                  backgroundImage: Image.asset('assets/profile-avatar.png').image,
-                                  foregroundImage: (widget.imageUrl?[0] != '') ? Image.network(widget.imageUrl?[0] ?? '').image : null,
-                              ),
+                    if (widget.imageUrl != null && (widget.imageUrl?.length ?? 0) > 1) Stack(
+                      children: [
+                        if ((widget.imageUrl?.length ?? 0) >= 3) Positioned(
+                          top: 24,
+                          child: Container(
+                            height: 40,
+                            width: 40,
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(40),
+                                border: Border.all(color: widget.model.paletteColor, width: 0.75),
                             ),
-                          ],
+                            child: CircleAvatar(
+                              backgroundColor: widget.model.webBackgroundColor,
+                              radius: 40,
+                              backgroundImage: Image.asset('assets/profile-avatar.png').image,
+                              foregroundImage: (widget.imageUrl?[2] != '') ? Image.network(widget.imageUrl?[2] ?? '').image : null,
+                            ),
+                          ),
                         ),
-                      ),
+                        if ((widget.imageUrl?.length ?? 0) >= 2) Positioned(
+                          top: 12,
+                          child: Container(
+                            height: 40,
+                            width: 40,
+                            decoration: BoxDecoration(
+                                boxShadow: [
+                                  if ((widget.imageUrl?.length ?? 0) >= 3) BoxShadow(
+                                      color: Colors.black.withOpacity(0.11),
+                                      spreadRadius: 1,
+                                      blurRadius: 15,
+                                      offset: Offset(0, 2)
+                                  )
+                                ],
+                              border: Border.all(color: widget.model.paletteColor, width: 0.75),
+                              borderRadius: BorderRadius.circular(40),
+                            ),
+                            child: CircleAvatar(
+                              backgroundColor: widget.model.webBackgroundColor,
+                              radius: 40,
+                              backgroundImage: Image.asset('assets/profile-avatar.png').image,
+                              foregroundImage: (widget.imageUrl?[1] != '') ? Image.network(widget.imageUrl?[1] ?? '').image : null,
+                            ),
+                          ),
+                        ),
+                        if ((widget.imageUrl?.length ?? 0) > 1) Positioned(
+                            top: 0,
+                            child: Column(
+                              children: [
+                                Container(
+                                  height: 40,
+                                  width: 40,
+                                  decoration: BoxDecoration(
+                                    boxShadow: [
+                                      BoxShadow(
+                                          color: Colors.black.withOpacity(0.23),
+                                          spreadRadius: 1,
+                                          blurRadius: 3,
+                                          offset: Offset(0, 2)
+                                      )
+                                    ],
+                                      borderRadius: BorderRadius.circular(40),
+                                      border: Border.all(color: (widget.isActive ?? false) || (widget.isHover ?? false) ? widget.model.paletteColor : Colors.transparent, width: 1.5)
+                                  ),
+                                  child: CircleAvatar(
+                                    backgroundColor: widget.model.webBackgroundColor,
+                                    radius: 40,
+                                    backgroundImage: Image.asset('assets/profile-avatar.png').image,
+                                    foregroundImage: (widget.imageUrl?[0] != '') ? Image.network(widget.imageUrl?[0] ?? '').image : null,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
 
 
 
-                    ],
-                  ),
-                  if (widget.itemCount != null && widget.itemCount != 0) Positioned(
+                      ],
+                    ),
+                    if (widget.itemCount != null && widget.itemCount != 0) Positioned(
+                        top: 0,
+                        right: 0,
+                        child: CounterBadge(count: widget.itemCount ?? 0, model: widget.model)
+                    ),
+                    if (widget.isPrivate == true) Positioned(
                       top: 0,
-                      right: 0,
-                      child: CounterBadge(count: widget.itemCount ?? 0, model: widget.model)
-                  ),
-                  if (widget.isPrivate == true) Positioned(
-                    top: 0,
-                    child: Icon(Icons.lock_outline, color: widget.model.paletteColor),
-                  ),
+                      child: Icon(Icons.lock_outline, color: widget.model.paletteColor),
+                    ),
 
-                ],
+                  ],
+                ),
               ),
             ),
             if (widget.isLast || widget.isLive == true) const SizedBox(height: 42.5),

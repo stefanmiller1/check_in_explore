@@ -595,6 +595,7 @@ Widget getParticipantsBasedOnRange(DashboardModel model, RangeValues range, {req
 /// TAB
 Widget topTabBarController(DashboardModel model, TabController tabController, List<String> tabList, {required Function(int) didTapTab}) {
   return TabBar(
+    indicatorSize: TabBarIndicatorSize.tab,
     controller: tabController,
     indicator: BoxDecoration(
         borderRadius: const BorderRadius.only(topLeft: Radius.circular(25), topRight: Radius.circular(25)),

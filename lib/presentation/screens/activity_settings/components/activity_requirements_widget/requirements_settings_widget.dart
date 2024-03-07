@@ -3,6 +3,7 @@ import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/components/invite_widgets/send_invitation_request.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/components/invite_widgets/send_invitation_request_helper.dart';
+import 'package:check_in_web_mobile_explore/presentation/web_screens/main_container_widgets/reservations_widget/reservation_helper_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -108,7 +109,7 @@ class _RequirementSettingsWidgetState extends State<RequirementSettingsWidget> {
   @override
   Widget build(BuildContext context) {
 
-    bool isLessThanMain = (MediaQuery.of(context).size.width <= 1150);
+    bool isLessThanMain = (MediaQuery.of(context).size.width <= 1150) || ReservationHelperCore.didPresentSidePanel;
 
     return Form(
       autovalidateMode: context.read<UpdateActivityFormBloc>().state.showErrorMessages,
@@ -119,175 +120,20 @@ class _RequirementSettingsWidgetState extends State<RequirementSettingsWidget> {
             width: MediaQuery.of(context).size.width,
             height: MediaQuery.of(context).size.height,
           ),
-
           SingleChildScrollView(
             controller: _scrollController,
             child: Padding(
               padding: const EdgeInsets.all(15.0),
-              child: (isLessThanMain) ? Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Row(
                 children: [
-                  mainContainerForSectionOneRowOneReq(
-                      context: context,
-                      model: widget.model,
-                      state: context.read<UpdateActivityFormBloc>().state,
-                      isSeventeenAndUnder: () {
-                        setState(() {
-                          if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.isSeventeenAndUnder) {
-                            context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isSeventeenAndUnderChanged(false));
-                          } else {
-                            context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isSeventeenAndUnderChanged(true));
-                          }
-                        });
-                      },
-                      minimumAgeChanged: (v) {
-                        setState(() {
-                          context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.minimumAgeChanged(v));
-                        });
-                      },
-                      isMensOnly: () {
-                        setState(() {
-                          _isMensOnly(context);
-                        });
-                      },
-                      isWomenOnly: () {
-                        setState(() {
-                           _isWomenOnly(context);
-                          });
-                        },
-                        isCoEdOnly: () {
-                          setState(() {
-                            _isCoEdOnly(context);
-                          });
-                        },
-                        skillLevelExpectationChanged: (skills) {
-                          setState(() {
-                            context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.skillLevelExpectationChanged(skills));
-                            });
-                          },
-                        ),
-                        mainContainerForSectionOneRowTwoReq(
-                        context: context,
-                        model: widget.model,
-                        state: context.read<UpdateActivityFormBloc>().state,
-                        activityManagerForm: widget.activityManagerForm,
-                        isAlcoholForSale: () {
-                        setState(() {
-                          if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.eventActivityRulesRequirement?.isAlcoholForSale == true) {
-                            context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.isAlcoholForSaleChanged(false));
-                            } else {
-                            context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.isAlcoholForSaleChanged(true));
-                            }
-                          });
-                        },
-                        isVendorMerchInviteOnly: () {
-                          setState(() {
-                            if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.eventActivityRulesRequirement?.isMerchantInviteOnly == true) {
-                              context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.isMerchantInviteOnlyChanged(false));
-                            } else {
-                              context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.isMerchantInviteOnlyChanged(true));
-                            }
-                          });
-                        },
-                        isFoodForSale: () {
-                        setState(() {
-                        if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.eventActivityRulesRequirement?.isFoodForSale == true) {
-                            context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isFoodForSaleChanged(false));
-                            } else {
-                            context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isFoodForSaleChanged(true));
-                          }
-                        });
-                      },
-                      getVendorAttendees: getVendorAttendees(),
-                      didSelectCreateVendor: () {
-                        _handleCreateNewAttendeeVendor(context);
-                      },
-                      didChangeMerchVenLimit: (limit) {
-                        context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.merchantLimitChanged(int.parse(limit)));
-                      },
-                      didChangeMerchVenFee: (fee) {
-                        context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.merchantFeeChanged(int.parse(fee)));
-                      }
-                  ),
-                  mainContainerForSectionFooterReq(
-                      context: context,
-                      model: widget.model,
-                      state: context.read<UpdateActivityFormBloc>().state,
-                      isGearProvided: () {
-                        setState(() {
-                          if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.isGearProvided ?? false) {
-                            context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isGearProvidedChanged(false));
-                          } else {
-                            context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isGearProvidedChanged(true));
-                          }
-                        });
-                      },
-                      isEquipmentProvided: () {
-                        setState(() {
-                          if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.isEquipmentProvided ?? false) {
-                            context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.isEquipmentProvidedChanged(false));
-                          } else {
-                            context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.isEquipmentProvidedChanged(true));
-                          }
-                        });
-                      },
-                      isAnalyticsProvided: () {
-                        setState(() {
-                          if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.isAnalyticsProvided ?? false) {
-                            context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isAnalyticsProvidedChanged(false));
-                          } else {
-                            context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isAnalyticsProvidedChanged(true));
-                          }
-                        });
-                      },
-                      isOfficiatorProvided: () {
-                        setState(() {
-                          if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.isOfficiatorProvided ?? false) {
-                            context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isOfficiatorProvidedChanged(false));
-                          } else {
-                            context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isOfficiatorProvidedChanged(true));
-                          }
-                        });
-                      },
-                      isAlcoholProvided: () {
-                        setState(() {
-                          if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.eventActivityRulesRequirement?.isAlcoholProvided ?? false) {
-                            context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isAlcoholProvidedChanged(false));
-                          } else {
-                            context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isAlcoholProvidedChanged(true));
-                          }
-                        });
-                      },
-                      isFoodProvided: () {
-                        setState(() {
-                          if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.eventActivityRulesRequirement?.isFoodProvided ?? false) {
-                            context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isFoodProvidedChanged(false));
-                          } else {
-                            context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isFoodProvidedChanged(true));
-                          }
-                        });
-                      },
-                      isSecurityProvided: () {
-                        setState(() {
-                          if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.eventActivityRulesRequirement?.isSecurityProvided ?? false) {
-                            context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.isSecurityProvidedChanged(false));
-                          } else {
-                            context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.isSecurityProvidedChanged(true));
-                        }
-                      });
-                    }
-                  ),
-                ],
-              ) : Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityType.activity == ProfileActivityTypeOption.experiences)
-                    Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(child: mainContainerForSectionOneRowOneReq(
+                  if (isLessThanMain) Flexible(
+                    child: Container(
+                      constraints: const BoxConstraints(maxWidth: 600),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          mainContainerForSectionOneRowOneReq(
                             context: context,
                             model: widget.model,
                             state: context.read<UpdateActivityFormBloc>().state,
@@ -306,140 +152,328 @@ class _RequirementSettingsWidgetState extends State<RequirementSettingsWidget> {
                               });
                             },
                             isMensOnly: () {
-                              _isMensOnly(context);
+                              setState(() {
+                                _isMensOnly(context);
+                              });
                             },
                             isWomenOnly: () {
-                              _isWomenOnly(context);
+                              setState(() {
+                                _isWomenOnly(context);
+                              });
                             },
                             isCoEdOnly: () {
-                              _isCoEdOnly(context);
+                              setState(() {
+                                _isCoEdOnly(context);
+                              });
                             },
                             skillLevelExpectationChanged: (skills) {
                               setState(() {
                                 context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.skillLevelExpectationChanged(skills));
                               });
-                            }
+                            },
                           ),
+                          mainContainerForSectionOneRowTwoReq(
+                              context: context,
+                              model: widget.model,
+                              state: context.read<UpdateActivityFormBloc>().state,
+                              activityManagerForm: widget.activityManagerForm,
+                              isAlcoholForSale: () {
+                                setState(() {
+                                  if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.eventActivityRulesRequirement?.isAlcoholForSale == true) {
+                                    context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.isAlcoholForSaleChanged(false));
+                                  } else {
+                                    context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.isAlcoholForSaleChanged(true));
+                                  }
+                                });
+                              },
+                              isVendorMerchInviteOnly: () {
+                                setState(() {
+                                  if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.eventActivityRulesRequirement?.isMerchantInviteOnly == true) {
+                                    context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.isMerchantInviteOnlyChanged(false));
+                                  } else {
+                                    context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.isMerchantInviteOnlyChanged(true));
+                                  }
+                                });
+                              },
+                              isFoodForSale: () {
+                                setState(() {
+                                  if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.eventActivityRulesRequirement?.isFoodForSale == true) {
+                                    context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isFoodForSaleChanged(false));
+                                  } else {
+                                    context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isFoodForSaleChanged(true));
+                                  }
+                                });
+                              },
+                              getVendorAttendees: getVendorAttendees(),
+                              didSelectCreateVendor: () {
+                                _handleCreateNewAttendeeVendor(context);
+                              },
+                              didChangeMerchVenLimit: (limit) {
+                                context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.merchantLimitChanged(int.parse(limit)));
+                              },
+                              didChangeMerchVenFee: (fee) {
+                                context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.merchantFeeChanged(int.parse(fee)));
+                              }
+                          ),
+                          mainContainerForSectionFooterReq(
+                              context: context,
+                              model: widget.model,
+                              state: context.read<UpdateActivityFormBloc>().state,
+                              isGearProvided: () {
+                                setState(() {
+                                  if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.isGearProvided ?? false) {
+                                    context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isGearProvidedChanged(false));
+                                  } else {
+                                    context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isGearProvidedChanged(true));
+                                  }
+                                });
+                              },
+                              isEquipmentProvided: () {
+                                setState(() {
+                                  if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.isEquipmentProvided ?? false) {
+                                    context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.isEquipmentProvidedChanged(false));
+                                  } else {
+                                    context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.isEquipmentProvidedChanged(true));
+                                  }
+                                });
+                              },
+                              isAnalyticsProvided: () {
+                                setState(() {
+                                  if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.isAnalyticsProvided ?? false) {
+                                    context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isAnalyticsProvidedChanged(false));
+                                  } else {
+                                    context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isAnalyticsProvidedChanged(true));
+                                  }
+                                });
+                              },
+                              isOfficiatorProvided: () {
+                                setState(() {
+                                  if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.isOfficiatorProvided ?? false) {
+                                    context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isOfficiatorProvidedChanged(false));
+                                  } else {
+                                    context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isOfficiatorProvidedChanged(true));
+                                  }
+                                });
+                              },
+                              isAlcoholProvided: () {
+                                setState(() {
+                                  if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.eventActivityRulesRequirement?.isAlcoholProvided ?? false) {
+                                    context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isAlcoholProvidedChanged(false));
+                                  } else {
+                                    context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isAlcoholProvidedChanged(true));
+                                  }
+                                });
+                              },
+                              isFoodProvided: () {
+                                setState(() {
+                                  if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.eventActivityRulesRequirement?.isFoodProvided ?? false) {
+                                    context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isFoodProvidedChanged(false));
+                                  } else {
+                                    context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isFoodProvidedChanged(true));
+                                  }
+                                });
+                              },
+                              isSecurityProvided: () {
+                                setState(() {
+                                  if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.eventActivityRulesRequirement?.isSecurityProvided ?? false) {
+                                    context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.isSecurityProvidedChanged(false));
+                                  } else {
+                                    context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.isSecurityProvidedChanged(true));
+                                  }
+                                });
+                              }
+                          ),
+                        ],
+                      ),
+                    ),
+                  ) else Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityType.activity == ProfileActivityTypeOption.experiences)
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(child: mainContainerForSectionOneRowOneReq(
+                                context: context,
+                                model: widget.model,
+                                state: context.read<UpdateActivityFormBloc>().state,
+                                isSeventeenAndUnder: () {
+                                  setState(() {
+                                    if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.isSeventeenAndUnder) {
+                                      context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isSeventeenAndUnderChanged(false));
+                                    } else {
+                                      context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isSeventeenAndUnderChanged(true));
+                                    }
+                                  });
+                                },
+                                minimumAgeChanged: (v) {
+                                  setState(() {
+                                    context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.minimumAgeChanged(v));
+                                  });
+                                },
+                                isMensOnly: () {
+                                  _isMensOnly(context);
+                                },
+                                isWomenOnly: () {
+                                  _isWomenOnly(context);
+                                },
+                                isCoEdOnly: () {
+                                  _isCoEdOnly(context);
+                                },
+                                skillLevelExpectationChanged: (skills) {
+                                  setState(() {
+                                    context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.skillLevelExpectationChanged(skills));
+                                  });
+                                }
+                            ),
+                            ),
+                            const SizedBox(width: 25),
+                            Expanded(child: mainContainerForSectionOneRowTwoReq(
+                                context: context,
+                                model: widget.model,
+                                state: context.read<UpdateActivityFormBloc>().state,
+                                activityManagerForm: widget.activityManagerForm,
+                                isAlcoholForSale: () {
+                                  setState(() {
+                                    if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.eventActivityRulesRequirement?.isAlcoholForSale ?? false) {
+                                      context.read<UpdateActivityFormBloc>().add(const UpdateActivityFormEvent.isAlcoholForSaleChanged(false));
+                                    } else {
+                                      context.read<UpdateActivityFormBloc>().add(const UpdateActivityFormEvent.isAlcoholForSaleChanged(true));
+                                    }
+                                  });
+                                },
+                                isVendorMerchInviteOnly: () {
+                                  setState(() {
+                                    if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.eventActivityRulesRequirement?.isMerchantInviteOnly == true) {
+                                      context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.isMerchantInviteOnlyChanged(false));
+                                    } else {
+                                      context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.isMerchantInviteOnlyChanged(true));
+                                    }
+                                  });
+                                },
+                                isFoodForSale: () {
+                                  setState(() {
+                                    if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.eventActivityRulesRequirement?.isFoodForSale ?? false) {
+                                      context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.isFoodForSaleChanged(false));
+                                    } else {
+                                      context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.isFoodForSaleChanged(true));
+                                    }
+                                  });
+                                },
+                                getVendorAttendees: getVendorAttendees(),
+                                didSelectCreateVendor: () {
+                                  _handleCreateNewAttendeeVendor(context);
+                                },
+                                didChangeMerchVenLimit: (limit) {
+                                  context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.merchantLimitChanged(int.parse(limit)));
+                                },
+                                didChangeMerchVenFee: (fee) {
+                                  context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.merchantFeeChanged(int.parse(fee)));
+                                }
+                            )
+                            ),
+                            if (MediaQuery.of(context).size.width >= 1300) SizedBox(width: MediaQuery.of(context).size.width * 0.1)
+                          ],
                         ),
-                        const SizedBox(width: 25),
-                        Expanded(child: mainContainerForSectionOneRowTwoReq(
+
+                        // if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityType.activity != ProfileActivityTypeOption.experiences)
+                        // mainContainerForSectionOneRowOne(context),
+                        mainContainerForSectionFooterReq(
                             context: context,
                             model: widget.model,
                             state: context.read<UpdateActivityFormBloc>().state,
-                            activityManagerForm: widget.activityManagerForm,
-                            isAlcoholForSale: () {
+                            isGearProvided: () {
                               setState(() {
-                                if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.eventActivityRulesRequirement?.isAlcoholForSale ?? false) {
-                                  context.read<UpdateActivityFormBloc>().add(const UpdateActivityFormEvent.isAlcoholForSaleChanged(false));
+                                if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.isGearProvided ?? false) {
+                                  context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isGearProvidedChanged(false));
                                 } else {
-                                  context.read<UpdateActivityFormBloc>().add(const UpdateActivityFormEvent.isAlcoholForSaleChanged(true));
+                                  context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isGearProvidedChanged(true));
                                 }
                               });
                             },
-                            isVendorMerchInviteOnly: () {
+                            isEquipmentProvided: () {
                               setState(() {
-                                if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.eventActivityRulesRequirement?.isMerchantInviteOnly == true) {
-                                  context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.isMerchantInviteOnlyChanged(false));
+                                if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.isEquipmentProvided ?? false) {
+                                  context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.isEquipmentProvidedChanged(false));
                                 } else {
-                                  context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.isMerchantInviteOnlyChanged(true));
+                                  context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.isEquipmentProvidedChanged(true));
                                 }
                               });
                             },
-                            isFoodForSale: () {
+                            isAnalyticsProvided: () {
                               setState(() {
-                                if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.eventActivityRulesRequirement?.isFoodForSale ?? false) {
-                                  context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.isFoodForSaleChanged(false));
+                                if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.isAnalyticsProvided ?? false) {
+                                  context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isAnalyticsProvidedChanged(false));
                                 } else {
-                                  context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.isFoodForSaleChanged(true));
+                                  context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isAnalyticsProvidedChanged(true));
                                 }
                               });
                             },
-                            getVendorAttendees: getVendorAttendees(),
-                            didSelectCreateVendor: () {
-                              _handleCreateNewAttendeeVendor(context);
+                            isOfficiatorProvided: () {
+                              setState(() {
+                                if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.isOfficiatorProvided ?? false) {
+                                  context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isOfficiatorProvidedChanged(false));
+                                } else {
+                                  context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isOfficiatorProvidedChanged(true));
+                                }
+                              });
                             },
-                            didChangeMerchVenLimit: (limit) {
-                              context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.merchantLimitChanged(int.parse(limit)));
+                            isAlcoholProvided: () {
+                              setState(() {
+                                if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.eventActivityRulesRequirement?.isAlcoholProvided ?? false) {
+                                  context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isAlcoholProvidedChanged(false));
+                                } else {
+                                  context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isAlcoholProvidedChanged(true));
+                                }
+                              });
                             },
-                            didChangeMerchVenFee: (fee) {
-                              context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.merchantFeeChanged(int.parse(fee)));
+                            isFoodProvided: () {
+                              setState(() {
+                                if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.eventActivityRulesRequirement?.isFoodProvided ?? false) {
+                                  context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isFoodProvidedChanged(false));
+                                } else {
+                                  context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isFoodProvidedChanged(true));
+                                }
+                              });
+                            },
+                            isSecurityProvided: () {
+                              setState(() {
+                                  if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.eventActivityRulesRequirement?.isSecurityProvided ?? false) {
+                                    context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.isSecurityProvidedChanged(false));
+                                  } else {
+                                    context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.isSecurityProvidedChanged(true));
+                                  }
+                              });
                             }
-                          )
                         ),
-                        if (MediaQuery.of(context).size.width >= 1300) SizedBox(width: MediaQuery.of(context).size.width * 0.1)
                       ],
                     ),
-
-                  // if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityType.activity != ProfileActivityTypeOption.experiences)
-                  // mainContainerForSectionOneRowOne(context),
-                  mainContainerForSectionFooterReq(
-                      context: context,
-                      model: widget.model,
-                      state: context.read<UpdateActivityFormBloc>().state,
-                      isGearProvided: () {
-                        setState(() {
-                          if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.isGearProvided ?? false) {
-                            context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isGearProvidedChanged(false));
-                          } else {
-                            context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isGearProvidedChanged(true));
-                          }
-                        });
-                      },
-                      isEquipmentProvided: () {
-                        setState(() {
-                          if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.isEquipmentProvided ?? false) {
-                            context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.isEquipmentProvidedChanged(false));
-                          } else {
-                            context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.isEquipmentProvidedChanged(true));
-                          }
-                        });
-                      },
-                      isAnalyticsProvided: () {
-                        setState(() {
-                          if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.isAnalyticsProvided ?? false) {
-                            context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isAnalyticsProvidedChanged(false));
-                          } else {
-                            context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isAnalyticsProvidedChanged(true));
-                          }
-                        });
-                      },
-                      isOfficiatorProvided: () {
-                        setState(() {
-                          if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.isOfficiatorProvided ?? false) {
-                            context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isOfficiatorProvidedChanged(false));
-                          } else {
-                            context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isOfficiatorProvidedChanged(true));
-                          }
-                        });
-                      },
-                      isAlcoholProvided: () {
-                        setState(() {
-                          if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.eventActivityRulesRequirement?.isAlcoholProvided ?? false) {
-                            context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isAlcoholProvidedChanged(false));
-                          } else {
-                            context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isAlcoholProvidedChanged(true));
-                          }
-                        });
-                      },
-                      isFoodProvided: () {
-                        setState(() {
-                          if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.eventActivityRulesRequirement?.isFoodProvided ?? false) {
-                            context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isFoodProvidedChanged(false));
-                          } else {
-                            context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isFoodProvidedChanged(true));
-                          }
-                        });
-                      },
-                      isSecurityProvided: () {
-                        setState(() {
-                          if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.eventActivityRulesRequirement?.isSecurityProvided ?? false) {
-                            context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.isSecurityProvidedChanged(false));
-                          } else {
-                            context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.isSecurityProvidedChanged(true));
-                          }
-                        });
-                      }
                   ),
+
+                  Visibility(
+                      visible: ReservationHelperCore.didPresentSidePanel && isLessThanMain == false,
+                      child: AnimatedContainer(
+                        width: (ReservationHelperCore.didPresentSidePanel && isLessThanMain == false) ? ReservationHelperCore.previewerWidth + 20 : 0,
+                        duration: const Duration(milliseconds: 650),
+                        curve: Curves.easeInOut,
+                        child: Visibility(
+                          visible: ReservationHelperCore.didPresentSidePanel,
+                          child: Row(
+                            children: [
+                              const SizedBox(width: 60),
+                              Expanded(
+                                child: SizedBox(
+                                  width: ReservationHelperCore.previewerWidth,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                  )
+
                 ],
               )
             ),

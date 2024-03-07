@@ -1,10 +1,11 @@
 // This is your test publishable API key.
-const stripe = Stripe('pk_test_51JEcLgBZ5oSwwStvcLDezAJYxKeP1Ms6wKmAGlgTc4hLdjRL3fNHzHENFa3sgmJp2aMfD63sTItSWSdBCNjbfYyS00cFnAK3MB');
+const stripe = Stripe('pk_test_51JEcLgBZ5oSwwStvcLDezAJYxKeP1Ms6wKmAGlgTc4hLdjRL3fNHzHENFa3sgmJp2aMfD63sTItSWSdBCNjbfYyS00cFnAK3MB', {
+    apiVersion: '2020-08-27',
+});
 
-// The items the customer wants to buy
-const items = [{ id: "xl-tshirt" }];
 
 let elements;
+let clientSecret;
 
 initialize();
 checkStatus();
@@ -18,63 +19,90 @@ document
 
 // Fetches a payment intent and captures the client secret
 async function initialize(e) {
+    try {
+        if (!e || !e.data) {
+            console.error("Event object or event data is missing.");
+            return;
+        }
 
-    var data = JSON.parse(e.data);
-    var clientSecret = data['data'];
-    console.log(clientSecret);
+        var data = JSON.parse(e.data);
+        if (!data || !data.data) {
+            console.error("Invalid data format or missing 'data' property.");
+            return;
+        }
+        clientSecret = data['data'];
+        console.log(clientSecret);
 
-//  const response = await fetch("/create-payment-intent", {
-//    method: "POST",
-//    headers: { "Content-Type": "application/json" },
-//    body: JSON.stringify({ items }),
-//  });
-//
-//  const { clientSecret } = await response.json();
+      const appearance = {
+        theme: 'flat',
+        variables: {
+            colorPrimary: '#000000',
+        }
+      };
+      elements = stripe.elements({ appearance, clientSecret });
 
-  const appearance = {
-    theme: 'flat',
-    variables: {
-        colorPrimary: '#000000',
-    }
-  };
-  elements = stripe.elements({ appearance, clientSecret });
+      setTimeout(() => {
+              console.log('Value of elements:', elements.create);
+          }, 1000); //
 
-  paymentElement = elements.create('payment', {
-    paymentMethodOrder: ['apple_pay', 'google_pay', 'card', 'klarna', 'afterpay_clearpay']
-  });
-  paymentElement.mount("#payment-element");
+      paymentElement = elements.create('payment', {
+        paymentMethodOrder: ['apple_pay', 'google_pay', 'card', 'klarna', 'afterpay_clearpay']
+      });
+      paymentElement.mount("#payment-element");
+  } catch (error) {
+          console.error("An error occurred during initialization:", error);
+      }
 }
 
-async function handleSubmit(e) {
-  e.preventDefault();
-  setLoading(true);
+async function handleSubmit(event) {
+try {
+  event.preventDefault();
 
-  const { error } = await stripe.confirmPayment({
-    elements,
-    redirect: 'if_required',
-    confirmParams: {
-      // Make sure to change this to your payment completion page
-      return_url: "http://localhost:4242/checkout.html",
-    },
-  });
+    console.log('trtyying');
+    console.log(elements);
+
+    if (!stripe || !elements) {
+        return;
+    }
+
+    setLoading(true);
+
+    const { error } = await stripe.confirmPayment({
+        elements,
+        redirect: 'if_required',
+        confirmParams: {
+          // Make sure to change this to your payment completion page
+          return_url: "http://www.cincout.ca/#/reservations",
+        },
+    });
 
     if (error == null) {
         window.parent.postMessage('success', '*');
         return;
     }
-  // This point will only be reached if there is an immediate error when
-  // confirming the payment. Otherwise, your customer will be redirected to
-  // your `return_url`. For some payment methods like iDEAL, your customer will
-  // be redirected to an intermediate site first to authorize the payment, then
-  // redirected to the `return_url`.
-  console.log(error);
-  if (error.type === "card_error" || error.type === "validation_error") {
-    showMessage(error.message);
-  } else {
-    showMessage("An unexpected error occurred.");
-  }
 
-  setLoading(false);
+
+      // This point will only be reached if there is an immediate error when
+      // confirming the payment. Otherwise, your customer will be redirected to
+      // your `return_url`. For some payment methods like iDEAL, your customer will
+      // be redirected to an intermediate site first to authorize the payment, then
+      // redirected to the `return_url`.
+
+    //  console.log(error);
+    //  console.log(elements);
+    //  if (error.type === "card_error" || error.type === "validation_error") {
+    //    showMessage(error.message);
+    //  } else {
+    //    console.log('ooops');
+        console.log(error.message);
+        showMessage("An unexpected error occurred.", error.message);
+    //  }
+
+      setLoading(false);
+  } catch (error) {
+      showMessage("An unexpected error occurred.");
+      console.error("An error occurred during Submit:", error);
+    }
 }
 
 // Fetches the payment intent status after payment submission

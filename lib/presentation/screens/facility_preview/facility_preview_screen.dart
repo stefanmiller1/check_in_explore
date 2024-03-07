@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 // import 'package:blur/blur.dart';
+import 'package:beamer/beamer.dart';
 import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_credentials/check_in_credentials.dart';
 import 'package:check_in_domain/check_in_domain.dart';
@@ -101,9 +102,26 @@ class _FacilityPreviewScreenState extends State<FacilityPreviewScreen> with Sing
                             currency: listing.listingProfileService.backgroundInfoServices.currency,
                             description: 'Ticket to be sold and to be made redeemable for a specific Reservation',
                             didFinishPayment: (e) {
-
                               context.read<ReservationFormBloc>().add(ReservationFormEvent.isFinishedCreatingReservationWeb(e));
-                              widget.didSelectBack();
+                            },
+                            didPressFinished: () {
+                              setState(() {
+                              Beamer.of(context).update(
+                                  configuration: const RouteInformation(
+                                      location: '/reservations'
+                                  ),
+                                  rebuild: false
+                              );
+                              context.read<ListingsSearchRequirementsBloc>().add(const ListingsSearchRequirementsEvent.currentDashboardMarker(DashboardMarker.reservations));
+                              });
+
+                              final snackBar = SnackBar(
+                                  elevation: 4,
+                                  backgroundColor: widget.model.paletteColor,
+                                  /// booking successful - confirmation e-mail sent!
+                                  content: Text('You\'re Done! - Check Out You\'re New Reservation.', style: TextStyle(color: widget.model.webBackgroundColor))
+                              );
+                              ScaffoldMessenger.of(context).showSnackBar(snackBar);
                             }
                         )
                     )
@@ -765,6 +783,7 @@ class _FacilityPreviewScreenState extends State<FacilityPreviewScreen> with Sing
       height: 40,
       width: MediaQuery.of(context).size.width,
       child: TabBar(
+        indicatorSize: TabBarIndicatorSize.tab,
         controller: _tabController,
           onTap: (index) {
             setState(() {
@@ -802,6 +821,7 @@ class _FacilityPreviewScreenState extends State<FacilityPreviewScreen> with Sing
                         color: widget.model.accentColor.withOpacity(0.35)
                     ),
                     child: TabBar(
+                      indicatorSize: TabBarIndicatorSize.tab,
                       controller: _tabController,
                       onTap: (index) {
                         setState(() {
@@ -977,73 +997,53 @@ class _FacilityPreviewScreenState extends State<FacilityPreviewScreen> with Sing
       child: BlocConsumer<ReservationFormBloc, ReservationFormState>(
         listenWhen: (p, c) => p.isSubmitting != c.isSubmitting,
         listener: (context, state) {
+          //
+          // state.authFailureOrSuccessOption.fold(
+          //         () {},
+          //         (either) => either.fold((failure) {
+          //
+          //       final snackBar = SnackBar(
+          //           backgroundColor: widget.model.webBackgroundColor,
+          //           content: failure.maybeMap(
+          //             invalidDate: (_) => Text('Sorry, the Date(s) You Have Selected are Conflicting', style: TextStyle(color: widget.model.disabledTextColor)),
+          //             waitingForPaymentConfirmation: (_) => Text('Waiting for payment confirmation', style: TextStyle(color: widget.model.disabledTextColor)),
+          //             // waitingForPaymentConfirmation: (_) => Text('Sorry, You will Need to first Agree to the Terms and Conditions Before Completing Your Reservation', style: TextStyle(color: widget.model.disabledTextColor)),
+          //             paymentResultError: (_) => Text('Please Fill Out Payment Method Details', style: TextStyle(color: widget.model.disabledTextColor)),
+          //             // cancelled: (_) => Text(AppLocalizations.of(context)!.loginFailuresCancelled, style: TextStyle( color: widget.model.disabledTextColor)),
+          //
+          //             reservationServerError: (e) => Text(AppLocalizations.of(context)!.serverError, style: TextStyle(color: widget.model.disabledTextColor)),
+          //             orElse: () => Text('A Problem Happened', style: TextStyle(color: widget.model.disabledTextColor)),
+          //           ));
+          //
+          //       ScaffoldMessenger.of(context).showSnackBar(snackBar);
+          //     }, (_) {
+          //
+          //     }));
 
-          state.authFailureOrSuccessOption.fold(
-                  () {},
-                  (either) => either.fold((failure) {
-
-                final snackBar = SnackBar(
-                    backgroundColor: widget.model.webBackgroundColor,
-                    content: failure.maybeMap(
-                      invalidDate: (_) => Text('Sorry, the Date(s) You Have Selected are Conflicting', style: TextStyle(color: widget.model.disabledTextColor)),
-                      waitingForPaymentConfirmation: (_) => Text('Waiting for payment confirmation', style: TextStyle(color: widget.model.disabledTextColor)),
-                      // waitingForPaymentConfirmation: (_) => Text('Sorry, You will Need to first Agree to the Terms and Conditions Before Completing Your Reservation', style: TextStyle(color: widget.model.disabledTextColor)),
-                      paymentResultError: (_) => Text('Please Fill Out Payment Method Details', style: TextStyle(color: widget.model.disabledTextColor)),
-                      // cancelled: (_) => Text(AppLocalizations.of(context)!.loginFailuresCancelled, style: TextStyle( color: widget.model.disabledTextColor)),
-
-                      reservationServerError: (e) => Text(AppLocalizations.of(context)!.serverError, style: TextStyle(color: widget.model.disabledTextColor)),
-                      orElse: () => Text('A Problem Happened', style: TextStyle(color: widget.model.disabledTextColor)),
-                    ));
-
-                ScaffoldMessenger.of(context).showSnackBar(snackBar);
-              }, (_) {
-
-                final snackBar = SnackBar(
-                    elevation: 4,
-                    backgroundColor: widget.model.paletteColor,
-                    /// booking successful - confirmation e-mail sent!
-                    content: Text(AppLocalizations.of(context)!.saved, style: TextStyle(color: widget.model.webBackgroundColor))
-                );
-                ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                setState(() {
-                  reservationMarker = ReservationMobileCreateNewMarker.listingDetails;
-                  ExploreWebHelperCore.selectedListing = false;
-                });
-
-              }));
-
-          state.authPaymentFailureOrSuccessOption.fold(
-            () => {},
-            (either) => either.fold(
-              (failure) {
-                final snackBar = SnackBar(
-                    backgroundColor: widget.model.webBackgroundColor,
-                    content: failure.maybeMap(
-                      couldNotRetrievePaymentMethod: (_) => Text('Could not retrieve payment details', style: TextStyle(color: widget.model.disabledTextColor)),
-                      paymentServerError: (e) => Text(e.failedValue ?? AppLocalizations.of(context)!.serverError, style: TextStyle(color: widget.model.disabledTextColor)),
-                      orElse: () => Text('A Problem Happened', style: TextStyle(color: widget.model.disabledTextColor)),
-                  )
-                );
-                ScaffoldMessenger.of(context).showSnackBar(snackBar);
-              }, (success) {
-                if (kIsWeb) {
-                  setState(() {
-                    ExploreWebHelperCore.selectedListing = false;
-                  });
-                } else {
-                  final snackBar = SnackBar(
-                      elevation: 4,
-                      backgroundColor: widget.model.paletteColor,
-                      /// booking successful - confirmation e-mail sent!
-                      content: Text(AppLocalizations.of(context)!.saved, style: TextStyle(color: widget.model.webBackgroundColor))
-                  );
-                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                  Navigator.of(context).pop();
-                }
-
-              }
-            )
-          );
+          // state.authPaymentFailureOrSuccessOption.fold(
+          //   () => {},
+          //   (either) => either.fold(
+          //     (failure) {
+          //       final snackBar = SnackBar(
+          //           backgroundColor: widget.model.webBackgroundColor,
+          //           content: failure.maybeMap(
+          //             couldNotRetrievePaymentMethod: (_) => Text('Could not retrieve payment details', style: TextStyle(color: widget.model.disabledTextColor)),
+          //             paymentServerError: (e) => Text(e.failedValue ?? AppLocalizations.of(context)!.serverError, style: TextStyle(color: widget.model.disabledTextColor)),
+          //             orElse: () => Text('A Problem Happened', style: TextStyle(color: widget.model.disabledTextColor)),
+          //         )
+          //       );
+          //       ScaffoldMessenger.of(context).showSnackBar(snackBar);
+          //     }, (success) {
+          //       final snackBar = SnackBar(
+          //             elevation: 4,
+          //             backgroundColor: widget.model.paletteColor,
+          //             /// booking successful - confirmation e-mail sent!
+          //             content: Text(AppLocalizations.of(context)!.saved, style: TextStyle(color: widget.model.webBackgroundColor))
+          //         );
+          //         ScaffoldMessenger.of(context).showSnackBar(snackBar);
+          //     }
+          //   )
+          // );
         },
         buildWhen: (p,c) =>  p.newFacilityBooking != c.newFacilityBooking ||
           p.isTermsConditionsAccepted != c.isTermsConditionsAccepted ||

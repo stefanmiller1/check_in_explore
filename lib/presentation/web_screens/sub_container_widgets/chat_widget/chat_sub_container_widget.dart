@@ -44,6 +44,7 @@ class _ChatSubContainerWidgetState extends State<ChatSubContainerWidget> with Si
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4.0),
           child: TabBar(
+              indicatorSize: TabBarIndicatorSize.tab,
               controller: _tabController,
               onTap: (index) {
                   ChatHelperCore.currentPageIndex = index;

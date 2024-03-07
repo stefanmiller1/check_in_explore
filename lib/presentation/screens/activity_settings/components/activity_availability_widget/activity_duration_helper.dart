@@ -62,8 +62,6 @@ int getNumberOfMinutesInListOfHours(int durationType, List<DateTimeRange> hours)
 List<DateTime> retrieveDatesFromSelectedWeekday(List<DayOptionItem> hoursList, DateTime startingDate) {
   List<DateTime> listToCreate = [];
 
-  print(hoursList.map((e) => e));
-
   for (DayOptionItem dayOption in hoursList) {
     if (dayOption.hoursOpen.isNotEmpty && !dayOption.isClosed || dayOption.isTwentyFourHour) {
       final int daysTillEndOfWeek = 7 - startingDate.weekday;
@@ -88,7 +86,6 @@ List<DateTime> retrieveDatesFromSelectedWeekday(List<DayOptionItem> hoursList, D
     }
   }
 
-  print(listToCreate);
   return listToCreate;
 }
 

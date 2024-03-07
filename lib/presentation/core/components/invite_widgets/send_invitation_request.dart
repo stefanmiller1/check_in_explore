@@ -94,6 +94,7 @@ class _SendInvitationRequestState extends State<SendInvitationRequest> {
         child: BlocConsumer<InvitationFormBloc, InvitationFormState>(
             listenWhen: (p,c) => p.isSubmitting != c.isSubmitting,
             listener: (context, state)  {
+
               state.authFailureRemoveAttendeeOrSuccess.fold(
                       () => null,
                       (either) => either.fold(
@@ -134,6 +135,7 @@ class _SendInvitationRequestState extends State<SendInvitationRequest> {
                   )
               );
             },
+            buildWhen: (p,c) => p.isSubmitting != c.isSubmitting || p.inviteList != c.inviteList,
             builder: (context, state) {
               return Scaffold(
                 appBar: AppBar(
@@ -148,11 +150,11 @@ class _SendInvitationRequestState extends State<SendInvitationRequest> {
                         onTap: () {
                           setState(() {
                             if (selectedUsers.isNotEmpty && !state.isSubmitting) {
-                              context.read<InvitationFormBloc>().add(const InvitationFormEvent.inviteIsSubmittingChanged(true));
+                              // context.read<InvitationFormBloc>().add(const InvitationFormEvent.inviteIsSubmittingChanged(true));
 
                               switch (widget.inviteType) {
                                 case InvitationType.reservation:
-                                  if (widget.activityForm != null) {
+                                  // if (widget.activityForm != null) {
                                     List<AttendeeItem> attendeeList = [];
                                     for (ContactDetails contact in selectedUsers) {
                                       final AttendeeItem attendee = AttendeeItem(
@@ -174,8 +176,8 @@ class _SendInvitationRequestState extends State<SendInvitationRequest> {
                                     }
 
                                     context.read<InvitationFormBloc>().add(const InvitationFormEvent.inviteIsSubmittingChanged(true));
-                                    context.read<InvitationFormBloc>().add(InvitationFormEvent.finishedSubmittingReservationInvite(widget.reservationItem.reservationId.getOrCrash(), widget.activityForm!, attendeeList));
-                                  }
+                                    context.read<InvitationFormBloc>().add(InvitationFormEvent.finishedSubmittingReservationInvite(widget.reservationItem.reservationId.getOrCrash(), widget.activityForm, attendeeList));
+                                  // }
                                   break;
                               }
                             }

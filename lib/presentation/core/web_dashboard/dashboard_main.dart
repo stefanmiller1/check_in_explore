@@ -87,7 +87,6 @@ class _WebDashboardMainState extends State<WebDashboardMain> {
   @override
   void initState() {
     currentMarker = widget.dashboardMarker;
-    print(currentMarker);
     super.initState();
   }
 
@@ -103,7 +102,7 @@ class _WebDashboardMainState extends State<WebDashboardMain> {
     Size _size = MediaQuery.of(context).size;
     return Scaffold(
       key: _scaffoldKey,
-      drawer: Container(
+      drawer: SizedBox(
        width: (subContainerIsHidden(currentMarker!)) ? 350 : 0,
         child: Drawer(
           elevation: 0,
@@ -194,7 +193,7 @@ class _WebDashboardMainState extends State<WebDashboardMain> {
               ),
             ),
             if (subContainerIsHidden(currentMarker!)) Expanded(
-              flex: 6,
+              flex: 5,
               child: AnimatedContainer(
                 duration: Duration(milliseconds: 750),
                 child: SubContainer(
@@ -260,7 +259,7 @@ class _WebDashboardMainState extends State<WebDashboardMain> {
               ),
             ),
             Expanded(
-              flex: _size.width > 1340 ? 8 : 10,
+              flex: _size.width > 1340 ? 9 : 11,
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 750),
                 child: MainMenuContainer(

@@ -88,7 +88,7 @@ class _ListingSearchResultState extends State<ListingSearchResult> {
                 highlightColor: Colors.grey.shade100,
                 child: Container(
                   height: 35,
-                  width: 300,
+                  width: 100,
                   decoration: BoxDecoration(
                     color: widget.model.accentColor.withOpacity(0.15),
                     borderRadius: const BorderRadius.all(Radius.circular(8)),

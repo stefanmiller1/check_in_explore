@@ -129,6 +129,7 @@ class _MapSearchContainerState extends State<MapSearchContainer> {
                 myLocationButtonEnabled: false,
                 myLocationEnabled: true,
                 zoomControlsEnabled: false,
+
                 initialCameraPosition: CameraPosition(
                   target: LatLng(MapHelper.lat, MapHelper.lng),
                   zoom: MapHelper.currentZoom,
@@ -144,13 +145,12 @@ class _MapSearchContainerState extends State<MapSearchContainer> {
                     MapHelper.lat = position.target.latitude;
                     MapHelper.lng = position.target.longitude;
 
-
-                    if (MapHelper.currentZoom == position.zoom) return;
-                    MapHelper.currentZoom = position.zoom;
-
+                    print(position.zoom);
+                    if (MapHelper.currentZoom >= position.zoom + 1.5 || MapHelper.currentZoom <= position.zoom - 1.5 || MapHelper.currentZoom == position.zoom) return;
 
                     MapHelper.initMarkers(context, widget.model, context.read<ListingsSearchRequirementsBloc>().state.listings.toList());
 
+                    MapHelper.currentZoom = position.zoom;
 
                 });
               }
@@ -170,6 +170,8 @@ class _MapSearchContainerState extends State<MapSearchContainer> {
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Center(
                     child: Chip(
+                      side: BorderSide.none,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                       backgroundColor: widget.model.mobileBackgroundColor,
                       label: Text(
                         '•••',
@@ -224,6 +226,7 @@ class _MapSearchContainerState extends State<MapSearchContainer> {
         if (!(Responsive.isDesktop(context))) getListingPagingController(
           context,
           widget.model,
+          context.read<ListingsSearchRequirementsBloc>().state.isMarkersLoading,
           (kIsWeb) ? 180 : 150 + (MediaQuery.of(context).size.height * 0.21),
           context.read<ListingsSearchRequirementsBloc>().state.listings.toList(),
           context.read<ListingsSearchRequirementsBloc>().state.selectedListingId,
@@ -235,8 +238,8 @@ class _MapSearchContainerState extends State<MapSearchContainer> {
               MapHelper.mapController.animateCamera(
                 CameraUpdate.newCameraPosition(
                     CameraPosition(
-                        zoom: 11,
-                        target: LatLng(listing.listingProfileService.listingLocationSetting.locationPosition!.latitude - 0.07, listing.listingProfileService.listingLocationSetting.locationPosition!.longitude)
+                        zoom: MapHelper.currentZoom,
+                        target: LatLng(listing.listingProfileService.listingLocationSetting.locationPosition!.latitude, listing.listingProfileService.listingLocationSetting.locationPosition!.longitude)
                     )
                 )
             );
@@ -285,21 +288,21 @@ class _MapSearchContainerState extends State<MapSearchContainer> {
                   child: Icon(Icons.refresh_rounded, color: widget.model.paletteColor)
                 ),
               ),
-            ) : InkWell(
-              onTap: () async {
-                _didSelectRefresh(context);
-              },
-              child: Container(
-                height: 40,
-                decoration: BoxDecoration(
-                    color: widget.model.mobileBackgroundColor,
-                    borderRadius: BorderRadius.circular(40)),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 3.0),
-                  child: Center(child: Chip(
+            ) : Container(
+              height: 40,
+              decoration: BoxDecoration(
+                  color: widget.model.mobileBackgroundColor,
+                  borderRadius: BorderRadius.circular(40)),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 3.0),
+                child: Center(child: FilterChip(
+                    onSelected: (e) async {
+                      _didSelectRefresh(context);
+                    },
+                    side: BorderSide.none,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                     backgroundColor: Colors.transparent,
-                      label: Text('Refresh', style: TextStyle(color: widget.model.paletteColor, fontWeight: FontWeight.bold)), avatar: Icon(Icons.refresh_rounded, color: widget.model.paletteColor)),
-                  ),
+                    label: Text('Refresh', style: TextStyle(color: widget.model.paletteColor, fontWeight: FontWeight.bold)), avatar: Icon(Icons.refresh_rounded, color: widget.model.paletteColor)),
                 ),
               ),
             ),

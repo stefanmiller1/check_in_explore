@@ -4,9 +4,12 @@ import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_domain/domain/misc/attendee_services/attendee_item/attendee_item.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
 import 'package:check_in_facade/check_in_facade.dart' as facade;
+import 'package:check_in_web_mobile_explore/presentation/core/responsive/responsive.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+
+import '../reservation_helper.dart';
 
 
 Widget getReservationFooterWidget(
@@ -33,8 +36,8 @@ Widget getReservationFooterWidget(
   final List<ReservationSlotItem> reservationSlots = [];
   reservationSlots.addAll(reservation.reservationSlotItem);
   late List<ReservationSlotItem> resSorted = reservationSlots..sort(((a,b) => a.selectedDate.compareTo(b.selectedDate)));
-  final isEnded = reservation.reservationSlotItem.map((e) => e.selectedDate).where((element) => element.isBefore(DateTime.now())).isNotEmpty;
-  final isUnrestrictedActivity = activityForm.activityAttendance.isLimitedAttendance == null && activityForm.activityAttendance.isTicketBased == null || activityForm.activityAttendance.isLimitedAttendance == false && activityForm.activityAttendance.isTicketBased == false;
+  final isEnded = reservation.reservationState == ReservationSlotState.completed;
+  final isCompleteOpenActivity = activityForm.activityAttendance.isLimitedAttendance == null && activityForm.activityAttendance.isTicketBased == null && activitySetupComplete(activityForm) || activityForm.activityAttendance.isLimitedAttendance == false && activityForm.activityAttendance.isTicketBased == false && activitySetupComplete(activityForm);
 
 
   return SizedBox(
@@ -59,7 +62,12 @@ Widget getReservationFooterWidget(
                   /// TODO: Side bar to contain - (Join, Buy, Leave, Interested...Button), Activity Title, Activity Dates, Activity Location??, Attending/Interested
                   /// TODO: Hide bottom when not on discussion..
 
-                  if (isUnrestrictedActivity) getFooterForFreeActivity(
+                  /// interested
+                  /// dates and slots booked?
+                  /// attending - manage if joined? (should be able to preview or nah?)
+
+
+                  if (isCompleteOpenActivity) getFooterForFreeActivity(
                       context,
                       model,
                       reservation,
@@ -124,9 +132,6 @@ Widget getReservationFooterWidget(
                       didSelectInterested: didSelectInterested
                   ),
 
-                    /// interested
-
-
                     const SizedBox(width: 4),
                     if (kIsWeb && (!(showAttendingOnly))) IconButton(
                         onPressed: () {
@@ -153,6 +158,157 @@ Widget getReservationFooterWidget(
   );
 }
 
+
+Widget getFooterForResWithoutActivity(BuildContext context, DashboardModel model, bool isOwner, ReservationItem reservation, List<AttendeeItem> allAttending, bool isEnded, bool showAttendingOnly, UniqueId currentUser, AttendeeItem? currentAttendee, {required Function() didSelectCreateActivity, required Function() didSelectShare, required Function() didSelectMoreOptions, required Function() didSelectInterested}) {
+
+  final List<ReservationSlotItem> reservationSlots = [];
+  reservationSlots.addAll(reservation.reservationSlotItem);
+  late List<ReservationSlotItem> resSorted = reservationSlots..sort(((a,b) => a.selectedDate.compareTo(b.selectedDate)));
+  final bool isAttending = currentAttendee?.contactStatus == ContactStatus.joined || isOwner;
+  final int numberOfAttendees = allAttending.where((element) => element.attendeeType == AttendeeType.free && element.contactStatus == ContactStatus.joined).length;
+
+  return SizedBox(
+    height: 100,
+    width: MediaQuery.of(context).size.width,
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Expanded(
+          child: Center(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: Row(
+                    children: [
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const SizedBox(width: 8),
+                          Flexible(
+                            child: IntrinsicWidth(
+                              child: Container(
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(width: 1, color: model.disabledTextColor)
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Row(
+                                      children: [
+                                        Icon(Icons.people_outline),
+                                        const SizedBox(width: 8),
+                                        Expanded(child: Text(numberOfAttendees == 0 ? 'Attending' : '$numberOfAttendees Attending', style: TextStyle(color: model.paletteColor, fontSize: model.secondaryQuestionTitleFontSize, fontWeight: FontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                                    ],
+                                  ),
+                                )
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(width: 8),
+                      if (Responsive.isDesktop(context)) Flexible(
+                        child: getInterestedAttendeesActivity(
+                            context,
+                            model,
+                            currentUser,
+                            allAttending,
+                            currentAttendee,
+                            didSelectInterested: () {
+                              if (isAttending == false)  {
+                                didSelectInterested();
+                            }
+                          }
+                        ),
+                      ),
+
+                    ],
+                  ),
+                ),
+
+                getReservationState(model, resSorted, isEnded),
+              ],
+            ),
+          ),
+        ),
+
+
+        if (!(showAttendingOnly)) Flexible(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              if (isEnded == true) Flexible(
+                child: InkWell(
+                  onTap: () {
+                  },
+                  child: Container(
+                    constraints: BoxConstraints(
+                        maxWidth: 200
+                    ),
+                    height: 45,
+                    width: 150,
+                    decoration: BoxDecoration(
+                      color: model.accentColor,
+                      border: Border.all(color: model.disabledTextColor),
+                      borderRadius: const BorderRadius.all(Radius.circular(40)),
+                    ),
+                    child: Center(child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                      child: Text((isAttending) ? 'Create Activity' : 'Finished', style: TextStyle(color: model.disabledTextColor, fontSize: model.secondaryQuestionTitleFontSize, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis, maxLines: 1),
+                    )),
+                  ),
+                ),
+              ),
+
+              if (isEnded == false) Flexible(
+                child: InkWell(
+                  onTap: () {
+                      didSelectCreateActivity();
+                  },
+                  child: Container(
+                    constraints: BoxConstraints(
+                        maxWidth: 200
+                    ),
+                    height: 45,
+                    width: 150,
+                    decoration: BoxDecoration(
+                      color: model.paletteColor,
+                      borderRadius: const BorderRadius.all(Radius.circular(40)),
+                    ),
+                    child: Center(child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                      child: Text((isOwner) ? 'Create Activity' : 'Preview', style: TextStyle(color: model.accentColor, fontSize: model.secondaryQuestionTitleFontSize, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis, maxLines: 1),
+                    )),
+                  ),
+                ),
+              ),
+
+            ],
+          ),
+        ),
+        const SizedBox(width: 4),
+        if (kIsWeb && (!(showAttendingOnly))) IconButton(
+            onPressed: () {
+              didSelectShare();
+            },
+            padding: EdgeInsets.zero,
+            icon: Icon(Icons.ios_share, color: model.paletteColor)
+        ),
+        if (kIsWeb && (!(showAttendingOnly))) IconButton(
+            onPressed: () {
+              didSelectMoreOptions();
+            },
+            padding: EdgeInsets.zero,
+            icon: Icon(Icons.more_vert_rounded, color: model.paletteColor)
+        ),
+
+      ],
+    ),
+  );
+}
 
 Widget getFooterForFreeActivity(BuildContext context, DashboardModel model, ReservationItem reservation, ActivityManagerForm activityForm, List<ReservationSlotItem> resSorted, bool isEnded, bool isOwner, bool showAttendeeOnly, UniqueId currentUser, bool isLimitedAttendance, List<AttendeeItem> allAttending, AttendeeItem? currentAttendee, {required Function() didSelectManage, required Function() didSelectJoin, required Function() didSelectInterested}) {
   
@@ -550,22 +706,24 @@ Widget getInterestedAttendeesActivity(BuildContext context, DashboardModel model
     onTap: () {
       didSelectInterested();
     },
-    child: Container(
-        decoration: BoxDecoration(
-            color: (isInterested) ? model.paletteColor : null,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(width: 1, color: model.disabledTextColor)
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            children: [
-              Icon(Icons.remove_red_eye_outlined, color: (isInterested) ? model.accentColor : model.paletteColor),
-              const SizedBox(width: 8),
-              Expanded(child: Text(numberOfInterested == 0 ? 'Interested' : '$numberOfInterested Interested', style: TextStyle(color: (isInterested) ? model.accentColor : model.paletteColor, fontSize: model.secondaryQuestionTitleFontSize, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis, maxLines: 1,)),
-          ],
-        ),
-      )
+    child: IntrinsicWidth(
+      child: Container(
+          decoration: BoxDecoration(
+              color: (isInterested) ? model.paletteColor : null,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(width: 1, color: model.disabledTextColor)
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                Icon(Icons.remove_red_eye_outlined, color: (isInterested) ? model.accentColor : model.paletteColor),
+                const SizedBox(width: 8),
+                Expanded(child: Text(numberOfInterested == 0 ? 'Interested' : '$numberOfInterested Interested', style: TextStyle(color: (isInterested) ? model.accentColor : model.paletteColor, fontSize: model.secondaryQuestionTitleFontSize, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis, maxLines: 1,)),
+            ],
+          ),
+        )
+      ),
     ),
   );
 }

@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Accept a payment</title>
+    <title>Checkout</title>
     <meta name="description" content="stripe check-out for CICO application" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="checkout.css" />
@@ -15,11 +15,16 @@
       <div id="payment-element">
         <!--Stripe.js injects the Payment Element-->
       </div>
+      <div id="link-authentication-element">
+        <!-- Elements will create authentication element here -->
+      </div>
       <button id="submit">
         <div class="spinner hidden" id="spinner"></div>
         <span id="button-text">Pay now</span>
       </button>
+      <div id="error-message"></div>
       <div id="payment-message" class="hidden"></div>
     </form>
+    <div id="messages" role="alert" style="display: none;"></div>
   </body>
 </html>

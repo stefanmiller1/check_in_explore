@@ -16,9 +16,11 @@ import 'presentation/router/location_builder.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform
+  );
   await LocalNotificationCore.setupFlutterNotifications(isFlutterLocalNotificationsInitialized);
-  LocalNotificationCore.showFlutterNotification(message);
+  LocalNotificationCore.showFlutterNotificationMobile(message);
 }
 
 
@@ -38,8 +40,9 @@ Future<void> main() async {
     Stripe.merchantIdentifier = STRIPE_MERCHANT_ID;
     await Stripe.instance.applySettings();
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-    await LocalNotificationCore.setupFlutterNotifications(isFlutterLocalNotificationsInitialized);
   }
+  await LocalNotificationCore.setupFlutterNotifications(isFlutterLocalNotificationsInitialized);
+
   runApp(const MyApp());
 }
 
@@ -80,7 +83,6 @@ class _MyAppState extends State<MyApp> {
 
   @override
   void initState() {
-
     LocalNotificationCore.initialize(context);
 
     /// background work called when app is terminated
@@ -90,18 +92,20 @@ class _MyAppState extends State<MyApp> {
       }
     );
 
+
     /// background work called when app is not open
     FirebaseMessaging.onMessageOpenedApp.listen((message) {
-
+      // print('Handling a foreground message: ${message.messageId}');
+      // print('Message data: ${message.data}');
+      // print('Message notification: ${message.notification?.title}');
+      // print('Message notification: ${message.notification?.body}');
     });
 
-    /// foreground work to call local notification
-    FirebaseMessaging.onMessage.listen(LocalNotificationCore.showFlutterNotification);
+
     super.initState();
   }
 
 
-  
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {

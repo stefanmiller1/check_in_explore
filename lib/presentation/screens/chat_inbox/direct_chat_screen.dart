@@ -15,6 +15,7 @@ import 'package:intl/intl.dart';
 import 'package:jumping_dot/jumping_dot.dart';
 import 'package:reservation_post/inputs/input.dart' as post;
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:check_in_facade/auth/notification_facade/notification_core_config.dart';
 
 import '../../core/components/reservation_card.dart';
 
@@ -92,70 +93,88 @@ class _DirectChatScreenState extends State<DirectChatScreen> {
           ),
          centerTitle: true,
         ) : null,
-        body: (widget.room != null && widget.reservationItem == null) ? BlocProvider(create: (_) => getIt<ReservationManagerWatcherBloc>()..add(ReservationManagerWatcherEvent.watchReservationItem(widget.room!.metadata?['reservationId'] ?? '')),
-          child: BlocBuilder<ReservationManagerWatcherBloc, ReservationManagerWatcherState>(
-              builder: (context, state) {
-                return state.maybeMap(
+        body: BlocProvider(create: (_) => getIt<NotificationWatcherBloc>()..add(NotificationWatcherEvent.watchAllAccountNotificationAmountByType([AccountNotificationType.message], widget.room != null ? UniqueId.fromUniqueString(widget.room!.id) : null)),
+            child: BlocBuilder<NotificationWatcherBloc, NotificationWatcherState>(
+                builder: (context, authState) {
+                  return authState.maybeMap(
+                      loadAllAccountNotificationByTypeSuccess: (item) {
+                        return mainContainer(item.notifications);
+                      },
+                      orElse: () {
+                        return mainContainer([]);
+                }
+              );
+            }
+          )
+        )
+      ),
+    );
+  }
+
+
+  Widget mainContainer(List<AccountNotificationItem> notifications) {
+    return (widget.room != null && widget.reservationItem == null) ? BlocProvider(create: (_) => getIt<ReservationManagerWatcherBloc>()..add(ReservationManagerWatcherEvent.watchReservationItem(widget.room!.metadata?['reservationId'] ?? '')),
+        child: BlocBuilder<ReservationManagerWatcherBloc, ReservationManagerWatcherState>(
+            builder: (context, state) {
+              return state.maybeMap(
                   resLoadInProgress: (_) => JumpingDots(color: widget.model.paletteColor, numberOfDots: 3),
-                  loadReservationItemFailure: (_) => retrieveMainChatContainer(null, widget.room!),
+                  loadReservationItemFailure: (_) => retrieveMainChatContainer(
+                    null,
+                    widget.room!,
+                    notifications
+                  ),
                   loadReservationItemSuccess: (items) {
                     /// add system message
                     if (systemMessages.length != retrieveSystemMessages(items.item).length) {
                       systemMessages.addAll(retrieveSystemMessages(items.item));
                     }
-                    return retrieveMainChatContainer(items.item, widget.room!);
+                    return retrieveMainChatContainer(
+                        items.item,
+                        widget.room!,
+                        notifications
+                    );
                   },
-                  orElse: () => retrieveMainChatContainer(null, widget.room!)
+                  orElse: () => retrieveMainChatContainer(
+                      null,
+                      widget.room!,
+                      notifications
+                  )
               );
             }
-          )
-        ) : (widget.reservationItem != null) ? StreamBuilder<List<types.Room>>(
-              stream: facade.FirebaseChatCore.instance.roomsFromReservation(reservationId: widget.reservationItem!.reservationId.getOrCrash()),
-                builder: (context, snapshot) {
+        )
+    ) : (widget.reservationItem != null) ? StreamBuilder<List<types.Room>>(
+      stream: facade.FirebaseChatCore.instance.roomsFromReservation(reservationId: widget.reservationItem!.reservationId.getOrCrash()),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData || snapshot.data!.isEmpty || snapshot.hasError || snapshot.data == null) {
+          noItemsFound(
+              widget.model,
+              Icons.chat_outlined,
+              'No Chats Yet!',
+              'When You book a new reservation - a chat with just you and the listing owner will appear here.',
+              'Go Back',
+              didTapStartButton: () {
+                setState(() {
+                  Navigator.of(context).pop();
+                });
+              }
+          );
+        }
 
-                if (!snapshot.hasData || snapshot.data!.isEmpty || snapshot.hasError || snapshot.data == null) {
-                  noItemsFound(
-                      widget.model,
-                      Icons.chat_outlined,
-                      'No Chats Yet!',
-                      'When You book a new reservation - a chat with just you and the listing owner will appear here.',
-                      'Go Back',
-                      didTapStartButton: () {
-                        setState(() {
-                          Navigator.of(context).pop();
-                        });
-                      }
-                  );
-                }
+        final room = snapshot.data?.first;
 
-                final room = snapshot.data?.first;
+        if (room != null) {
+          /// add system messages
+          if (systemMessages.length != retrieveSystemMessages(widget.reservationItem!).length) {
+            systemMessages.addAll(retrieveSystemMessages(widget.reservationItem!));
+          }
+          return retrieveMainChatContainer(
+            widget.reservationItem,
+            room,
+            notifications
+          );
+        }
 
-                if (room != null) {
-                  /// add system messages
-                  if (systemMessages.length != retrieveSystemMessages(widget.reservationItem!).length) {
-                    systemMessages.addAll(retrieveSystemMessages(widget.reservationItem!));
-                  }
-                  return retrieveMainChatContainer(
-                      widget.reservationItem,
-                      room
-                  );
-                }
-
-                return noItemsFound(
-                    widget.model,
-                    Icons.chat_outlined,
-                    'No Chats Yet!',
-                    'When You book a new reservation - a chat with just you and the listing owner will appear here.',
-                    'Go Back',
-                    didTapStartButton: () {
-                      setState(() {
-                        Navigator.of(context).pop();
-                      });
-                    }
-                );
-
-            },
-        ) : noItemsFound(
+        return noItemsFound(
             widget.model,
             Icons.chat_outlined,
             'No Chats Yet!',
@@ -166,14 +185,25 @@ class _DirectChatScreenState extends State<DirectChatScreen> {
                 Navigator.of(context).pop();
               });
             }
-          )
-        ),
-      );
+        );
+
+      },
+    ) : noItemsFound(
+        widget.model,
+        Icons.chat_outlined,
+        'No Chats Yet!',
+        'When You book a new reservation - a chat with just you and the listing owner will appear here.',
+        'Go Back',
+        didTapStartButton: () {
+          setState(() {
+            Navigator.of(context).pop();
+          });
+        }
+    );
   }
 
 
-
-  Widget retrieveMainChatContainer(ReservationItem? reservation, types.Room selectedRoom) {
+  Widget retrieveMainChatContainer(ReservationItem? reservation, types.Room selectedRoom, List<AccountNotificationItem> notifications) {
 
     return StreamBuilder<types.Room>(
         initialData: selectedRoom,
@@ -229,8 +259,17 @@ class _DirectChatScreenState extends State<DirectChatScreen> {
                         },
                         onMessageVisibilityChanged: (message, visible) {
                           if (message.status != types.Status.seen && message.type != types.MessageType.system) {
-                            _updateMessageStatusOnVisibilityChange(message, selectedRoom);
+                            _updateMessageStatusOnVisibilityChange(
+                                message,
+                                selectedRoom
+                            );
                           }
+                          /// update room notification
+                          LocalNotificationCore.updateNotificationToRead(context, notifications.where((e) =>
+                          e.reservationId?.getOrCrash() == selectedRoom.id).map((e) => e.notificationId).toList(),
+                              widget.model.paletteColor,
+                              widget.model.accentColor
+                          );
                         },
 
                         isAttachmentUploading: _isAttachmentUploading,
@@ -255,6 +294,7 @@ class _DirectChatScreenState extends State<DirectChatScreen> {
                       widget.model,
                       false,
                       false,
+                      [],
                       didSelectReservation: (listing, res, activity, attendeeItem, activityTickets) {
                         if (widget.isFromReservation) {
                           return Navigator.of(context).pop();
@@ -301,7 +341,8 @@ class _DirectChatScreenState extends State<DirectChatScreen> {
     );
     facade.FirebaseChatCore.instance.sendDirectNotifications(
         currentRoom.users.map((e) => e.id).toList(),
-        message
+        message,
+        currentRoom.id
     );
   }
 
@@ -309,22 +350,22 @@ class _DirectChatScreenState extends State<DirectChatScreen> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 15.0),
       child: post.Input(
-          isAudioAttachmentUploading: isAudioAttachmentUploading,
-          isCameraImageAttachmentUploading: isCameraImageAttachmentUploading,
-          isImageVideoAttachmentUploading: isImageVideoAttachmentUploading,
-          onSubmitPressed: (postText) async {
-            _handleSendPressed(
-              types.PartialText(
-                  text: postText.text,
-              ),
-              currentRoom
-            );
-          },
-          onAttachmentPressed: (type) async {
+        isAudioAttachmentUploading: isAudioAttachmentUploading,
+        isCameraImageAttachmentUploading: isCameraImageAttachmentUploading,
+        isImageVideoAttachmentUploading: isImageVideoAttachmentUploading,
+        onSubmitPressed: (postText) async {
+          _handleSendPressed(
+            types.PartialText(
+                text: postText.text,
+            ),
+            currentRoom
+          );
+        },
+        onAttachmentPressed: (type) async {
 
-          },
-          isSubmitting: false,
-          model: widget.model
+        },
+        isSubmitting: false,
+        model: widget.model
       ),
     );
   }

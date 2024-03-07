@@ -128,7 +128,7 @@ class _PostWidgetBuilderState extends State<PostWidgetBuilder> {
             currentUser: userProfile,
             didSelectEditProfile: (profile) {
 
-              if (!kIsWeb && Platform.isIOS) {
+              if (!kIsWeb) {
                   Navigator.push(context, MaterialPageRoute(
                       builder: (_) {
                         return EditCurrentProfile(
@@ -143,19 +143,7 @@ class _PostWidgetBuilderState extends State<PostWidgetBuilder> {
                       })
                   );
                 } else {
-                  Navigator.push(context, MaterialPageRoute(
-                    builder: (_) {
-                        return EditCurrentProfile(
-                          profile: widget.currentUser,
-                          model: widget.model,
-                          didFinishSaving: (profile) {
-                            setState(() {
-                              Navigator.of(context).pop();
-                          });
-                        },
-                      );
-                    })
-                  );
+
                 }
               },
             );

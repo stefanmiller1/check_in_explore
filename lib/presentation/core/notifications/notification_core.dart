@@ -27,8 +27,6 @@ class NotificationCore {
         }
     });
 
-
-print(chatReceivedNotification);
     return chatReceivedNotification;
   }
 }

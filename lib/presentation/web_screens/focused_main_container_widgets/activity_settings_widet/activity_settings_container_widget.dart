@@ -37,7 +37,7 @@ class ActivitySettingsMainContainerWidget extends StatelessWidget {
                 borderRadius: BorderRadius.all(Radius.circular(20))
             ),
             child: retrieveAuthenticationState(context)
-        )
+      )
     );
   }
 

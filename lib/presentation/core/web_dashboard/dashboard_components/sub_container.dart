@@ -50,7 +50,7 @@ class _SubContainerState extends State<SubContainer> {
       ),
       body: SafeArea(
         child: Container(
-          color: widget.model.disabledTextColor.withOpacity(0.25),
+          color: widget.model.accentColor.withOpacity(0.68),
           child: widget.subWidget
         ),
       ),

@@ -1,4 +1,5 @@
 import 'package:check_in_presentation/check_in_presentation.dart';
+import 'package:check_in_web_mobile_explore/presentation/core/responsive/responsive.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -31,9 +32,7 @@ class _MainDashboardContainerState extends State<MainDashboardContainer> {
     return Stack(
       alignment: Alignment.centerRight,
       children: [
-
         widget.mainContainer,
-
         // Positioned(
         //   top: 120,
         //   child: AnimatedContainer(

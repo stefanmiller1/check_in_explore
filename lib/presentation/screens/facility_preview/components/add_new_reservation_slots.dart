@@ -36,7 +36,7 @@ class _AddNewReservationSlotsState extends State<AddNewReservationSlots> {
   ScrollController? _scrollController;
   DateRangePickerController? _calendarController;
   DateTime? currentDateTime;
-  int durationType = 30;
+  // int durationType = 30;
   bool isShowingFeeDetails = false;
   UniqueId? selectedActivityType;
   SpaceOption? currentSelectedSpace;
@@ -173,7 +173,7 @@ class _AddNewReservationSlotsState extends State<AddNewReservationSlots> {
               getClosedDatesForCalendar(
                 widget.model,
                 currentSelectedSpaceOption,
-                durationType,
+                currentSelectedSpaceOption?.durationType ?? 30,
                 widget.listing.listingProfileService.backgroundInfoServices.startEndDate,
               ),
               _calendarController,
@@ -188,14 +188,14 @@ class _AddNewReservationSlotsState extends State<AddNewReservationSlots> {
           calendarListOfSelectableReservations(
             context,
             widget.model,
-            durationType,
+            currentSelectedSpaceOption?.durationType ?? 30,
             widget.reservations,
             currentSelectedSpaceOption?.spaceId ?? UniqueId(),
             getLiveCalendarList(
               model: widget.model,
               fee: widget.listing.listingRulesService.defaultPricingRuleSettings.defaultPricingRate.toString(),
               currency: widget.listing.listingProfileService.backgroundInfoServices.currency,
-              durationType: durationType,
+              durationType: currentSelectedSpaceOption?.durationType ?? 30,
               minHour: currentSelectedSpaceOption?.availabilityHoursSettings?.startHour.toInt() ?? 0,
               maxHour: currentSelectedSpaceOption?.availabilityHoursSettings?.endHour.toInt() ?? 0,
               weekDaysToRemove: currentSelectedSpaceOption?.availabilityHoursSettings?.hideCalendarDays ?? [],
@@ -217,12 +217,12 @@ class _AddNewReservationSlotsState extends State<AddNewReservationSlots> {
             AppLocalizations.of(context)!.facilityLocationAdd,
             selectedReservation: (e) {
               setState(() {
-                print(currentFacilityBooking?.reservationSlotItem ?? []);
+
                 final List<ReservationSlotItem> slotItems = [];
                 final List<ReservationTimeFeeSlotItem> timeSlotItems = [];
                 final ReservationTimeFeeSlotItem newTime = ReservationTimeFeeSlotItem(slotRange: DateTimeRange(
                         start: e.slotRange.start,
-                        end: e.slotRange.start.add(Duration(minutes: durationType))), fee: e.fee);
+                        end: e.slotRange.start.add(Duration(minutes: currentSelectedSpaceOption?.durationType ?? 30))), fee: e.fee);
 
                 slotItems.addAll(currentFacilityBooking?.reservationSlotItem ?? []);
 
@@ -453,7 +453,7 @@ class _AddNewReservationSlotsState extends State<AddNewReservationSlots> {
                                         final List<ReservationTimeFeeSlotItem> timeSlotItems = [];
                                         final ReservationTimeFeeSlotItem newTime = ReservationTimeFeeSlotItem(slotRange: DateTimeRange(
                                                 start: e.slotRange.start,
-                                                end: e.slotRange.start.add(Duration(minutes: durationType))),
+                                                end: e.slotRange.start.add(Duration(minutes: currentSelectedSpaceOption?.durationType ?? 30))),
                                             fee: e.fee);
 
                                         slotItems.addAll(currentFacilityBooking?.reservationSlotItem ??[]);

@@ -25,7 +25,7 @@ class ActivitySubSettingsContainer extends StatelessWidget {
             currentReservationItem: currentReservationItem!,
             currentActivityManagerForm: currentActivityManagerForm ?? ActivityManagerForm.empty(),
         );
-    } else {
+    } else if (currentReservationItem != null) {
       return AttendeeSettingsListContainer(
         model: model,
         currentSelectedSettingItem: currentSelectedSettingItem,
@@ -33,6 +33,8 @@ class ActivitySubSettingsContainer extends StatelessWidget {
         currentReservationItem: currentReservationItem!,
         currentActivityManagerForm: currentActivityManagerForm,
       );
+    } else {
+      return Container();
     }
   }
 }

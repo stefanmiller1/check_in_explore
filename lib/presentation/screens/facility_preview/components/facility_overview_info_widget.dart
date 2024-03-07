@@ -112,12 +112,12 @@ class _FacilityOverviewInfoWidgetState extends State<FacilityOverviewInfoWidget>
                               children: [
                                 Text('Around ${snap.data?.toInt()}m away •', style: TextStyle(color: widget.model.disabledTextColor)),
                                 const SizedBox(width: 10),
-                                Expanded(child: Text(' -- slots this week', style: TextStyle(color: widget.model.paletteColor), overflow: TextOverflow.ellipsis, maxLines: 1,)
-                                )
+                                // Expanded(child: Text(' -- slots this week', style: TextStyle(color: widget.model.paletteColor), overflow: TextOverflow.ellipsis, maxLines: 1,)
+                                // )
                               ],
                             );
                           }
-                          return Text(' -- open slots this week', style: TextStyle(color: widget.model.paletteColor));
+                          return Container();
                         }),
                     const SizedBox(height: 5),
                     Text('${widget.listing.listingProfileService.listingLocationSetting.city.getOrCrash()}, ${widget.listing.listingProfileService.listingLocationSetting.provinceState.getOrCrash()}, ${widget.listing.listingProfileService.listingLocationSetting.countryRegion}', style: TextStyle(color: widget.model.paletteColor)),
@@ -367,39 +367,39 @@ class _FacilityOverviewInfoWidgetState extends State<FacilityOverviewInfoWidget>
                           child: Padding(
                               padding: const EdgeInsets.all(4.0),
                               child: (getNumberOfSlotsToGo(widget.newFacilityBooking) == 1) ? Text('${getNumberOfSlotsToGo(widget.newFacilityBooking)} Slot Remaining', style: TextStyle(color: widget.model.disabledTextColor, fontSize: 14, fontWeight: FontWeight.bold,)) : Text('${getNumberOfSlotsToGo(widget.newFacilityBooking)} Slots Remaining', style: TextStyle(color: widget.model.paletteColor, fontSize: 14, fontWeight: FontWeight.bold,))
-                          )
+                        )
                       ),
                     ),
                     const SizedBox(height: 10),
-                    // Row(
-                    //   children: [
-                        // Flexible(
-                        //   child: Container(
-                        //     constraints: BoxConstraints(
-                        //         maxWidth: 470
-                        //     ),
-                        //     child: viewListOfSelectedSlots(
-                        //         context,
-                        //         widget.model,
-                        //         [],
-                        //         widget.newFacilityBooking.reservationSlotItem,
-                        //         widget.newFacilityBooking.cancelledSlotItem ?? [],
-                        //         false,
-                        //         AppLocalizations.of(context)!.profileFacilitySlotTime,
-                        //         AppLocalizations.of(context)!.profileFacilitySlotBookingLocation,
-                        //         AppLocalizations.of(context)!.profileFacilitySlotBookingDate,
-                        //         widget.listing,
-                        //         didSelectReservation: (e) {
-                        //         },
-                        //         didSelectCancelResSlot: (e, f) {
-                        //         },
-                        //         didSelectRemoveResSlot: (e, f) {
-                        //         }
-                        //     ),
-                        //   ),
-                        // ),
-                    //   ],
-                    // ),
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Container(
+                            constraints: BoxConstraints(
+                                maxWidth: 470
+                            ),
+                            child: viewListOfSelectedSlots(
+                                context,
+                                widget.model,
+                                [],
+                                widget.newFacilityBooking.reservationSlotItem,
+                                widget.newFacilityBooking.cancelledSlotItem ?? [],
+                                false,
+                                AppLocalizations.of(context)!.profileFacilitySlotTime,
+                                AppLocalizations.of(context)!.profileFacilitySlotBookingLocation,
+                                AppLocalizations.of(context)!.profileFacilitySlotBookingDate,
+                                widget.listing,
+                                didSelectReservation: (e) {
+                                },
+                                didSelectCancelResSlot: (e, f) {
+                                },
+                                didSelectRemoveResSlot: (e, f) {
+                                }
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 )
               ),
@@ -455,7 +455,7 @@ class _FacilityOverviewInfoWidgetState extends State<FacilityOverviewInfoWidget>
                     Divider(color: widget.model.paletteColor),
                     const SizedBox(height: 5),
 
-                    getHostColumn(context, widget.listingOwnerProfile, widget.model),
+                    getHostColumn(context, widget.listingOwnerProfile, true, widget.model),
 
                   ],
                 ),
@@ -741,7 +741,7 @@ class _FacilityOverviewInfoWidgetState extends State<FacilityOverviewInfoWidget>
                 borderRadius: BorderRadius.circular(15),
                 child: Stack(
                   children: [
-                    if (widget.overViewState == FacilityPreviewState.listing) ClipRRect(
+                     ClipRRect(
                       child: SizedBox(
                         height: 275,
                         width: 550,

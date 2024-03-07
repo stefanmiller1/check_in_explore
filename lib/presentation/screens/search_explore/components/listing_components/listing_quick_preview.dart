@@ -14,8 +14,9 @@ import 'package:jumping_dot/jumping_dot.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shimmer/shimmer.dart';
 
-Widget getListingPagingController(BuildContext context, DashboardModel model, double bottomOffset, List<ListingManagerForm> listings, UniqueId? selectedListing, {required Function(int) didChangePage, required Function(ListingManagerForm) didSelectListing}) {
+Widget getListingPagingController(BuildContext context, DashboardModel model, bool isLoading, double bottomOffset, List<ListingManagerForm> listings, UniqueId? selectedListing, {required Function(int) didChangePage, required Function(ListingManagerForm) didSelectListing}) {
 
   /// based on selected listing-id & search filter type - search for corresponding reservations
   switch (SearchExploreCoreHelper.currentSearchListingType) {
@@ -23,6 +24,7 @@ Widget getListingPagingController(BuildContext context, DashboardModel model, do
       return getListingPageQuickPreview(
           context,
           model,
+          isLoading,
           bottomOffset,
           listings,
           selectedListing,
@@ -54,6 +56,7 @@ Widget getListingPagingController(BuildContext context, DashboardModel model, do
               loadReservationListSuccess: (items) => getListingPageQuickPreview(
                   context,
                   model,
+                  isLoading,
                   bottomOffset,
                   listings,
                   selectedListing,
@@ -69,13 +72,67 @@ Widget getListingPagingController(BuildContext context, DashboardModel model, do
   }
 }
 
+Widget pagingPreviewIsLoading() {
+  return Shimmer.fromColors(
+    baseColor: Colors.grey.shade400,
+    highlightColor: Colors.grey.shade100,
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(25),
+          child: Container(
+            width: 120,
+            height: 120,
+            color: Colors.grey.withOpacity(0.15),
+          ),
+        ),
+        const SizedBox(
+          width: 15,
+        ),
+        Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  height: 45,
+                  width: 45,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.withOpacity(0.15),
+                    borderRadius: const BorderRadius.all(Radius.circular(35)),
+                  ),
+                ),
+                const SizedBox(
+                  width: 15,
+                ),
+                Container(
+                  height: 18,
+                  width: 200,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.withOpacity(0.15),
+                    borderRadius: const BorderRadius.all(Radius.circular(3)),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 15),
+          ],
+        )
+      ],
+    ),
+  );
+}
 
-Widget getListingPageQuickPreview(BuildContext context, DashboardModel model, double bottomOffset, List<ListingManagerForm>? listings, UniqueId? selectedListingId, List<ReservationItem>? reservation, {required Function(int) didChangePage, required Function(ListingManagerForm) didSelectListing}) {
+
+Widget getListingPageQuickPreview(BuildContext context, DashboardModel model, bool isLoading, double bottomOffset, List<ListingManagerForm>? listings, UniqueId? selectedListingId, List<ReservationItem>? reservation, {required Function(int) didChangePage, required Function(ListingManagerForm) didSelectListing}) {
 
   return Positioned(
     bottom: bottomOffset,
     child: Container(
-    height: 115,
+    height: 120,
     width: MediaQuery.of(context).size.width,
       child: (reservation?.isNotEmpty ?? false) ? Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -96,6 +153,7 @@ Widget getListingPageQuickPreview(BuildContext context, DashboardModel model, do
             child: getFacilityQuickPreview(
                 context,
                 model,
+                isLoading,
                 e,
                 didSelectListing: (listing) => didSelectListing(listing)
               )
@@ -212,7 +270,7 @@ Widget getActivityQuickPreview(BuildContext context, DashboardModel model, Listi
 }
 
 
-Widget getFacilityQuickPreview(BuildContext context, DashboardModel model, ListingManagerForm listing, {required Function(ListingManagerForm) didSelectListing}) {
+Widget getFacilityQuickPreview(BuildContext context, DashboardModel model, bool isLoading, ListingManagerForm listing, {required Function(ListingManagerForm) didSelectListing}) {
   String? listingImage;
 
     for (SpaceOption space in listing.listingProfileService.spaceSetting.spaceTypes.value.fold((l) => [], (r) => r)) {
@@ -222,40 +280,42 @@ Widget getFacilityQuickPreview(BuildContext context, DashboardModel model, Listi
     }
 
     return InkWell(
-      onTap: () {
-        didSelectListing(listing);
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          color: model.mobileBackgroundColor,
-          borderRadius: BorderRadius.circular(25),
-        ),
-        child: PointerInterceptor(
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(25),
-                child: Container(
-                  width: 115,
-                  height: 115,
-                  color: model.accentColor,
-                  child: (listingImage != null) ? Image.network(listingImage, fit: BoxFit.cover) : Icon(Icons.house_outlined, color: model.disabledTextColor),
-                ),
-              ),
-              Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
-                    child: retrieveListingPreviewFacility(
-                      context,
-                      model,
-                      listing,
+        onTap: () {
+          didSelectListing(listing);
+        },
+        child: Container(
+            decoration: BoxDecoration(
+              color: model.mobileBackgroundColor,
+              borderRadius: BorderRadius.circular(25),
+            ),
+            child: PointerInterceptor(
+              child: (isLoading) ? pagingPreviewIsLoading() : Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(25),
+                    child: Container(
+                      width: 120,
+                      height: 120,
+                      color: model.accentColor,
+                      child: (listingImage != null) ? Image.network(
+                          listingImage, fit: BoxFit.cover) : Icon(
+                          Icons.house_outlined, color: model.disabledTextColor),
+                    ),
                   ),
-                )
+                  Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: retrieveListingPreviewFacility(
+                          context,
+                          model,
+                          listing,
+                        ),
+                      )
+                  ),
+                ],
               ),
-            ],
-          ),
-        )
-      ),
-    );
+            )
+        ),
+      );
 }

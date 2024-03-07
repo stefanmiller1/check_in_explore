@@ -76,8 +76,7 @@ class _ListingResultMainCardState extends State<ListingResultMainCard> {
               height: 10,
             ),
             Container(
-              // color: Colors.blue,
-                height: 115,
+                height: 125,
                 width: MediaQuery.of(context).size.width,
                 child: widget.isLoading ? isLoading() : retrievedListingsFooter(
                     context,

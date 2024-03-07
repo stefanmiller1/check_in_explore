@@ -3,6 +3,8 @@ import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_domain/domain/misc/attendee_services/attendee_item/attendee_item.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/components/invite_widgets/send_invitation_request.dart';
+import 'package:check_in_web_mobile_explore/presentation/core/responsive/responsive.dart';
+import 'package:check_in_web_mobile_explore/presentation/web_screens/main_container_widgets/reservations_widget/reservation_helper_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -159,44 +161,6 @@ class _BackgroundInfoSettingsWidgetState extends State<BackgroundInfoSettingsWid
       );
     }
 
-    // if (kIsWeb) {
-    //
-    // }
-    // showGeneralDialog(
-    //   context: context,
-    //   barrierDismissible: true,
-    //   barrierLabel: AppLocalizations.of(context)!.facilityCreateFormNavLocation1,
-    //   barrierColor: widget.model.disabledTextColor.withOpacity(0.34),
-    //   transitionDuration: Duration(milliseconds: 650),
-    //   pageBuilder: (BuildContext contexts, anim1, anim2) {
-    //     return Scaffold(
-    //         backgroundColor: Colors.transparent,
-    //         body: Align(
-    //           alignment: Alignment.bottomCenter,
-    //           child: Container(
-    //               decoration: BoxDecoration(
-    //                   color: widget.model.accentColor,
-    //                   borderRadius: BorderRadius.only(topRight: Radius.circular(17.5), topLeft: Radius.circular(17.5))
-    //               ),
-    //               width: 600,
-    //               height: 750,
-    //               child: CreateNewInstructorForm(
-    //                 model: widget.model,
-    //                 reservation: context.read<UpdateActivityFormBloc>().state.reservationItem,
-    //                 activityForm: context.read<UpdateActivityFormBloc>().state.activitySettingsForm,
-    //                 resOwner: widget.activityOwner,
-    //               )
-    //           ),
-    //         )
-    //     );
-    //   },
-    //   transitionBuilder: (context, anim1, anim2, child) {
-    //     return SlideTransition(
-    //       position: Tween(begin: Offset(0, 1), end: Offset(0, 0.01)).animate(anim1),
-    //       child: child,
-    //     );
-    //   },
-    // );
   }
 
 
@@ -216,7 +180,7 @@ class _BackgroundInfoSettingsWidgetState extends State<BackgroundInfoSettingsWid
 
 
   Widget getMainContainer(BuildContext context, List<AttendeeItem> attendees) {
-    bool isLessThanMain = (MediaQuery.of(context).size.width <= 1150);
+    bool isLessThanMain = (MediaQuery.of(context).size.width <= 1150) || ReservationHelperCore.didPresentSidePanel;
 
     return Form(
       autovalidateMode: context.read<UpdateActivityFormBloc>().state.showErrorMessages,
@@ -227,141 +191,204 @@ class _BackgroundInfoSettingsWidgetState extends State<BackgroundInfoSettingsWid
             width: MediaQuery.of(context).size.width,
             height: MediaQuery.of(context).size.height,
           ),
-
           SingleChildScrollView(
               controller: _scrollController,
               child: Padding(
                 padding: const EdgeInsets.all(15.0),
-                child: (isLessThanMain) ? Column(
+                child: Row(
                   children: [
-                    ImageSelectorWithPreview(
-                      model: widget.model,
-                      currentImageList: widget.activityManagerForm.profileService.activityBackground.activityProfileImages ?? [],
-                      imagesToUpLoad: (images) {
-                        setState(() {
-                          context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.activityProfileImagesChanged(images));
-                        });
-                      },
-                    ),
-                    mainContainerForSectionOneRowOne(
-                        context: context,
-                        model: widget.model,
-                        state: context.read<UpdateActivityFormBloc>().state,
-                        activityManagerForm: widget.activityManagerForm,
-                        activityTitleChanged: (value) {
-                          context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.activityTitleChanged(BackgroundInfoTitle(value)));
-                        },
-                        activityDescriptionChanged: (value) {
-                          context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.activityDescriptionChanged(BackgroundInfoDescription(value)));
-                        },
-                        activityDescriptionChangedTwo: (value) {
-                          context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.activityDescriptionChangedTwo(BackgroundInfoDescription(value)));
-                        }
-                    ),
-                    mainContainerForSectionOneRowTwo(
-                        context: context,
-                        model: widget.model,
-                        state: context.read<UpdateActivityFormBloc>().state,
-                        activityForm: widget.activityManagerForm,
-                        isPartnersInviteOnly: (isPartner) {
-                          setState(() {
-                            if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityBackground.isPartnersInviteOnly == true) {
-                              context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.isPartnersInviteOnly(false));
-                            } else {
-                              context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.isPartnersInviteOnly(true));
-                            }
-                          });
-                        },
-                        isInstructorInviteOnly: (isInvite) {
-                          setState(() {
-                            if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityBackground.isInstructorInviteOnly == true) {
-                              context.read<UpdateActivityFormBloc>().add(const UpdateActivityFormEvent.isInstructorInviteOnly(false));
-                            } else {
-                              context.read<UpdateActivityFormBloc>().add(const UpdateActivityFormEvent.isInstructorInviteOnly(true));
-                            }
-                          });
-                        },
-                        getPartnerAttendees: getPartnerAttendees(attendees.where((element) => element.attendeeType == AttendeeType.partner).toList()),
-                        didSelectCreateNewPartner: () {
-                          _handleCreateNewAttendeePartner(context);
-                        },
-                        getInstructorAttendees: getInstructorAttendees(attendees.where((element) => element.attendeeType == AttendeeType.instructor).toList()),
-                        didSelectCreateInstructor: () {
-                          _handleCreateNewAttendeeInstructor(context);
-                        }
-                    ),
-                  ],
-                ) : Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ImageSelectorWithPreview(
-                      model: widget.model,
-                      currentImageList: widget.activityManagerForm.profileService.activityBackground.activityProfileImages ?? [],
-                      imagesToUpLoad: (images) {
-                        setState(() {
-                          context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.activityProfileImagesChanged(images));
-                        });
-                      },
-                    ),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(child:  mainContainerForSectionOneRowOne(
+                    if (isLessThanMain) Flexible(
+                      child: Container(
+                        constraints: const BoxConstraints(maxWidth: 600),
+                        child: Column(
+                          children: [
+                            ImageSelectorWithPreview(
+                              model: widget.model,
+                              currentImageList: widget.activityManagerForm.profileService.activityBackground.activityProfileImages ?? [],
+                              imagesToUpLoad: (images) {
+                                setState(() {
+                                  context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.activityProfileImagesChanged(images));
+                                });
+                              },
+                            ),
+                            mainContainerForSectionOneRowOne(
+                                context: context,
+                                model: widget.model,
+                                state: context.read<UpdateActivityFormBloc>().state,
+                                activityManagerForm: widget.activityManagerForm,
+                                activityTitleChanged: (value) {
+                                  context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.activityTitleChanged(BackgroundInfoTitle(value)));
+                                },
+                                activityDescriptionChanged: (value) {
+                                  context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.activityDescriptionChanged(BackgroundInfoDescription(value)));
+                                },
+                                activityDescriptionChangedTwo: (value) {
+                                  context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.activityDescriptionChangedTwo(BackgroundInfoDescription(value)));
+                                }
+                            ),
+                            mainContainerForSectionOneRowTwo(
+                                context: context,
+                                model: widget.model,
+                                state: context.read<UpdateActivityFormBloc>().state,
+                                activityForm: widget.activityManagerForm,
+                                isPartnersInviteOnly: (isPartner) {
+                                  setState(() {
+                                    if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityBackground.isPartnersInviteOnly == true) {
+                                      context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.isPartnersInviteOnly(false));
+                                    } else {
+                                      context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.isPartnersInviteOnly(true));
+                                    }
+                                  });
+                                },
+                                isInstructorInviteOnly: (isInvite) {
+                                  setState(() {
+                                    if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityBackground.isInstructorInviteOnly == true) {
+                                      context.read<UpdateActivityFormBloc>().add(const UpdateActivityFormEvent.isInstructorInviteOnly(false));
+                                    } else {
+                                      context.read<UpdateActivityFormBloc>().add(const UpdateActivityFormEvent.isInstructorInviteOnly(true));
+                                    }
+                                  });
+                                },
+                                getPartnerAttendees: getPartnerAttendees(attendees.where((element) => element.attendeeType == AttendeeType.partner).toList()),
+                                didSelectCreateNewPartner: () {
+                                  _handleCreateNewAttendeePartner(context);
+                                },
+                                getInstructorAttendees: getInstructorAttendees(attendees.where((element) => element.attendeeType == AttendeeType.instructor).toList()),
+                                didSelectCreateInstructor: () {
+                                  _handleCreateNewAttendeeInstructor(context);
+                                }
+                            ),
+                            const SizedBox(height: 25),
+                            if (widget.activityManagerForm.profileService.isActivityPost == null || widget.activityManagerForm.profileService.isActivityPost == true) mainActivityBackgroundContainerFooter(
+                              context: context,
+                              model: widget.model,
+                              activityForm: widget.activityManagerForm,
+                              state: context.read<UpdateActivityFormBloc>().state,
+                              contactEmailChanged: (value) {
+                                context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.activityPostContactEmail(value));
+                              },
+                              contactWebsiteChanged: (value) {
+                                context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.activityPostContactWebsite(value));
+                              },
+                              contactInstagramChanged: (value) {
+                                context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.activityPostContactInstagram(value));
+                              }
+                            )
+                          ],
+                        ),
+                      ),
+                    ) else Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ImageSelectorWithPreview(
+                            model: widget.model,
+                            currentImageList: widget.activityManagerForm.profileService.activityBackground.activityProfileImages ?? [],
+                            imagesToUpLoad: (images) {
+                              setState(() {
+                                context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.activityProfileImagesChanged(images));
+                              });
+                            },
+                          ),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(child:  mainContainerForSectionOneRowOne(
+                                  context: context,
+                                  model: widget.model,
+                                  state: context.read<UpdateActivityFormBloc>().state,
+                                  activityManagerForm: widget.activityManagerForm,
+                                  activityTitleChanged: (value) {
+                                    context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.activityTitleChanged(BackgroundInfoTitle(value)));
+                                  },
+                                  activityDescriptionChanged: (value) {
+                                    context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.activityDescriptionChanged(BackgroundInfoDescription(value)));
+                                  },
+                                  activityDescriptionChangedTwo: (value) {
+                                    context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.activityDescriptionChangedTwo(BackgroundInfoDescription(value)));
+                                  }
+                              ),
+                              ),
+                              const SizedBox(width: 25),
+                              Expanded(child: mainContainerForSectionOneRowTwo(
+                                  context: context,
+                                  model: widget.model,
+                                  state: context.read<UpdateActivityFormBloc>().state,
+                                  activityForm: widget.activityManagerForm,
+                                  isPartnersInviteOnly: (isPartner) {
+                                    setState(() {
+                                      if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityBackground.isPartnersInviteOnly ?? false) {
+                                        context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isPartnersInviteOnly(false));
+                                      } else {
+                                        context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isPartnersInviteOnly(true));
+                                      }
+                                    });
+                                  },
+                                  isInstructorInviteOnly: (isInvite) {
+                                    setState(() {
+                                      if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityBackground.isInstructorInviteOnly == true) {
+                                        context.read<UpdateActivityFormBloc>().add(const UpdateActivityFormEvent.isInstructorInviteOnly(false));
+                                      } else {
+                                        context.read<UpdateActivityFormBloc>().add(const UpdateActivityFormEvent.isInstructorInviteOnly(true));
+                                      }
+                                    });
+                                  },
+                                  getPartnerAttendees: getPartnerAttendees(attendees.where((element) => element.attendeeType == AttendeeType.partner).toList()),
+                                  didSelectCreateNewPartner: () {
+                                    _handleCreateNewAttendeePartner(context);
+                                  },
+                                  getInstructorAttendees: getInstructorAttendees(attendees.where((element) => element.attendeeType == AttendeeType.instructor).toList()),
+                                  didSelectCreateInstructor: () {
+                                    _handleCreateNewAttendeeInstructor(context);
+                                  }
+                                ),
+                              ),
+                            if (MediaQuery.of(context).size.width >= 1300) SizedBox(width: MediaQuery.of(context).size.width * 0.1)
+                          ],
+                        ),
+                        const SizedBox(height: 25),
+                        if (widget.activityManagerForm.profileService.isActivityPost == null || widget.activityManagerForm.profileService.isActivityPost == true) mainActivityBackgroundContainerFooter(
                             context: context,
                             model: widget.model,
-                            state: context.read<UpdateActivityFormBloc>().state,
-                            activityManagerForm: widget.activityManagerForm,
-                            activityTitleChanged: (value) {
-                              context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.activityTitleChanged(BackgroundInfoTitle(value)));
-                            },
-                            activityDescriptionChanged: (value) {
-                              context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.activityDescriptionChanged(BackgroundInfoDescription(value)));
-                            },
-                            activityDescriptionChangedTwo: (value) {
-                              context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.activityDescriptionChangedTwo(BackgroundInfoDescription(value)));
-                            }
-                        ),
-                        ),
-                        const SizedBox(width: 25),
-                        Expanded(child: mainContainerForSectionOneRowTwo(
-                            context: context,
-                            model: widget.model,
-                            state: context.read<UpdateActivityFormBloc>().state,
                             activityForm: widget.activityManagerForm,
-                            isPartnersInviteOnly: (isPartner) {
-                              setState(() {
-                                if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityBackground.isPartnersInviteOnly ?? false) {
-                                  context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isPartnersInviteOnly(false));
-                                } else {
-                                  context.read<UpdateActivityFormBloc>()..add(UpdateActivityFormEvent.isPartnersInviteOnly(true));
-                                }
-                              });
+                            state: context.read<UpdateActivityFormBloc>().state,
+                            contactEmailChanged: (value) {
+                              context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.activityPostContactEmail(value));
                             },
-                            isInstructorInviteOnly: (isInvite) {
-                              setState(() {
-                                if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityBackground.isInstructorInviteOnly == true) {
-                                  context.read<UpdateActivityFormBloc>().add(const UpdateActivityFormEvent.isInstructorInviteOnly(false));
-                                } else {
-                                  context.read<UpdateActivityFormBloc>().add(const UpdateActivityFormEvent.isInstructorInviteOnly(true));
-                                }
-                              });
+                            contactWebsiteChanged: (value) {
+                              context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.activityPostContactWebsite(value));
                             },
-                            getPartnerAttendees: getPartnerAttendees(attendees.where((element) => element.attendeeType == AttendeeType.partner).toList()),
-                            didSelectCreateNewPartner: () {
-                              _handleCreateNewAttendeePartner(context);
-                            },
-                            getInstructorAttendees: getInstructorAttendees(attendees.where((element) => element.attendeeType == AttendeeType.instructor).toList()),
-                            didSelectCreateInstructor: () {
-                              _handleCreateNewAttendeeInstructor(context);
+                            contactInstagramChanged: (value) {
+                              context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.activityPostContactInstagram(value));
                             }
+                        )
+                      ],
+                    ),
+                  ),
+                  Visibility(
+                    visible: ReservationHelperCore.didPresentSidePanel && isLessThanMain == false,
+                      child: AnimatedContainer(
+                        width: (ReservationHelperCore.didPresentSidePanel && isLessThanMain == false) ? ReservationHelperCore.previewerWidth + 20 : 0,
+                        duration: const Duration(milliseconds: 650),
+                        curve: Curves.easeInOut,
+                        child: Visibility(
+                          visible: ReservationHelperCore.didPresentSidePanel,
+                          child: Row(
+                            children: [
+                              const SizedBox(width: 60),
+                              Expanded(
+                                child: SizedBox(
+                                    width: ReservationHelperCore.previewerWidth,
+                              ),
+                            ),
+                          ],
                         ),
-                        ),
-                        if (MediaQuery.of(context).size.width >= 1300) SizedBox(width: MediaQuery.of(context).size.width * 0.1)
-                    ],
+                      ),
+                    )
                   )
                 ],
-              ),
+              )
             )
           )
         ],

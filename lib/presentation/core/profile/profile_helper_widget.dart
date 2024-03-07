@@ -241,12 +241,13 @@ Widget getUpComingReservations(BuildContext context, UserProfileModel currentUse
                           model,
                           false,
                           reservation.reservationSlotItem.map((e) => e.selectedDate).where((element) => element.isBefore(DateTime.now())).isNotEmpty,
+                          [],
                           didSelectReservation: (listing, reservation, activity, attendeeItem, activityTickets) {
                             didSelectReservation(listing, reservation);
-                        }
-                      ),
-                    );
-                  }
+                      }
+                    ),
+                  );
+                }
               ),
             )
       ],

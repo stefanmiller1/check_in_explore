@@ -5,17 +5,20 @@ import 'package:check_in_web_mobile_explore/presentation/screens/reservations/co
 import 'package:check_in_web_mobile_explore/presentation/screens/reservations/reservations_screen.dart';
 import 'package:check_in_web_mobile_explore/presentation/web_screens/main_container_widgets/reservations_widget/reservation_helper_core.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:check_in_facade/auth/notification_facade/notification_core_config.dart';
 
 class ReservationSubContainerWidget extends StatelessWidget {
 
   final DashboardModel model;
+  final List<AccountNotificationItem> notifications;
   final UniqueId? initialReservationId;
   final Function() didSelectReservation;
 
   const ReservationSubContainerWidget({super.key,
     required this.model,
     required this.didSelectReservation,
-    this.initialReservationId
+    this.initialReservationId,
+    required this.notifications
   });
 
   @override
@@ -41,20 +44,27 @@ class ReservationSubContainerWidget extends StatelessWidget {
                 didSelectReservation();
                 Beamer.of(context).update(
                     configuration: RouteInformation(
-                        location: '/${DashboardMarker.reservations.toString()}/reservation/${ReservationHelperCore.selectedReservationItem?.reservationId.getOrCrash().toString()}'
+                        location: '/${DashboardMarker.reservations.name.toString()}/reservation/${ReservationHelperCore.selectedReservationItem?.reservationId.getOrCrash().toString()}'
                     ),
 
                     rebuild: false
                 );
 
                 Future.delayed(const Duration(seconds: 1), () {
-                  ReservationHelperCore.isLoading = false;
-                  int tabIndex = ResOverViewTabs.values.indexWhere((element) => element == ReservationCoreHelper.resOverViewTabs);
+                  int tabIndex = tabItems([]).map((e) => e.tabMarker).toList().indexWhere((element) => element == ReservationCoreHelper.resOverViewTabs);
                   ReservationCoreHelper.pageController = PageController(initialPage: tabIndex);
 
+                  ReservationHelperCore.isLoading = false;
 
                   didSelectReservation();
                 });
+
+                LocalNotificationCore.updateNotificationToRead(context, notifications.where((e) =>
+                      e.notificationType == AccountNotificationType.resSlot &&
+                      ReservationHelperCore.selectedReservationItem?.reservationId == e.reservationId).map((e) => e.notificationId).toList(),
+                      model.paletteColor,
+                      model.accentColor
+                );
             },
           ),
         ),

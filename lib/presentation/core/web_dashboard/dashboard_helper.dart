@@ -13,6 +13,7 @@ class DashboardContainerModel {
   late bool? isVisible;
   late bool? isPrivate;
   late bool? isLive;
+  late int? notificationCount;
 
   DashboardContainerModel({
       required this.mainContainer,
@@ -24,7 +25,8 @@ class DashboardContainerModel {
       this.imageUrl,
       this.isVisible,
       this.isPrivate,
-      this.isLive
+      this.isLive,
+      this.notificationCount
   });
 
 }

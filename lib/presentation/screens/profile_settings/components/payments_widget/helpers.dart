@@ -6,7 +6,6 @@ import 'package:intl/intl.dart';
 
 
 Widget getPaymentHistoryItemWidget(BuildContext context, DashboardModel model, PaymentIntent paymentIntent, ListingManagerForm listing, ReservationItem reservationItem, {required Function(PaymentIntent) didSelectPayment}) {
-  print(paymentIntent.receipt_url);
 
   return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),

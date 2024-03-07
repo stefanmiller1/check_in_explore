@@ -58,6 +58,7 @@ class _NotificationProfileState extends State<NotificationProfile> with SingleTi
             const SizedBox(height: 35),
 
             TabBar(
+                indicatorSize: TabBarIndicatorSize.tab,
                 controller: _tabController,
                 onTap: (index) {
                   setState(() {

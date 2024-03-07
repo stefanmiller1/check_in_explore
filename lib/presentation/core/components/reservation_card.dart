@@ -6,6 +6,7 @@ import 'package:check_in_presentation/check_in_presentation.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/components/reservation_details_widget.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/responsive/responsive.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/reservations/components/widgets/reservation_footer_widget.dart';
+import 'package:check_in_web_mobile_explore/presentation/screens/reservations/components/widgets/reservation_notification_helper.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/search_components/search_helper.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/cupertino.dart';
@@ -84,14 +85,14 @@ Widget LoadingReservationCard(BuildContext context) {
 
 
 
-Widget getReservationCardListing(BuildContext context, bool isMessenger, ReservationItem reservationItem, UserProfileModel currentUser, DashboardModel model, bool endedReservation, bool isSelected, {required Function(ListingManagerForm listing, ReservationItem reservation, ActivityManagerForm activity, AttendeeItem? attendee, List<TicketItem> activityTickets) didSelectReservation}) {
+Widget getReservationCardListing(BuildContext context, bool isMessenger, ReservationItem reservationItem, UserProfileModel currentUser, DashboardModel model, bool endedReservation, bool isSelected, List<AccountNotificationItem> notifications, {required Function(ListingManagerForm listing, ReservationItem reservation, ActivityManagerForm activity, AttendeeItem? attendee, List<TicketItem> activityTickets) didSelectReservation}) {
   return BlocProvider(create: (_) => getIt<ListingManagerWatcherBloc>()..add(ListingManagerWatcherEvent.watchListingManagerItemStarted(reservationItem.instanceId.getOrCrash())),
     child: BlocBuilder<ListingManagerWatcherBloc, ListingManagerWatcherState>(
       builder: (context, state) {
         return state.maybeMap(
           loadListingManagerItemFailure: (_) => LoadingReservationCard(context),
           loadListingManagerItemSuccess: (item) {
-            return getReservationCardAttendance(context, isMessenger, item.failure, reservationItem, currentUser, model, endedReservation, isSelected, didSelectReservation: (listing, reservation, activity, attendee, activityTickets) => didSelectReservation(listing, reservation, activity, attendee, activityTickets));
+            return getReservationCardAttendance(context, isMessenger, item.failure, reservationItem, currentUser, model, endedReservation, isSelected, notifications, didSelectReservation: (listing, reservation, activity, attendee, activityTickets) => didSelectReservation(listing, reservation, activity, attendee, activityTickets));
           },
           orElse: () => LoadingReservationCard(context),
         );
@@ -101,17 +102,17 @@ Widget getReservationCardListing(BuildContext context, bool isMessenger, Reserva
 }
 
 /// check current users [UserProfileModel]'s [AttendeeItem] for [ReservationItem]
-Widget getReservationCardAttendance(BuildContext context, bool isMessenger, ListingManagerForm listing, ReservationItem reservationItem, UserProfileModel currentUser, DashboardModel model, bool isEnded, bool isSelected, {required Function(ListingManagerForm listing, ReservationItem reservation, ActivityManagerForm activity, AttendeeItem? attendance, List<TicketItem> currentAttTickets) didSelectReservation}) {
+Widget getReservationCardAttendance(BuildContext context, bool isMessenger, ListingManagerForm listing, ReservationItem reservationItem, UserProfileModel currentUser, DashboardModel model, bool isEnded, bool isSelected, List<AccountNotificationItem> notifications, {required Function(ListingManagerForm listing, ReservationItem reservation, ActivityManagerForm activity, AttendeeItem? attendance, List<TicketItem> currentAttTickets) didSelectReservation}) {
   if (reservationItem.reservationOwnerId == currentUser.userId) {
     final ownerAttendee = AttendeeItem(attendeeId: UniqueId(), attendeeOwnerId: currentUser.userId, contactStatus: ContactStatus.joined, reservationId: reservationItem.reservationId, cost: '', paymentStatus: PaymentStatusType.noStatus, attendeeType: AttendeeType.free, paymentIntentId: '', dateCreated: DateTime.now(), );
-    return getReservationCardActivity(context, isMessenger, listing, reservationItem, currentUser, ownerAttendee,  model, isEnded, isSelected, didSelectReservation: didSelectReservation);
+    return getReservationCardActivity(context, isMessenger, listing, reservationItem, currentUser, ownerAttendee,  model, isEnded, isSelected, notifications, didSelectReservation: didSelectReservation);
   } else {
   return BlocProvider(create: (_) => getIt<AttendeeManagerWatcherBloc>()..add(AttendeeManagerWatcherEvent.watchAttendeeItem(reservationItem.reservationId.getOrCrash(), currentUser.userId.getOrCrash())),
     child: BlocBuilder<AttendeeManagerWatcherBloc, AttendeeManagerWatcherState>(
       builder: (context, state) {
         return state.maybeMap(
-            loadAttendeeItemSuccess: (item) => getReservationCardActivity(context, isMessenger, listing, reservationItem, currentUser, item.item,  model, isEnded, isSelected, didSelectReservation: didSelectReservation),
-            orElse: () => getReservationCardActivity(context, isMessenger, listing, reservationItem, currentUser, AttendeeItem.empty(),  model, isEnded, isSelected, didSelectReservation: didSelectReservation),
+            loadAttendeeItemSuccess: (item) => getReservationCardActivity(context, isMessenger, listing, reservationItem, currentUser, item.item,  model, isEnded, isSelected, notifications, didSelectReservation: didSelectReservation),
+            orElse: () => getReservationCardActivity(context, isMessenger, listing, reservationItem, currentUser, AttendeeItem.empty(),  model, isEnded, isSelected, notifications, didSelectReservation: didSelectReservation),
           );
         },
       ),
@@ -120,16 +121,16 @@ Widget getReservationCardAttendance(BuildContext context, bool isMessenger, List
 }
 
 
-Widget getReservationCardActivity(BuildContext context, bool isMessenger, ListingManagerForm listing, ReservationItem reservationItem, UserProfileModel currentUser, AttendeeItem? attendance, DashboardModel model, bool isEnded, bool isSelected, {required Function(ListingManagerForm listing, ReservationItem reservation, ActivityManagerForm activity, AttendeeItem? attendance, List<TicketItem> currentAttTickets) didSelectReservation}) {
+Widget getReservationCardActivity(BuildContext context, bool isMessenger, ListingManagerForm listing, ReservationItem reservationItem, UserProfileModel currentUser, AttendeeItem? attendance, DashboardModel model, bool isEnded, bool isSelected, List<AccountNotificationItem> notifications, {required Function(ListingManagerForm listing, ReservationItem reservation, ActivityManagerForm activity, AttendeeItem? attendance, List<TicketItem> currentAttTickets) didSelectReservation}) {
   return BlocProvider(create: (context) =>  getIt<ActivityManagerWatcherBloc>()..add(ActivityManagerWatcherEvent.watchActivityManagerFormStarted(reservationItem.reservationId.getOrCrash())),
     child: BlocBuilder<ActivityManagerWatcherBloc, ActivityManagerWatcherState>(
       builder: (context, state) {
         return state.maybeMap(
             loadActivityManagerFormSuccess: (item) {
-              return getReservationCardActivityTickets(context, isMessenger, listing, item.item, reservationItem, attendance, currentUser, model, isEnded, isSelected, didSelectReservation: didSelectReservation);
+              return getReservationCardActivityTickets(context, isMessenger, listing, item.item, reservationItem, attendance, currentUser, model, isEnded, isSelected, notifications, didSelectReservation: didSelectReservation);
             },
             orElse: () {
-              return getReservationCardActivityTickets(context, isMessenger, listing, ActivityManagerForm.empty(), reservationItem, attendance, currentUser, model, isEnded, isSelected, didSelectReservation: didSelectReservation);
+              return getReservationCardActivityTickets(context, isMessenger, listing, ActivityManagerForm.empty(), reservationItem, attendance, currentUser, model, isEnded, isSelected, notifications, didSelectReservation: didSelectReservation);
             }
         );
       },
@@ -142,7 +143,7 @@ Widget getReservationCardActivity(BuildContext context, bool isMessenger, Listin
 
 
 /// an optional watcher in the case that an activity is ticket based
-Widget getReservationCardActivityTickets(BuildContext context, bool isMessenger, ListingManagerForm listing, ActivityManagerForm activity, ReservationItem reservationItem, AttendeeItem? attendeeItem, UserProfileModel currentUser, DashboardModel model, bool isEnded, bool isSelected, {required Function(ListingManagerForm listing, ReservationItem reservation, ActivityManagerForm activity, AttendeeItem? attendeeItem, List<TicketItem> tickets) didSelectReservation}) {
+Widget getReservationCardActivityTickets(BuildContext context, bool isMessenger, ListingManagerForm listing, ActivityManagerForm activity, ReservationItem reservationItem, AttendeeItem? attendeeItem, UserProfileModel currentUser, DashboardModel model, bool isEnded, bool isSelected, List<AccountNotificationItem> notifications, {required Function(ListingManagerForm listing, ReservationItem reservation, ActivityManagerForm activity, AttendeeItem? attendeeItem, List<TicketItem> tickets) didSelectReservation}) {
   return BlocProvider(create: (context) => getIt<ActivityTicketWatcherBloc>()..add(ActivityTicketWatcherEvent.watchCurrentUserTicketsStarted(currentUser.userId.getOrCrash(), reservationItem.reservationId.getOrCrash())),
     child: BlocBuilder<ActivityTicketWatcherBloc, ActivityTicketWatcherState>(
       builder: (context, state) {
@@ -151,13 +152,13 @@ Widget getReservationCardActivityTickets(BuildContext context, bool isMessenger,
               if (isMessenger) {
                 return getMessengerReservationHeader(context, listing, activity, reservationItem, attendeeItem, currentUser, model, didSelectReservation: (listing, reservation, activity, attendeeItem) => didSelectReservation(listing, reservation, activity, attendeeItem, item));
               }
-              return getReservationCardItem(context, listing, activity, reservationItem, attendeeItem, item, model, isEnded, isSelected, didSelectReservation: didSelectReservation);
+              return getReservationCardItem(context, listing, activity, reservationItem, attendeeItem, item, model, isEnded, isSelected, notifications, didSelectReservation: didSelectReservation);
             },
             orElse: () {
               if (isMessenger) {
                 return getMessengerReservationHeader(context, listing, activity, reservationItem, attendeeItem, currentUser, model, didSelectReservation: (listing, reservation, activity, attendeeItem) => didSelectReservation(listing, reservation, activity, attendeeItem, []));
               }
-              return getReservationCardItem(context, listing, activity, reservationItem, attendeeItem, [], model, isEnded, isSelected, didSelectReservation: didSelectReservation);
+              return getReservationCardItem(context, listing, activity, reservationItem, attendeeItem, [], model, isEnded, isSelected, notifications, didSelectReservation: didSelectReservation);
             }
           );
       }
@@ -269,8 +270,8 @@ Widget getMessengerReservationHeader(BuildContext context, ListingManagerForm li
                               allAttendees: [],
                               isFromChat: true,
                               currentUser: currentUser,
-                            );
-                          })
+                              );
+                            })
                           );
                         },
                         child: Container(
@@ -309,7 +310,7 @@ Widget getMessengerReservationHeader(BuildContext context, ListingManagerForm li
 
 
 
-Widget getReservationCardItem(BuildContext context, ListingManagerForm listing, ActivityManagerForm activity, ReservationItem reservationItem, AttendeeItem? attendeeItem, List<TicketItem> ticketsCurrentAttendee, DashboardModel model, bool isEnded, bool isSelected, {required Function(ListingManagerForm listing, ReservationItem reservation, ActivityManagerForm activity, AttendeeItem? attendeeItem, List<TicketItem> currentAttendeeTickets) didSelectReservation}) {
+Widget getReservationCardItem(BuildContext context, ListingManagerForm listing, ActivityManagerForm activity, ReservationItem reservationItem, AttendeeItem? attendeeItem, List<TicketItem> ticketsCurrentAttendee, DashboardModel model, bool isEnded, bool isSelected, List<AccountNotificationItem> notifications, {required Function(ListingManagerForm listing, ReservationItem reservation, ActivityManagerForm activity, AttendeeItem? attendeeItem, List<TicketItem> currentAttendeeTickets) didSelectReservation}) {
 
   final List<ReservationSlotItem> reservationSlots = [];
   reservationSlots.addAll(reservationItem.reservationSlotItem);
@@ -362,7 +363,7 @@ Widget getReservationCardItem(BuildContext context, ListingManagerForm listing, 
                     activity,
                     reservationItem,
                     didSelectItem: () {
-                      didSelectReservation(listing, reservationItem, activity, attendeeItem, ticketsCurrentAttendee);
+                      // didSelectReservation(listing, reservationItem, activity, attendeeItem, ticketsCurrentAttendee);
                     }
                 ),
                 const SizedBox(width: 10),
@@ -389,22 +390,26 @@ Widget getReservationCardItem(BuildContext context, ListingManagerForm listing, 
                             const SizedBox(height: 4),
                             /// number of attendees
 
-                            Row(
-                              children: [
-                                ///  free
-                                Visibility(
-                                  visible: activity.activityAttendance.isLimitedAttendance == true || activity.activityAttendance.isTicketBased == null || activity.activityAttendance.isPassBased == null || activity.activityAttendance.isLimitedAttendance == null,
-                                  child: getReservationCardActivityAttendees(context, model, activity),
-                                ),
-                                ///  tickets
-                                Visibility(
-                                  visible: activity.activityAttendance.isTicketBased == true,
-                                  child: getReservationCardActivityTicketAttendees(context, model, activity),
-                                ),
-                                Icon(Icons.favorite, color: model.paletteColor, size: 14),
-                                const SizedBox(width: 4),
-                                Text('1', style: TextStyle(color: model.paletteColor))
-                              ],
+                            reservationInviteNotificationTitle(
+                              model,
+                              Row(
+                                children: [
+                                  ///  free
+                                  Visibility(
+                                    visible: activity.activityAttendance.isLimitedAttendance == true || activity.activityAttendance.isTicketBased == null || activity.activityAttendance.isPassBased == null || activity.activityAttendance.isLimitedAttendance == null,
+                                    child: getReservationCardActivityAttendees(context, model, activity),
+                                  ),
+                                  ///  tickets
+                                  Visibility(
+                                    visible: activity.activityAttendance.isTicketBased == true,
+                                    child: getReservationCardActivityTicketAttendees(context, model, activity),
+                                  ),
+                                  Icon(Icons.favorite, color: model.paletteColor, size: 14),
+                                  const SizedBox(width: 4),
+                                  Text('1', style: TextStyle(color: model.paletteColor))
+                                ],
+                              ),
+                              notifications.length
                             ),
                             const SizedBox(height: 4),
                             Column(
@@ -566,17 +571,17 @@ Widget getSearchFooterWidget(BuildContext context, DashboardModel model, UniqueI
                     ],
                   ),
                   const SizedBox(height: 5),
-                  if (reservationItem.reservationState == ReservationSlotState.current) Padding(
-                    padding: const EdgeInsets.only(left: 10.0),
-                    child: Container(
-                      height: 25,
-                      width: 25,
-                      decoration: BoxDecoration(
-                        color: textColor.withOpacity(0.20),
-                        borderRadius: BorderRadius.circular(20)
-                      ),
-                      child: Icon(CupertinoIcons.dot_radiowaves_left_right, size: 15, color: textColor),
+                  if (reservationItem.reservationState == ReservationSlotState.current) Chip(
+                    side: BorderSide.none,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                    backgroundColor: Colors.red,
+                    label: Text('On Now', style: TextStyle(
+                        color: model.accentColor,
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.center,
                     ),
+                    avatar: Icon(CupertinoIcons.dot_radiowaves_left_right, size: 15, color: textColor),
                   )
                 ],
               ),

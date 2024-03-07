@@ -161,7 +161,6 @@ class _DirectChatRoomsScreenState extends State<DirectChatRoomsScreen> {
 
                               final bool hasReadLastMessages = messageSnapshot.data?.where((element) => element.author.id != facade.FirebaseChatCore.instance.firebaseUser?.uid && element.status != types.Status.seen).isNotEmpty ?? false;
 
-
                                 return Padding(
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 4, vertical: 8),
