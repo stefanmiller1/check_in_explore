@@ -18,7 +18,6 @@ import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
-import 'package:widget_to_marker/widget_to_marker.dart';
 
 class MapHelper {
 

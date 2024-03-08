@@ -205,11 +205,13 @@ class ReservationActivityInfoWidget extends StatelessWidget {
 
         if (Responsive.isMobile(context) || Responsive.isTablet(context))
         if (activityForm.profileService.isActivityPost == true && activityOwner != null || activityForm.profileService.isActivityPost == null && activityOwner != null) Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const SizedBox(height: 10),
-            SizedBox(
-                width: 400,
-                child: getPostedOnBehalfColumn(context, model, activityOwner!, activityForm))
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 18.0),
+              child: getPostedOnBehalfColumn(context, model, activityOwner!, activityForm),
+            )
             /// claim activity as organizer
           ],
         ),
@@ -280,7 +282,4 @@ class ReservationActivityInfoWidget extends StatelessWidget {
       ],
     );
   }
-
-
-
 }

@@ -51,6 +51,12 @@
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>FacebookAppID</key>
+	<string>1080456166365843</string>
+	<key>FacebookClientToken</key>
+	<string>f27b68c225bac206bd8ebc6dd819fdcf</string>
+	<key>FacebookDisplayName</key>
+	<string>Circle</string>
 	<key>FirebaseAppDelegateProxyEnabled</key>
 	<false/>
 	<key>LSApplicationQueriesSchemes</key>
@@ -70,12 +76,6 @@
 		<string>whatsapp</string>
 		<string>tg</string>
 	</array>
-	<key>FacebookAppID</key>
-  	<string>1080456166365843</string>
-  	<key>FacebookClientToken</key>
-  	<string>f27b68c225bac206bd8ebc6dd819fdcf</string>
-  	<key>FacebookDisplayName</key>
-  	<string>Circle</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>

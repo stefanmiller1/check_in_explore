@@ -13,7 +13,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:check_in_facade/check_in_facade.dart';
 import 'package:flutter/rendering.dart';
-import 'package:geoflutterfire/geoflutterfire.dart';
 
 class ActivityResultMain extends StatefulWidget {
 

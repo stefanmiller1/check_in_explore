@@ -76,13 +76,13 @@ class ActivityAttendeeCreateTicket extends StatelessWidget {
                         width: 375,
                         child: DropdownButtonHideUnderline(
                             child: DropdownButton2(
-                                offset: const Offset(-10,-15),
+                                // offset: const Offset(-10,-15),
                                 isDense: true,
-                                buttonElevation: 0,
-                                buttonDecoration: BoxDecoration(
-                                  color: Colors.transparent,
-                                  borderRadius: BorderRadius.circular(35),
-                                ),
+                                // buttonElevation: 0,
+                                // buttonDecoration: BoxDecoration(
+                                //   color: Colors.transparent,
+                                //   borderRadius: BorderRadius.circular(35),
+                                // ),
                                 customButton: Container(
                                   decoration: BoxDecoration(
                                     color: model.accentColor,
@@ -107,23 +107,23 @@ class ActivityAttendeeCreateTicket extends StatelessWidget {
                                 ),
                                 onChanged: (Object? navItem) {
                                 },
-                                buttonWidth: 80,
-                                buttonHeight: 70,
-                                dropdownElevation: 1,
-                                dropdownPadding: const EdgeInsets.all(1),
-                                dropdownDecoration: BoxDecoration(
-                                    boxShadow: [BoxShadow(
-                                        color: Colors.black.withOpacity(0.11),
-                                        spreadRadius: 1,
-                                        blurRadius: 15,
-                                        offset: Offset(0, 2)
-                                    )
-                                    ],
-                                    color: model.cardColor,
-                                    borderRadius: BorderRadius.circular(14)),
-                                itemHeight: 50,
-                                // dropdownWidth: (model.mainContentWidth)! - 100,
-                                focusColor: Colors.grey.shade100,
+                                // buttonWidth: 80,
+                                // buttonHeight: 70,
+                                // dropdownElevation: 1,
+                                // dropdownPadding: const EdgeInsets.all(1),
+                                // dropdownDecoration: BoxDecoration(
+                                //     boxShadow: [BoxShadow(
+                                //         color: Colors.black.withOpacity(0.11),
+                                //         spreadRadius: 1,
+                                //         blurRadius: 15,
+                                //         offset: Offset(0, 2)
+                                //     )
+                                //     ],
+                                //     color: model.cardColor,
+                                //     borderRadius: BorderRadius.circular(14)),
+                                // itemHeight: 50,
+                                // // dropdownWidth: (model.mainContentWidth)! - 100,
+                                // focusColor: Colors.grey.shade100,
                                 items: [for(var i=0; i<100; i+=1) i].where((element) => element != 0).map(
                                         (e) => DropdownMenuItem<int>(
                                         onTap: () {
@@ -182,13 +182,13 @@ class ActivityAttendeeCreateTicket extends StatelessWidget {
                         width: 375,
                         child: DropdownButtonHideUnderline(
                             child: DropdownButton2(
-                                offset: const Offset(-10,-15),
+                                // offset: const Offset(-10,-15),
                                 isDense: true,
-                                buttonElevation: 0,
-                                buttonDecoration: BoxDecoration(
-                                  color: Colors.transparent,
-                                  borderRadius: BorderRadius.circular(35),
-                                ),
+                                // buttonElevation: 0,
+                                // buttonDecoration: BoxDecoration(
+                                //   color: Colors.transparent,
+                                //   borderRadius: BorderRadius.circular(35),
+                                // ),
                                 customButton: Container(
                                   decoration: BoxDecoration(
                                     color: model.accentColor,
@@ -213,23 +213,23 @@ class ActivityAttendeeCreateTicket extends StatelessWidget {
                                 ),
                                 onChanged: (Object? navItem) {
                                 },
-                                buttonWidth: 80,
-                                buttonHeight: 70,
-                                dropdownElevation: 1,
-                                dropdownPadding: const EdgeInsets.all(1),
-                                dropdownDecoration: BoxDecoration(
-                                    boxShadow: [BoxShadow(
-                                        color: Colors.black.withOpacity(0.11),
-                                        spreadRadius: 1,
-                                        blurRadius: 15,
-                                        offset: Offset(0, 2)
-                                      )
-                                    ],
-                                    color: model.cardColor,
-                                    borderRadius: BorderRadius.circular(14)),
-                                itemHeight: 50,
-                                // dropdownWidth: (model.mainContentWidth)! - 100,
-                                focusColor: Colors.grey.shade100,
+                                // buttonWidth: 80,
+                                // buttonHeight: 70,
+                                // dropdownElevation: 1,
+                                // dropdownPadding: const EdgeInsets.all(1),
+                                // dropdownDecoration: BoxDecoration(
+                                //     boxShadow: [BoxShadow(
+                                //         color: Colors.black.withOpacity(0.11),
+                                //         spreadRadius: 1,
+                                //         blurRadius: 15,
+                                //         offset: Offset(0, 2)
+                                //       )
+                                //     ],
+                                //     color: model.cardColor,
+                                //     borderRadius: BorderRadius.circular(14)),
+                                // itemHeight: 50,
+                                // // dropdownWidth: (model.mainContentWidth)! - 100,
+                                // focusColor: Colors.grey.shade100,
                                 items: [for(var i=0; i<100; i+=1) i].where((element) => element != 0).map(
                                         (e) => DropdownMenuItem<int>(
                                         onTap: () {

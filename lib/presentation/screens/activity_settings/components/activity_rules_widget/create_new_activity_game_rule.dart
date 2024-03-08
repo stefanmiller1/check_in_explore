@@ -69,13 +69,13 @@ class _ActivityRuleGameToCreateState extends State<ActivityRuleGameToCreate> {
                                    padding: const EdgeInsets.all(8.0),
                                    child: DropdownButtonHideUnderline(
                                           child: DropdownButton2(
-                                              offset: const Offset(-10,-15),
+                                              // offset: const Offset(-10,-15),
                                               isDense: true,
-                                              buttonElevation: 0,
-                                              buttonDecoration: BoxDecoration(
-                                                color: Colors.transparent,
-                                                borderRadius: BorderRadius.circular(35),
-                                              ),
+                                              // buttonElevation: 0,
+                                              // buttonDecoration: BoxDecoration(
+                                              //   color: Colors.transparent,
+                                              //   borderRadius: BorderRadius.circular(35),
+                                              // ),
                                               customButton: Container(
                                                 decoration: BoxDecoration(
                                                   color: widget.model.accentColor,
@@ -100,23 +100,23 @@ class _ActivityRuleGameToCreateState extends State<ActivityRuleGameToCreate> {
                                               ),
                                               onChanged: (Object? navItem) {
                                               },
-                                              buttonWidth: 80,
-                                              buttonHeight: 70,
-                                              dropdownElevation: 1,
-                                              dropdownPadding: const EdgeInsets.all(1),
-                                              dropdownDecoration: BoxDecoration(
-                                                  boxShadow: [BoxShadow(
-                                                      color: Colors.black.withOpacity(0.11),
-                                                      spreadRadius: 1,
-                                                      blurRadius: 15,
-                                                      offset: Offset(0, 2)
-                                                    )
-                                                  ],
-                                                  color: widget.model.cardColor,
-                                                  borderRadius: BorderRadius.circular(14)),
-                                              itemHeight: 50,
-                                              // dropdownWidth: (widget.model.mainContentWidth)! - 100,
-                                              focusColor: Colors.grey.shade100,
+                                              // buttonWidth: 80,
+                                              // buttonHeight: 70,
+                                              // dropdownElevation: 1,
+                                              // dropdownPadding: const EdgeInsets.all(1),
+                                              // dropdownDecoration: BoxDecoration(
+                                              //     boxShadow: [BoxShadow(
+                                              //         color: Colors.black.withOpacity(0.11),
+                                              //         spreadRadius: 1,
+                                              //         blurRadius: 15,
+                                              //         offset: Offset(0, 2)
+                                              //       )
+                                              //     ],
+                                              //     color: widget.model.cardColor,
+                                              //     borderRadius: BorderRadius.circular(14)),
+                                              // itemHeight: 50,
+                                              // // dropdownWidth: (widget.model.mainContentWidth)! - 100,
+                                              // focusColor: Colors.grey.shade100,
                                               items: DonationType.values.map(
                                                       (e) => DropdownMenuItem<DonationType>(
                                                       onTap: () {

@@ -3,12 +3,11 @@ import 'package:check_in_application/misc/watcher_services/stripe_watcher_servic
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/components/reservation_card.dart';
-import 'package:check_in_web_mobile_explore/presentation/core/components/webview_controller_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:jumping_dot/jumping_dot.dart';
-import 'package:webview_flutter/webview_flutter.dart';
+// import 'package:webview_flutter/webview_flutter.dart';
 
 import 'helpers.dart';
 

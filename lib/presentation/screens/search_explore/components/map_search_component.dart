@@ -119,42 +119,38 @@ class _MapSearchContainerState extends State<MapSearchContainer> {
     return Stack(
       alignment: Alignment.center,
       children: [
-        AnimatedContainer(
-          duration: Duration(milliseconds: 700),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(18),
-            child: GoogleMap(
-                mapToolbarEnabled: true,
-                zoomGesturesEnabled: true,
-                myLocationButtonEnabled: false,
-                myLocationEnabled: true,
-                zoomControlsEnabled: false,
+        ClipRRect(
+          borderRadius: BorderRadius.circular(18),
+          child: GoogleMap(
+              mapToolbarEnabled: true,
+              zoomGesturesEnabled: true,
+              myLocationButtonEnabled: false,
+              myLocationEnabled: true,
+              zoomControlsEnabled: false,
+              initialCameraPosition: CameraPosition(
+                target: LatLng(MapHelper.lat, MapHelper.lng),
+                zoom: MapHelper.currentZoom,
+              ),
+              mapType: MapType.normal,
+              markers: MapHelper.markerSet,
+              onCameraMoveStarted: () => _didStartMovingMap(context),
+              onMapCreated: (controller) => _onMapCreated(context, controller),
+              onCameraMove: (CameraPosition position) {
+                setState(() {
 
-                initialCameraPosition: CameraPosition(
-                  target: LatLng(MapHelper.lat, MapHelper.lng),
-                  zoom: MapHelper.currentZoom,
-                ),
-                mapType: MapType.normal,
-                markers: MapHelper.markerSet,
-                onCameraMoveStarted: () => _didStartMovingMap(context),
-                onMapCreated: (controller) => _onMapCreated(context, controller),
-                onCameraMove: (CameraPosition position) {
-                  setState(() {
+                  MapHelper.showMapReload = true;
+                  MapHelper.lat = position.target.latitude;
+                  MapHelper.lng = position.target.longitude;
 
-                    MapHelper.showMapReload = true;
-                    MapHelper.lat = position.target.latitude;
-                    MapHelper.lng = position.target.longitude;
+                  print(position.zoom);
+                  if (MapHelper.currentZoom >= position.zoom + 1.5 || MapHelper.currentZoom <= position.zoom - 1.5 || MapHelper.currentZoom == position.zoom) return;
 
-                    print(position.zoom);
-                    if (MapHelper.currentZoom >= position.zoom + 1.5 || MapHelper.currentZoom <= position.zoom - 1.5 || MapHelper.currentZoom == position.zoom) return;
+                  MapHelper.initMarkers(context, widget.model, context.read<ListingsSearchRequirementsBloc>().state.listings.toList());
 
-                    MapHelper.initMarkers(context, widget.model, context.read<ListingsSearchRequirementsBloc>().state.listings.toList());
+                  MapHelper.currentZoom = position.zoom;
 
-                    MapHelper.currentZoom = position.zoom;
-
-                });
-              }
-            ),
+              });
+            }
           ),
         ),
         Positioned(

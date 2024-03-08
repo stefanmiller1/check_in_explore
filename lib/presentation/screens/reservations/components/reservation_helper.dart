@@ -6,7 +6,6 @@ import 'package:check_in_presentation/check_in_presentation.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/components/reservation_details_widget.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/components/invite_widgets/send_invitation_request.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/components/tabHelper.dart';
-import 'package:check_in_web_mobile_explore/presentation/core/components/webview_controller_widget.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/activity_attendees/activity_attendees_list_screen.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/activity_settings_screen.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/chat_inbox/direct_chat_screen.dart';
