@@ -2,7 +2,6 @@ import 'dart:ui';
 
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/activity_preview/activity_preview_screen_helper.dart';
 import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_web_mobile_explore/presentation/web_screens/focused_main_container_widgets/activity_ticket_settings_widget/activity_ticket_helper.dart';
 import 'package:flutter/foundation.dart';
@@ -82,7 +81,6 @@ class _ActivityTicketSubContainerState extends State<ActivityTicketSubContainer>
               ),
             )
           ),
-
         ],
       ),
     );
@@ -156,7 +154,7 @@ class _ActivityTicketSubContainerState extends State<ActivityTicketSubContainer>
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 5.0),
                 child: Center(child: Text('Review Earnings', style: TextStyle(color: widget.model.accentColor, fontWeight: FontWeight.bold))),
-              )
+            ),
           ),
         ),
         const SizedBox(height: 10),

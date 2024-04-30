@@ -1,7 +1,7 @@
 import 'package:avatar_stack/avatar_stack.dart';
 import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
-import 'package:check_in_web_mobile_explore/presentation/core/responsive/responsive.dart';
+import 'package:check_in_web_mobile_explore/presentation/core/components/reservation_details_widget.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/reservations/components/reservation_results_main.dart';
 import 'package:check_in_web_mobile_explore/presentation/web_screens/main_container_widgets/chat_widget/chat_helper_core.dart';
 import 'package:flutter/foundation.dart';
@@ -16,8 +16,6 @@ import 'package:jumping_dot/jumping_dot.dart';
 import 'package:reservation_post/inputs/input.dart' as post;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:check_in_facade/auth/notification_facade/notification_core_config.dart';
-
-import '../../core/components/reservation_card.dart';
 
 class DirectChatScreen extends StatefulWidget {
 
@@ -295,6 +293,20 @@ class _DirectChatScreenState extends State<DirectChatScreen> {
                       false,
                       false,
                       [],
+                      didSelectResDetail: (model, listing, reservation, isResOwner, isFromChat, currentUser) {
+                        Navigator.of(context).push(MaterialPageRoute(builder: (_) {
+                          return ReservationDetailsWidget(
+                              model: model,
+                              listing: listing,
+                              reservationItem: reservation,
+                              isReservationOwner: false,
+                              allAttendees: [],
+                              isFromChat: true,
+                              currentUser: currentUser,
+                            );
+                          })
+                        );
+                      },
                       didSelectReservation: (listing, res, activity, attendeeItem, activityTickets) {
                         if (widget.isFromReservation) {
                           return Navigator.of(context).pop();

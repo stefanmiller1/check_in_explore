@@ -2,9 +2,6 @@ import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
 import 'package:check_in_facade/check_in_facade.dart' as facade;
-import 'package:check_in_web_mobile_explore/presentation/core/components/reservation_card.dart';
-import 'package:check_in_web_mobile_explore/presentation/core/loading_containers/loading_widgets.dart';
-import 'package:check_in_web_mobile_explore/presentation/core/responsive/responsive.dart';
 import 'package:check_in_web_mobile_explore/presentation/web_screens/main_container_widgets/chat_widget/chat_helper_core.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter/material.dart';
@@ -61,7 +58,7 @@ class _DirectChatRoomsScreenState extends State<DirectChatRoomsScreen> {
         builder: (context, authState) {
           return authState.maybeMap(
               loadInProgress: (_) => emptyLoadingListView(context, isBrowser),
-              loadProfileFailure: (_) => (isBrowser) ? GetLoginSignUpWidget(model: widget.model) : emptyLoadingListView(context, true),
+              loadProfileFailure: (_) => (isBrowser) ? GetLoginSignUpWidget(model: widget.model, didLoginSuccess: () {  },) : emptyLoadingListView(context, true),
               loadUserProfileSuccess: (item) => getChatRooms(context, item.profile),
               orElse: () {
                 return emptyLoadingListView(context, isBrowser);

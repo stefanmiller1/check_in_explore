@@ -1,10 +1,7 @@
 import 'package:check_in_application/auth/update_services/listing_update_create_services/settings_update_create_services/activity_settings/activity_settings_form_bloc.dart';
 import 'package:check_in_application/check_in_application.dart';
-import 'package:check_in_application/un_auth/watcher_services/attendee_watcher_service/attendee_manager_watcher_bloc.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
-import 'package:check_in_web_mobile_explore/presentation/core/responsive/responsive.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/activity_preview/activity_preview_screen_helper.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_access_visibility_widgets/access_visibility_info_settings_widget.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_rules_widget/activity_general_rules_widget.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_background_mobile_widget/background_info_settings_widget.dart';
@@ -17,18 +14,15 @@ import 'package:check_in_web_mobile_explore/presentation/screens/activity_settin
 import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_attendee_widget/select_attendee_type_widget.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_cancellation_widget/select_cancellation_settings_widget.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings_web/settings_helper.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/reservations/components/reservation_helper.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/reservations/components/widgets/reservation_activity_info_widget.dart';
-import 'package:check_in_web_mobile_explore/presentation/web_screens/main_container_widgets/reservations_widget/reservation_helper_core.dart';
-import 'package:check_in_web_mobile_explore/presentation/web_screens/side_panel_container/activity_settings_widget/activity_settings_side_panel_container.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:jumping_dot/jumping_dot.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:dartz/dartz.dart' as bloc;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
+import '../activity_settings/components/activity_vendor_form_widget/activity_vendor_forms_widget.dart';
 
 class SettingsMainContainerWidget extends StatefulWidget {
 
@@ -110,6 +104,13 @@ class _SettingsMainContainerWidgetState extends State<SettingsMainContainerWidge
         return ActivityGeneralRulesWidget(
             model: widget.model
         );
+      case SettingNavMarker.vendorForm:
+        return VendorFormsWidget(
+          reservation: widget.reservationItem,
+          model: widget.model,
+          activityForm: widget.activityForm,
+          resOwner: activityOwner,
+        );
       case SettingNavMarker.payments:
         return PaymentsSettingWidget(
             userProfile: widget.userProfileModel,
@@ -137,6 +138,8 @@ class _SettingsMainContainerWidgetState extends State<SettingsMainContainerWidge
         );
       case SettingNavMarker.passesBased:
         break;
+      default:
+        return Container();
     }
     return Container();
   }
@@ -187,9 +190,14 @@ class _SettingsMainContainerWidgetState extends State<SettingsMainContainerWidge
                     widget.model,
                     true,
                     false,
-                    null,
+                    reservationOwner,
                     widget.activityForm,
-                    null
+                    widget.reservationItem,
+                    [],
+                    widget.userProfileModel.userId.getOrCrash(),
+                    didSelectAttendees: () {
+
+                    }
                   ),
                 ],
               ),
@@ -271,6 +279,10 @@ class _SettingsMainContainerWidgetState extends State<SettingsMainContainerWidge
       case SettingNavMarker.passesBased:
         // TODO: Handle this case.
         break;
+      case null:
+        // TODO: Handle this case.
+      case SettingNavMarker.vendorForm:
+        // TODO: Handle this case.
     }
     return Container();
   }
@@ -440,7 +452,10 @@ class _SettingsMainContainerWidgetState extends State<SettingsMainContainerWidge
                             const SizedBox(height: 8),
 
                             /// will un-publish if saving (from init published) but incomplete.
-                            if (state.activitySettingsForm != initActivityManagerForm && activitySetupComplete(state.activitySettingsForm) == false && (initActivityManagerForm != null) && activitySetupComplete(initActivityManagerForm!)) InkWell(
+                            if (state.activitySettingsForm != initActivityManagerForm &&
+                                activitySetupComplete(state.activitySettingsForm) == false &&
+                                (initActivityManagerForm != null) &&
+                                activitySetupComplete(initActivityManagerForm!)) InkWell(
                               onTap: () {
                                 context.read<UpdateActivityFormBloc>().add(const UpdateActivityFormEvent.isSavingChanged(true));
                                 context.read<UpdateActivityFormBloc>().add(const UpdateActivityFormEvent.createActivityFinished());

@@ -1,9 +1,8 @@
 import 'package:beamer/beamer.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/reservations/components/reservation_helper.dart';
+import 'package:check_in_web_mobile_explore/presentation/screens/reservations/reservation_helper.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/reservations/reservations_screen.dart';
-import 'package:check_in_web_mobile_explore/presentation/web_screens/main_container_widgets/reservations_widget/reservation_helper_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:check_in_facade/auth/notification_facade/notification_core_config.dart';
 

@@ -1,23 +1,11 @@
-import 'dart:math';
-
-import 'package:avatar_stack/avatar_stack.dart';
-import 'package:avatar_stack/positions.dart';
-import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_credentials/check_in_credentials.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_domain/domain/misc/attendee_services/attendee_item/attendee_item.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
-import 'package:check_in_web_mobile_explore/presentation/core/components/invite_widgets/send_invitation_request.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/chat_inbox/direct_chat_screen.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/facility_preview/facility_preview_screen.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/profile_settings/profile_settings_screen_helper.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/reservations/components/reservation_helper.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/helper.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/search_components/search_helper.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:provider/provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ReservationDetailsWidget extends StatefulWidget {
@@ -288,7 +276,7 @@ class _ReservationDetailsWidgetState extends State<ReservationDetailsWidget> {
                       Navigator.of(context).push(MaterialPageRoute(builder: (_) {
                         return SendInvitationRequest(
                           model: widget.model,
-                          currentUser: widget.currentUser,
+                          currentUserId: widget.currentUser.userId.getOrCrash(),
                           attendeeType: AttendeeType.free,
                           reservationItem: widget.reservationItem,
                           inviteType: InvitationType.reservation,
@@ -319,7 +307,7 @@ class _ReservationDetailsWidgetState extends State<ReservationDetailsWidget> {
                               ],
                             ),
                           ),
-                          //
+
                           // if (widget.profiles.isNotEmpty) Container(
                           //   height: 50,
                           //   width: 180,

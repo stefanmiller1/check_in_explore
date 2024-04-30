@@ -29,9 +29,9 @@ bool isFlutterLocalNotificationsInitialized = false;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  configureInjection(prodEnv);
-  configureInjectionFacade(prodEnvFacade);
-  configureInjectionApp(prodEnvFacade);
+  setup();
+  setupFacade();
+  setupApp();
   await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform
   );

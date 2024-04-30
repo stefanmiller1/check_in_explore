@@ -1,6 +1,5 @@
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
-import 'package:check_in_web_mobile_explore/presentation/core/responsive/responsive.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/web_dashboard/dashboard_components/main_menu_container.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/web_dashboard/dashboard_components/side_panel_container.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/web_dashboard/dashboard_components/sub_container.dart';

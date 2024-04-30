@@ -1,13 +1,10 @@
 import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_application/un_auth/watcher_services/attendee_watcher_service/attendee_manager_watcher_bloc.dart';
 import 'package:check_in_domain/check_in_domain.dart';
-import 'package:check_in_domain/domain/misc/attendee_services/attendee_item/attendee_item.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
-import 'package:check_in_web_mobile_explore/presentation/core/responsive/responsive.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings_web/activity_attendee_settings_container_widget.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings_web/activity_owner_settings_container_widget.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings_web/settings_helper.dart';
-import 'package:check_in_web_mobile_explore/presentation/web_screens/main_container_widgets/reservations_widget/reservation_helper_core.dart';
 import 'package:flutter/material.dart';
 import 'package:jumping_dot/jumping_dot.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -50,7 +47,7 @@ class ActivitySettingsMainContainerWidget extends StatelessWidget {
               loadInProgress: (_) => JumpingDots(color: model.paletteColor, numberOfDots: 3),
               loadProfileFailure: (_) => Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: GetLoginSignUpWidget(model: model),
+                child: GetLoginSignUpWidget(model: model, didLoginSuccess: () {  },),
               ),
               loadUserProfileSuccess: (item) {
                   if (reservationItem != null && activityManagerForm != null) {

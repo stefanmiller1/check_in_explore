@@ -35,20 +35,20 @@ class AttendeeGeneralSettingsWidget extends StatefulWidget {
 
 class _AttendeeGeneralSettingsWidgetState extends State<AttendeeGeneralSettingsWidget> {
 
-  late ClassesInstructorProfile classInstructorBackground = widget.attendeeItem.classesInstructorProfile ?? ClassesInstructorProfile.empty();
-  late EventMerchantVendorProfile? eventMerchantVendor = widget.attendeeItem.eventMerchantVendorProfile;
+  // late ClassesInstructorProfile classInstructorBackground = widget.attendeeItem.classesInstructorProfile;
+  // late EventMerchantVendorProfile? eventMerchantVendor = widget.attendeeItem.eventMerchantVendorProfile;
   late Uint8List? selectedImage = null;
 
   @override
   void initState() {
-    classInstructorBackground = widget.attendeeItem.classesInstructorProfile ?? ClassesInstructorProfile.empty();
-    eventMerchantVendor = widget.attendeeItem.eventMerchantVendorProfile;
+    // classInstructorBackground = widget.attendeeItem.classesInstructorProfile ?? ClassesInstructorProfile.empty();
+    // eventMerchantVendor = widget.attendeeItem.eventMerchantVendorProfile;
     super.initState();
   }
 
   @override
   void dispose() {
-    eventMerchantVendor = null;
+    // eventMerchantVendor = null;
     super.dispose();
   }
 
@@ -67,140 +67,142 @@ class _AttendeeGeneralSettingsWidgetState extends State<AttendeeGeneralSettingsW
         break;
       case AttendeeType.instructor:
         /// review instructor form...ask for refund - change instructor info?
-        return instructorEditorContainer(
-            context: context,
-            model: widget.model,
-            classInstructorBackground: classInstructorBackground,
-            didChangeNumberOfYears: (number) {
-              setState(() {
-                classInstructorBackground = classInstructorBackground.copyWith(
-                    numberOfYearsInExperience: number
-                );
-                context.read<AttendeeFormBloc>().add(AttendeeFormEvent.updateClassesInstructorForm(classInstructorBackground));
-              });
-            },
-            didSelectExperience: (experience, i) {
-              setState(() {
-                handleSelectedExperience(
-                    context,
-                    widget.model,
-                    i,
-                    experience,
-                    didSelectSaveExperience: (e, i) {
-                      setState(() {
-                        late List<ExperienceOption> newExperience = [];
-                        newExperience.addAll(classInstructorBackground.experience);
-
-                        newExperience.replaceRange(i, i+1, [e]);
-                        classInstructorBackground = classInstructorBackground.copyWith(
-                            experience: newExperience
-                        );
-                        context.read<AttendeeFormBloc>().add(AttendeeFormEvent.updateClassesInstructorForm(classInstructorBackground));
-                      });
-                    }
-                );
-              });
-            },
-            didSelectRemoveExperience: (i) {
-              setState(() {
-                late List<ExperienceOption> newExperience = [];
-                newExperience.addAll(classInstructorBackground.experience);
-
-                newExperience.removeAt(i);
-                classInstructorBackground = classInstructorBackground.copyWith(
-                    experience: newExperience
-                );
-
-                classInstructorBackground.experience.toList().addAll(newExperience);
-                context.read<AttendeeFormBloc>().add(AttendeeFormEvent.updateClassesInstructorForm(classInstructorBackground));
-              });
-            },
-            didSelectCreateExperience: () {
-              setState(() {
-                handleCreateNewExperience(
-                    context,
-                    widget.model,
-                    didSelectSaveExperience: (experience) {
-                      setState(() {
-                        late List<ExperienceOption> newExperience = [];
-                        newExperience.addAll(classInstructorBackground.experience);
-
-                        newExperience.add(experience);
-                        classInstructorBackground = classInstructorBackground.copyWith(
-                            experience: newExperience
-                        );
-                        context.read<AttendeeFormBloc>().add(AttendeeFormEvent.updateClassesInstructorForm(classInstructorBackground));
-                      });
-                    }
-                );
-              });
-            },
-            didSelectCertificate: (certificate) {
-
-            },
-            didSelectRemoveCertificate: (i) {
-              setState(() {
-                late List<CertificateOption> newCertificate = [];
-                newCertificate.addAll(classInstructorBackground.certificates);
-
-                newCertificate.removeAt(i);
-                classInstructorBackground = classInstructorBackground.copyWith(
-                    certificates: newCertificate
-                );
-
-                classInstructorBackground.certificates.toList().addAll(newCertificate);
-                context.read<AttendeeFormBloc>().add(AttendeeFormEvent.updateClassesInstructorForm(classInstructorBackground));
-              });
-            },
-            didCreateNewCertificate: () {
-              setState(() {
-                handleNewCertificate(
-                    context,
-                    widget.model,
-                    didSelectSaveCertificate: (certificate) {
-                      setState(() {
-                        late List<CertificateOption> newCertificate = [];
-                        newCertificate.addAll(classInstructorBackground.certificates);
-
-                        newCertificate.add(certificate);
-                        classInstructorBackground = classInstructorBackground.copyWith(
-                            certificates: newCertificate
-                        );
-                        context.read<AttendeeFormBloc>().add(AttendeeFormEvent.updateClassesInstructorForm(classInstructorBackground));
-                      });
-                    }
-                );
-              });
-            }
-          );
+        // return instructorEditorContainer(
+        //     context: context,
+        //     model: widget.model,
+        //     classInstructorBackground: classInstructorBackground,
+        //     didChangeNumberOfYears: (number) {
+        //       setState(() {
+        //         classInstructorBackground = classInstructorBackground.copyWith(
+        //             numberOfYearsInExperience: number
+        //         );
+        //         context.read<AttendeeFormBloc>().add(AttendeeFormEvent.updateClassesInstructorForm(classInstructorBackground));
+        //       });
+        //     },
+        //     didSelectExperience: (experience, i) {
+        //       setState(() {
+        //         handleSelectedExperience(
+        //             context,
+        //             widget.model,
+        //             i,
+        //             experience,
+        //             didSelectSaveExperience: (e, i) {
+        //               setState(() {
+        //                 late List<ExperienceOption> newExperience = [];
+        //                 newExperience.addAll(classInstructorBackground.experience);
+        //
+        //                 newExperience.replaceRange(i, i+1, [e]);
+        //                 classInstructorBackground = classInstructorBackground.copyWith(
+        //                     experience: newExperience
+        //                 );
+        //                 context.read<AttendeeFormBloc>().add(AttendeeFormEvent.updateClassesInstructorForm(classInstructorBackground));
+        //               });
+        //             }
+        //         );
+        //       });
+        //     },
+        //     didSelectRemoveExperience: (i) {
+        //       setState(() {
+        //         late List<ExperienceOption> newExperience = [];
+        //         newExperience.addAll(classInstructorBackground.experience);
+        //
+        //         newExperience.removeAt(i);
+        //         classInstructorBackground = classInstructorBackground.copyWith(
+        //             experience: newExperience
+        //         );
+        //
+        //         classInstructorBackground.experience.toList().addAll(newExperience);
+        //         context.read<AttendeeFormBloc>().add(AttendeeFormEvent.updateClassesInstructorForm(classInstructorBackground));
+        //       });
+        //     },
+        //     didSelectCreateExperience: () {
+        //       setState(() {
+        //         handleCreateNewExperience(
+        //             context,
+        //             widget.model,
+        //             didSelectSaveExperience: (experience) {
+        //               setState(() {
+        //                 late List<ExperienceOption> newExperience = [];
+        //                 newExperience.addAll(classInstructorBackground.experience);
+        //
+        //                 newExperience.add(experience);
+        //                 classInstructorBackground = classInstructorBackground.copyWith(
+        //                     experience: newExperience
+        //                 );
+        //                 context.read<AttendeeFormBloc>().add(AttendeeFormEvent.updateClassesInstructorForm(classInstructorBackground));
+        //               });
+        //             }
+        //         );
+        //       });
+        //     },
+        //     didSelectCertificate: (certificate) {
+        //
+        //     },
+        //     didSelectRemoveCertificate: (i) {
+        //       setState(() {
+        //         late List<CertificateOption> newCertificate = [];
+        //         newCertificate.addAll(classInstructorBackground.certificates);
+        //
+        //         newCertificate.removeAt(i);
+        //         classInstructorBackground = classInstructorBackground.copyWith(
+        //             certificates: newCertificate
+        //         );
+        //
+        //         classInstructorBackground.certificates.toList().addAll(newCertificate);
+        //         context.read<AttendeeFormBloc>().add(AttendeeFormEvent.updateClassesInstructorForm(classInstructorBackground));
+        //       });
+        //     },
+        //     didCreateNewCertificate: () {
+        //       setState(() {
+        //         handleNewCertificate(
+        //             context,
+        //             widget.model,
+        //             didSelectSaveCertificate: (certificate) {
+        //               setState(() {
+        //                 late List<CertificateOption> newCertificate = [];
+        //                 newCertificate.addAll(classInstructorBackground.certificates);
+        //
+        //                 newCertificate.add(certificate);
+        //                 classInstructorBackground = classInstructorBackground.copyWith(
+        //                     certificates: newCertificate
+        //                 );
+        //                 context.read<AttendeeFormBloc>().add(AttendeeFormEvent.updateClassesInstructorForm(classInstructorBackground));
+        //               });
+        //             }
+        //         );
+        //       });
+        //     }
+        //   );
+        break;
       case AttendeeType.vendor:
-        return vendorMerchantEditorContainer(
-            context: context,
-            selectedImage: selectedImage,
-            eventMerchantVendor: widget.attendeeItem.eventMerchantVendorProfile,
-            activityForm: widget.activityForm,
-            model: widget.model,
-            state: context.read<AttendeeFormBloc>().state,
-            handleImageSelection: () {
-              _handleImageSelection(context);
-            },
-            didChangeVendorName: (value) {
-              setState(() {
-                eventMerchantVendor = eventMerchantVendor?.copyWith(
-                    brandName: FirstLastName(value)
-                );
-                context.read<AttendeeFormBloc>().add(AttendeeFormEvent.updateMerchantVendorForm(eventMerchantVendor!));
-              });
-            },
-            didChangeVendorInfo: (value) {
-              setState(() {
-                eventMerchantVendor = eventMerchantVendor?.copyWith(
-                    backgroundInfo: BackgroundInfoDescription(value)
-                );
-                context.read<AttendeeFormBloc>().add(AttendeeFormEvent.updateMerchantVendorForm(eventMerchantVendor!));
-            });
-          }
-        );
+        // return vendorMerchantEditorContainer(
+        //     context: context,
+        //     selectedImage: selectedImage,
+        //     eventMerchantVendor: widget.attendeeItem.eventMerchantVendorProfile,
+        //     activityForm: widget.activityForm,
+        //     model: widget.model,
+        //     state: context.read<AttendeeFormBloc>().state,
+        //     handleImageSelection: () {
+        //       _handleImageSelection(context);
+        //     },
+        //     didChangeVendorName: (value) {
+        //       setState(() {
+        //         eventMerchantVendor = eventMerchantVendor?.copyWith(
+        //             brandName: FirstLastName(value)
+        //         );
+        //         context.read<AttendeeFormBloc>().add(AttendeeFormEvent.updateMerchantVendorForm(eventMerchantVendor!));
+        //       });
+        //     },
+        //     didChangeVendorInfo: (value) {
+        //       setState(() {
+        //         eventMerchantVendor = eventMerchantVendor?.copyWith(
+        //             backgroundInfo: BackgroundInfoDescription(value)
+        //         );
+        //         context.read<AttendeeFormBloc>().add(AttendeeFormEvent.updateMerchantVendorForm(eventMerchantVendor!));
+        //     });
+        //   }
+        // );
+        break;
       case AttendeeType.partner:
         // TODO: Handle this case.
 
@@ -217,23 +219,23 @@ class _AttendeeGeneralSettingsWidgetState extends State<AttendeeGeneralSettingsW
 
 
   void _handleImageSelection(BuildContext context) async {
-    final imageData = await handleImageSelection(context, widget.model);
-    try {
-      setState(() {
-        selectedImage = imageData;
-        eventMerchantVendor = eventMerchantVendor?.copyWith(
-            vendorLogo: imageData
-        );
-      });
-      context.read<AttendeeFormBloc>().add(AttendeeFormEvent.updateMerchantVendorForm(eventMerchantVendor!));
-    } catch (e) {
-      final snackBar = SnackBar(
-          elevation: 4,
-          backgroundColor: widget.model.paletteColor,
-          content: Text('Sorry, please try again.', style: TextStyle(color: widget.model.webBackgroundColor))
-      );
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
-    }
+    // final imageData = await handleImageSelection(context, widget.model);
+    // try {
+    //   setState(() {
+    //     selectedImage = imageData;
+    //     eventMerchantVendor = eventMerchantVendor?.copyWith(
+    //         uriImage: ImageUpload(imageToUpload: imageData, key: ''),
+    //     );
+    //   });
+    //   context.read<AttendeeFormBloc>().add(AttendeeFormEvent.updateMerchantVendorForm(eventMerchantVendor!));
+    // } catch (e) {
+    //   final snackBar = SnackBar(
+    //       elevation: 4,
+    //       backgroundColor: widget.model.paletteColor,
+    //       content: Text('Sorry, please try again.', style: TextStyle(color: widget.model.webBackgroundColor))
+    //   );
+    //   ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    // }
   }
 
   @override

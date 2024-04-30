@@ -66,7 +66,9 @@ class _FacilityActivityProgrammingState extends State<FacilityActivityProgrammin
                       widget.listing,
                       widget.reservations.where((element) => element.reservationId == e.exploreItemId).isNotEmpty ? widget.reservations.where((element) => element.reservationId == e.exploreItemId).first : null,
                       currentSpaceOption,
-                      didSelectListing: (listing) {},
+                      didSelectListing: (listing) {
+
+                      },
                       didSelectReservation: (listing, res) {
                       if (listing != null) {
                         widget.didSelectReservation(listing, res);

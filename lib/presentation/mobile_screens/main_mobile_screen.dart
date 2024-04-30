@@ -3,7 +3,6 @@ import 'package:check_in_web_mobile_explore/presentation/mobile_screens/main_mob
 import 'package:check_in_web_mobile_explore/presentation/screens/chat_inbox/components/direct_chat_archive_rooms_screen.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/chat_inbox/direct_chat_rooms_screen.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/chat_inbox/direct_chat_screen.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/profile_settings/profile_settings_screen.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/reservations/components/reservation_results_main.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/reservations/reservations_screen.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/search_components/search_explore_filter.dart';
@@ -12,7 +11,7 @@ import 'package:check_in_web_mobile_explore/presentation/web_screens/main_contai
 import 'package:flutter/material.dart';
 import 'package:check_in_facade/check_in_facade.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-
+import 'package:check_in_presentation/profile_core_widgets/profile_settings/profile_settings_screen.dart';
 
 class MainMobileScreen extends StatefulWidget {
 
@@ -143,9 +142,6 @@ class _MainMobileScreenState extends State<MainMobileScreen> {
             title: const Text('Chat'),
             titleTextStyle: TextStyle(color: widget.model.paletteColor, fontWeight: FontWeight.bold),
             actions: [
-
-
-
               //      Badge(
               //       badgeContent: Text(NotificationCore.chatReceivedNotification.length.toString() ?? '', style: TextStyle(color: model.accentColor),),
               //       position: BadgePosition.topEnd(end: 4, top: 2),
@@ -177,6 +173,9 @@ class _MainMobileScreenState extends State<MainMobileScreen> {
           ),
           mainWidgetItem: ProfileSettingsScreen(
             model: widget.model,
+            isActivityApp: false,
+            didSelectLogOut: () {  },
+            didDeleteAccount: () {  },
           ),
           isSelected: false
       ),

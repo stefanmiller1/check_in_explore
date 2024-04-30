@@ -50,7 +50,7 @@ class ActivityTicketSettingsMainContainerWidget extends StatelessWidget {
               loadInProgress: (_) => JumpingDots(color: model.paletteColor, numberOfDots: 3),
               loadProfileFailure: (_) => Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: GetLoginSignUpWidget(model: model),
+                child: GetLoginSignUpWidget(model: model, didLoginSuccess: () {  },),
               ),
               loadUserProfileSuccess: (item) => (reservationItem != null && activityManagerForm != null) ?  ActivityTicketsResultMain(
                   model: model,

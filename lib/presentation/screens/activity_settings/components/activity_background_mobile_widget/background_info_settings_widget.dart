@@ -2,11 +2,7 @@ import 'package:check_in_application/auth/update_services/listing_update_create_
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_domain/domain/misc/attendee_services/attendee_item/attendee_item.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
-import 'package:check_in_web_mobile_explore/presentation/core/components/invite_widgets/send_invitation_request.dart';
-import 'package:check_in_web_mobile_explore/presentation/core/responsive/responsive.dart';
-import 'package:check_in_web_mobile_explore/presentation/web_screens/main_container_widgets/reservations_widget/reservation_helper_core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 // import 'package:image_picker_web/image_picker_web.dart';
@@ -63,7 +59,7 @@ class _BackgroundInfoSettingsWidgetState extends State<BackgroundInfoSettingsWid
                       height: 750,
                       child: SendInvitationRequest(
                         model: widget.model,
-                        currentUser: widget.currentUser,
+                        currentUserId: widget.currentUser.userId.getOrCrash(),
                         attendeeType: AttendeeType.partner,
                         reservationItem: widget.reservationItem,
                         inviteType: InvitationType.reservation,
@@ -90,7 +86,7 @@ class _BackgroundInfoSettingsWidgetState extends State<BackgroundInfoSettingsWid
           builder: (_) {
             return SendInvitationRequest(
               model: widget.model,
-              currentUser: widget.currentUser,
+              currentUserId: widget.currentUser.userId.getOrCrash(),
               attendeeType: AttendeeType.partner,
               reservationItem: widget.reservationItem,
               inviteType: InvitationType.reservation,
@@ -123,7 +119,7 @@ class _BackgroundInfoSettingsWidgetState extends State<BackgroundInfoSettingsWid
                       height: 750,
                       child: SendInvitationRequest(
                         model: widget.model,
-                        currentUser: widget.currentUser,
+                        currentUserId: widget.currentUser.userId.getOrCrash(),
                         attendeeType: AttendeeType.instructor,
                         reservationItem: widget.reservationItem,
                         inviteType: InvitationType.reservation,
@@ -150,7 +146,7 @@ class _BackgroundInfoSettingsWidgetState extends State<BackgroundInfoSettingsWid
           builder: (_) {
             return SendInvitationRequest(
               model: widget.model,
-              currentUser: widget.currentUser,
+              currentUserId: widget.currentUser.userId.getOrCrash(),
               attendeeType: AttendeeType.instructor,
               reservationItem: widget.reservationItem,
               inviteType: InvitationType.reservation,

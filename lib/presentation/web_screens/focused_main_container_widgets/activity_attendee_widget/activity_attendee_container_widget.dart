@@ -2,11 +2,9 @@ import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_domain/domain/misc/attendee_services/attendee_item/attendee_item.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/activity_attendees/activity_attendees_result_main.dart';
 import 'package:flutter/material.dart';
 import 'package:jumping_dot/jumping_dot.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:jumping_dot/jumping_dot.dart';
 
 class ActivityAttendeeMainContainerWidget extends StatelessWidget {
 
@@ -41,7 +39,7 @@ class ActivityAttendeeMainContainerWidget extends StatelessWidget {
               loadInProgress: (_) => JumpingDots(color: model.paletteColor, numberOfDots: 3),
               loadProfileFailure: (_) => Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: GetLoginSignUpWidget(model: model),
+                child: GetLoginSignUpWidget(model: model, didLoginSuccess: () {  },),
               ),
               loadUserProfileSuccess: (item) => (selectedProfile != null && attendee != null) ?  ActivityAttendeesResultMain(
                   model: model,

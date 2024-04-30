@@ -6,24 +6,21 @@ import 'package:flutter/material.dart';
 import 'package:jumping_dot/jumping_dot.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../screens/activity_tickets/activity_attendee_ticket_results_main.dart';
-
-class ActivityAttendeeTicketSettingMainContainerWidget extends StatelessWidget {
+class ActivityVendorFormManageMainContainerWidget extends StatelessWidget {
 
   final DashboardModel model;
-  final List<TicketItem> attendeeTickets;
   final ReservationItem? reservationItem;
   final ActivityManagerForm? activityManagerForm;
   final Function() rebuild;
 
-  const ActivityAttendeeTicketSettingMainContainerWidget({super.key, required this.model, required this.reservationItem, required this.activityManagerForm, required this.rebuild, required this.attendeeTickets});
+  const ActivityVendorFormManageMainContainerWidget({super.key, required this.model, required this.reservationItem, required this.activityManagerForm, required this.rebuild});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: (!(kIsWeb)) ? AppBar(
         backgroundColor: model.paletteColor,
-        title: const Text('Manage Tickets'),
+        title: const Text('Manage Vendor Applications'),
         centerTitle: true,
       ) : null,
       body: Padding(
@@ -34,9 +31,9 @@ class ActivityAttendeeTicketSettingMainContainerWidget extends StatelessWidget {
               decoration: BoxDecoration(
                   color: model.accentColor,
                   borderRadius: BorderRadius.all(Radius.circular(20))
-            ),
-          child: retrieveAuthenticationState(context)
-        )
+              ),
+              child: retrieveAuthenticationState(context)
+          )
       ),
     );
   }
@@ -51,12 +48,9 @@ class ActivityAttendeeTicketSettingMainContainerWidget extends StatelessWidget {
                 padding: const EdgeInsets.all(8.0),
                 child: GetLoginSignUpWidget(model: model, didLoginSuccess: () {  },),
               ),
-              loadUserProfileSuccess: (item) => (reservationItem != null && activityManagerForm != null) ?  ActivityAttendeeTicketsResultMain(
-                  model: model,
-                  tickets: attendeeTickets,
-                  reservationItem: reservationItem!,
-                  currentUser: item.profile,
-                  activityManagerForm: activityManagerForm!) : settingsFailureToLoadContainer(),
+              loadUserProfileSuccess: (item) =>
+              (reservationItem != null && activityManagerForm != null) ? Container() :
+              settingsFailureToLoadContainer(),
               orElse: () {
                 return JumpingDots(color: model.paletteColor, numberOfDots: 3);
               }
@@ -74,9 +68,9 @@ class ActivityAttendeeTicketSettingMainContainerWidget extends StatelessWidget {
         children: [
           Icon(Icons.info_outline, color: model.disabledTextColor, size: 85),
           const SizedBox(height: 10),
-          Text('Sorry, Cannot Manage Tickets', style: TextStyle(color: model.disabledTextColor, fontSize: model.secondaryQuestionTitleFontSize)),
+          Text('Sorry, Cannot Manage Applications', style: TextStyle(color: model.disabledTextColor, fontSize: model.secondaryQuestionTitleFontSize)),
           const SizedBox(height: 10),
-          Text('Start your own reservation and be able to see & manage your tickets', style: TextStyle(color: model.disabledTextColor)),
+          Text('Start your own reservation and be able to see & manage your own applicants', style: TextStyle(color: model.disabledTextColor)),
         ],
       ),
     );

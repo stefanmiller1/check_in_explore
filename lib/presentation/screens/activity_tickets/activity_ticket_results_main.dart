@@ -1,13 +1,9 @@
 import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
-import 'package:check_in_web_mobile_explore/presentation/core/responsive/responsive.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:dartz/dartz.dart' as dart;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jumping_dot/jumping_dot.dart';
-import 'package:provider/src/provider.dart';
 
 import '../../web_screens/focused_main_container_widgets/activity_ticket_settings_widget/activity_ticket_helper.dart';
 import 'activity_ticket_results_helper.dart';

@@ -1,15 +1,9 @@
 import 'package:check_in_application/auth/update_services/listing_update_create_services/settings_update_create_services/activity_settings/activity_settings_form_bloc.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
-import 'package:check_in_web_mobile_explore/presentation/core/components/invite_widgets/send_invitation_request.dart';
-import 'package:check_in_web_mobile_explore/presentation/core/components/invite_widgets/send_invitation_request_helper.dart';
-import 'package:check_in_web_mobile_explore/presentation/web_screens/main_container_widgets/reservations_widget/reservation_helper_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_chat_types/flutter_chat_types.dart';
-import 'package:flutter_switch/flutter_switch.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:check_in_application/un_auth/watcher_services/attendee_watcher_service/attendee_manager_watcher_bloc.dart';
 import 'package:jumping_dot/jumping_dot.dart';
 
@@ -98,7 +92,7 @@ class _RequirementSettingsWidgetState extends State<RequirementSettingsWidget> {
     didSelectInvitationRequest(
         context: context,
         model: widget.model,
-        currentUser: widget.currentUser,
+        currentUser: widget.currentUser.userId.getOrCrash(),
         attendeeType: AttendeeType.vendor,
         reservationItem: widget.reservationItem,
         inviteType: InvitationType.reservation,
@@ -204,7 +198,7 @@ class _RequirementSettingsWidgetState extends State<RequirementSettingsWidget> {
                                   }
                                 });
                               },
-                              getVendorAttendees: getVendorAttendees(),
+                              getVendorAttendees: getVendorAttendeesList(widget.activityManagerForm),
                               didSelectCreateVendor: () {
                                 _handleCreateNewAttendeeVendor(context);
                               },
@@ -362,7 +356,7 @@ class _RequirementSettingsWidgetState extends State<RequirementSettingsWidget> {
                                     }
                                   });
                                 },
-                                getVendorAttendees: getVendorAttendees(),
+                                getVendorAttendees: getVendorAttendeesList(widget.activityManagerForm),
                                 didSelectCreateVendor: () {
                                   _handleCreateNewAttendeeVendor(context);
                                 },
@@ -483,7 +477,7 @@ class _RequirementSettingsWidgetState extends State<RequirementSettingsWidget> {
     );
   }
 
-  Widget getVendorAttendees() {
+  Widget getVendorAttendeesList(ActivityManagerForm activityForm) {
     return BlocProvider(create: (context) =>  getIt<AttendeeManagerWatcherBloc>()..add(AttendeeManagerWatcherEvent.watchAllAttendanceByType(AttendeeType.vendor.toString(), context.read<UpdateActivityFormBloc>().state.activitySettingsForm.activityFormId.getOrCrash())),
       child: BlocBuilder<AttendeeManagerWatcherBloc, AttendeeManagerWatcherState>(
         builder: (context, state) {
@@ -491,31 +485,14 @@ class _RequirementSettingsWidgetState extends State<RequirementSettingsWidget> {
             attLoadInProgress: (_) => JumpingDots(color: widget.model.paletteColor, numberOfDots: 3),
             loadAllAttendanceFailure: (_) => Container(),
             loadAllAttendanceSuccess: (item) {
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Vendors', style: TextStyle(color: widget.model.disabledTextColor, fontSize: widget.model.secondaryQuestionTitleFontSize)),
-                  Container(
-                    height: 320,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      children: item.item.map(
-                              (attendee) => Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 6.0),
-                            child: getVendorAttendeeType(
-                                context,
-                                widget.model,
-                                attendee: attendee,
-                                didSelectAttendee: (attendee) {
+              return getVendorAttendees(
+                  context,
+                  widget.model,
+                  activityForm,
+                  item.item,
+                  didSelectAttendee: () {
 
-                                }
-                            ),
-                          )
-                      ).toList(),
-                    ),
-                  ),
-                ],
+                }
               );
             },
             orElse: () => Container(),

@@ -2,16 +2,13 @@ import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/listing_components/listing_result_main_card.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/map_helper.dart';
-import 'package:collection/collection.dart';
+import 'package:dismissible_page/dismissible_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
-import 'components/listing_components/listing_result_main.dart';
 
 class ListingSearchResult extends StatefulWidget {
 
@@ -156,7 +153,27 @@ class _ListingSearchResultState extends State<ListingSearchResult> {
 
               },
               didSelectEmbeddedRes: (listing, res) {
-
+                Navigator.push(context, MaterialPageRoute(
+                    builder: (_) {
+                      return DismissiblePage(
+                        startingOpacity: 0.75,
+                        backgroundColor: Colors.transparent,
+                        direction: DismissiblePageDismissDirection.startToEnd,
+                        isFullScreen: true,
+                        onDismissed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: ActivityPreviewScreen(
+                          model: widget.model,
+                          listing: listing,
+                          reservation: res,
+                          currentReservationId: res.reservationId,
+                          currentListingId: listing.listingServiceId,
+                          didSelectBack: () {  },
+                        ),
+                      );
+                    }
+                ));
               },
             ),
           ),

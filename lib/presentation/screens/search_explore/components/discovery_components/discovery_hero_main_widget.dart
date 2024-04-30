@@ -1,7 +1,5 @@
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
-import 'package:check_in_web_mobile_explore/presentation/core/responsive/responsive.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/discovery_search_helper.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -48,11 +46,11 @@ class _DiscoveryHeroMainWidgetState extends State<DiscoveryHeroMainWidget> {
         );
 
         /// is looking for vend. or merch
-        if (activityManagerForm.profileService.activityRequirements.eventActivityRulesRequirement?.isMerchantInviteOnly == true) {
+        if (activityManagerForm?.profileService.activityRequirements.eventActivityRulesRequirement?.isMerchantInviteOnly == true) {
           weight += 2;
         }
         /// has hero images (10 points)
-        if (activityManagerForm.profileService.activityBackground.activityProfileImages?.isNotEmpty ?? false) {
+        if (activityManagerForm?.profileService.activityBackground.activityProfileImages?.isNotEmpty ?? false) {
           weight += 10;
         }
       } catch (e) {}
@@ -171,9 +169,11 @@ class _DiscoveryHeroMainWidgetState extends State<DiscoveryHeroMainWidget> {
                                   context,
                                   widget.model,
                                   preview,
+                                  UniqueId.fromUniqueString(FirebaseChatCore.instance.firebaseUser?.uid ?? ''),
                                   didSelectItem: () {
 
-                                  }
+                                  },
+                                  didSelectInterested: () {  }
                               ),
                             ),
                           ],

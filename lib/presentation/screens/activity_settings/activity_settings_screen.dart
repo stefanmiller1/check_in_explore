@@ -1,23 +1,16 @@
 import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_domain/check_in_domain.dart';
-import 'package:check_in_domain/domain/misc/attendee_services/attendee_item/attendee_item.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_attendee_widget/create_ticket_attendee_mobile_widget.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_attendee_widget/select_attendee_type_mobile_widget.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_cancellation_widget/select_cancellation_settings_mobile_widget.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_payment_widget/activity_payments_mobile_widget.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_rules_widget/activity_general_rules_mobile_widget.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_rules_widget/activity_general_rules_widget.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_background_mobile_widget/background_info_settings_widget.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_check_in_widget/check_ins_info_widget.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_check_in_widget/chexk_ins_info_mobile_widget.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_custom_rules_widgets/custom_rule_info_mobile_widget.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_custom_rules_widgets/custom_rule_info_widget.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_cancellation_widget/select_cancellation_settings_widget.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_access_visibility_widgets/access_visibility_info_settings_mobile_widget.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_requirements_widget/requirements_settings_mobile_widget.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_requirements_widget/requirements_settings_widget.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_access_visibility_widgets/access_visibility_info_settings_widget.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings_web/settings_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -26,9 +19,6 @@ import 'package:intl/intl.dart';
 
 import 'components/activity_background_mobile_widget/activity_background_preview.dart';
 import 'components/activity_reservation_widget/create_pass_reservation_widget.dart';
-import 'components/activity_reservation_widget/create_ticket_reservation_widget.dart';
-import 'components/activity_reservation_widget/select_reservation_overview_widget.dart';
-import 'components/activity_rules_widget/create_new_activity_rule.dart';
 import 'components/activity_settings_mobile_container.dart';
 
 class ActivitySettingsScreenMobile extends StatefulWidget {
@@ -583,6 +573,8 @@ class _ActivitySettingsScreenMobileState extends State<ActivitySettingsScreenMob
           leading: Icon(Icons.credit_card_rounded, color: widget.model.paletteColor),
           trailing: Icon(Icons.keyboard_arrow_right_rounded, color: widget.model.paletteColor),
         );
+      default:
+        return Container();
     }
 
     return Container();

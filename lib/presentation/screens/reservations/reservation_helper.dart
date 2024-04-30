@@ -4,14 +4,9 @@ import 'package:check_in_domain/domain/auth/reservation_manager/reservation_post
 import 'package:check_in_domain/domain/misc/attendee_services/attendee_item/attendee_item.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/components/reservation_details_widget.dart';
-import 'package:check_in_web_mobile_explore/presentation/core/components/invite_widgets/send_invitation_request.dart';
-import 'package:check_in_web_mobile_explore/presentation/core/components/tabHelper.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/activity_attendees/activity_attendees_list_screen.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/activity_settings_screen.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/chat_inbox/direct_chat_screen.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/facility_preview/facility_preview_screen.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/profile_settings/components/review_current_profile.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/profile_settings/profile_settings_screen_helper.dart';
 import 'package:check_in_web_mobile_explore/presentation/web_screens/focused_main_container_widgets/activity_ticket_settings_widget/activity_ticket_settings_container_widget.dart';
 import 'package:check_in_web_mobile_explore/presentation/web_screens/sub_container_widgets/activity_ticket_settings_widget/activity_ticket_sub_container_widget.dart';
 import 'package:flutter/foundation.dart';
@@ -24,7 +19,6 @@ import 'package:check_in_facade/auth/notification_facade/notification_core_confi
 
 enum ResSettingMarker {details, manageActivity, manageAttendance, manageActivityTickets, manageActivityAttendees, manageActivityPasses, messageOwner, sendInvites, addCalendar, receipts, showListing, leaveReservation}
 enum ResOverviewMarker {messageHost, receipts, showListing, getSupport}
-enum ResOverViewTabs {activity, reservation, discussion}
 
 class ReservationCoreHelper {
 
@@ -80,7 +74,6 @@ bool showAffiliateOnBoarding(AttendeeType type) {
   }
 }
 
-bool activitySetupComplete(ActivityManagerForm activityForm) => (activityForm.profileService.activityBackground.activityProfileImages != null && activityForm.profileService.activityBackground.activityProfileImages?.isNotEmpty == true && activityForm.profileService.activityBackground.activityTitle.isValid() && activityForm.profileService.activityBackground.activityDescription1.isValid());
 
 /// tab items for top tab controller
 List<TabBadge> tabItems(List<AccountNotificationItem> notifications) {
@@ -190,299 +183,6 @@ void updateNotifications(BuildContext context, DashboardModel model, ResOverView
   }
 }
 
-void presentNewAttendeeJoin(BuildContext context, DashboardModel model, ReservationItem reservation, ActivityManagerForm activity, UserProfileModel reservationOwner) {
-  if (kIsWeb) {
-    showGeneralDialog(
-        context: context,
-        barrierDismissible: false,
-        barrierLabel: '',
-        transitionDuration: Duration(milliseconds: 350),
-        pageBuilder: (BuildContext contexts, anim1, anim2) {
-          return Scaffold(
-            backgroundColor: Colors.transparent,
-            body: Center(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(25),
-                child: Container(
-                  height: 750,
-                  width: 600,
-                  decoration: BoxDecoration(
-                    color: model.accentColor,
-                    borderRadius: BorderRadius.all(Radius.circular(25))
-                  ),
-                  child: ReservationCreateNewAttendee(
-                    model: model,
-                    reservation: reservation,
-                    activityForm: activity,
-                    resOwner: reservationOwner,
-                    isFromInvite: false,
-                  ),
-                ),
-              ),
-            ),
-          );
-        },
-        transitionBuilder: (context, anim1, anim2, child) {
-          return Transform.scale(
-              scale: anim1.value,
-              child: Opacity(
-                  opacity: anim1.value,
-                  child: child
-              )
-          );
-        }
-      );
-  } else {
-    Navigator.push(context, MaterialPageRoute(
-        builder: (_) {
-          return ReservationCreateNewAttendee(
-            model: model,
-            reservation: reservation,
-            activityForm: activity,
-            resOwner: reservationOwner,
-            isFromInvite: false,
-          );
-      })
-    );
-  }
-}
-
-void presentNewTicketAttendeeJoin(BuildContext context, DashboardModel model, ReservationItem reservation, ActivityManagerForm activity, UserProfileModel reservationOwner) {
-  if (kIsWeb) {
-    showGeneralDialog(
-        context: context,
-        barrierDismissible: false,
-        barrierLabel: '',
-        transitionDuration: const Duration(milliseconds: 350),
-        pageBuilder: (BuildContext contexts, anim1, anim2) {
-          return Scaffold(
-            backgroundColor: Colors.transparent,
-            body: Center(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(25),
-                child: Container(
-                  height: 750,
-                  width: 600,
-                  decoration: BoxDecoration(
-                      color: model.accentColor,
-                      borderRadius: BorderRadius.all(Radius.circular(25))
-                  ),
-                  child: ReservationCreateTicketAttendee(
-                      model: model,
-                      reservation: reservation,
-                      activityForm: activity,
-                      resOwner: reservationOwner,
-                  )
-                ),
-              ),
-            ),
-          );
-        },
-        transitionBuilder: (context, anim1, anim2, child) {
-          return Transform.scale(
-              scale: anim1.value,
-              child: Opacity(
-                  opacity: anim1.value,
-                  child: child
-          )
-        );
-      }
-    );
-  } else {
-    Navigator.push(context, MaterialPageRoute(
-        builder: (_) {
-          return ReservationCreateTicketAttendee(
-              model: model,
-              reservation: reservation,
-              activityForm: activity,
-              resOwner: reservationOwner,
-          );
-        }
-      )
-    );
-  }
-}
-
-
-
-
-void presentPartnershipRequestAttendee(BuildContext context, DashboardModel model, ReservationItem reservation, ActivityManagerForm activity, UserProfileModel reservationOwner) {
-  if (kIsWeb) {
-    showGeneralDialog(
-        context: context,
-        barrierDismissible: false,
-        barrierLabel: '',
-        transitionDuration: const Duration(milliseconds: 350),
-        pageBuilder: (BuildContext contexts, anim1, anim2) {
-          return Scaffold(
-            backgroundColor: Colors.transparent,
-            body: Center(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(25),
-                child: Container(
-                    height: 750,
-                    width: 600,
-                    decoration: BoxDecoration(
-                        color: model.accentColor,
-                        borderRadius: BorderRadius.all(Radius.circular(25))
-                    ),
-                    child: ReservationRequestPartnershipAttendee(
-                      model: model,
-                      reservation: reservation,
-                      activityForm: activity,
-                      resOwner: reservationOwner,
-                      isFromInvite: false,
-                    )
-                ),
-              ),
-            ),
-          );
-        },
-        transitionBuilder: (context, anim1, anim2, child) {
-          return Transform.scale(
-              scale: anim1.value,
-              child: Opacity(
-                  opacity: anim1.value,
-                  child: child
-              )
-          );
-        }
-    );
-  } else {
-    Navigator.push(context, MaterialPageRoute(
-        builder: (_) {
-          return ReservationRequestPartnershipAttendee(
-            model: model,
-            reservation: reservation,
-            activityForm: activity,
-            resOwner: reservationOwner,
-            isFromInvite: false,
-          );
-        }
-    )
-    );
-  }
-}
-
-
-
-void presentNewInstructorAttendee(BuildContext context, DashboardModel model, ReservationItem reservation, ActivityManagerForm activity, UserProfileModel reservationOwner) {
-  if (kIsWeb) {
-    showGeneralDialog(
-        context: context,
-        barrierDismissible: false,
-        barrierLabel: '',
-        transitionDuration: const Duration(milliseconds: 350),
-        pageBuilder: (BuildContext contexts, anim1, anim2) {
-          return Scaffold(
-            backgroundColor: Colors.transparent,
-            body: Center(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(25),
-                child: Container(
-                    height: 750,
-                    width: 600,
-                    decoration: BoxDecoration(
-                        color: model.accentColor,
-                        borderRadius: BorderRadius.all(Radius.circular(25))
-                    ),
-                    child: CreateNewInstructorForm(
-                      model: model,
-                      reservation: reservation,
-                      activityForm: activity,
-                      resOwner: reservationOwner,
-                      isFromInvite: false,
-                    )
-                ),
-              ),
-            ),
-          );
-        },
-        transitionBuilder: (context, anim1, anim2, child) {
-          return Transform.scale(
-              scale: anim1.value,
-              child: Opacity(
-                  opacity: anim1.value,
-                  child: child
-              )
-          );
-        }
-    );
-  } else {
-    Navigator.push(context, MaterialPageRoute(
-        builder: (_) {
-          return CreateNewInstructorForm(
-            model: model,
-            reservation: reservation,
-            activityForm: activity,
-            resOwner: reservationOwner,
-            isFromInvite: false,
-          );
-        }
-      )
-    );
-  }
-}
-
-
-void presentNewVendorAttendee(BuildContext context, DashboardModel model, ReservationItem reservation, ActivityManagerForm activity, UserProfileModel reservationOwner) {
-  if (kIsWeb) {
-    showGeneralDialog(
-        context: context,
-        barrierDismissible: false,
-        barrierLabel: '',
-        transitionDuration: const Duration(milliseconds: 350),
-        pageBuilder: (BuildContext contexts, anim1, anim2) {
-          return Scaffold(
-            backgroundColor: Colors.transparent,
-            body: Center(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(25),
-                child: Container(
-                    height: 750,
-                    width: 600,
-                    decoration: BoxDecoration(
-                        color: model.accentColor,
-                        borderRadius: BorderRadius.all(Radius.circular(25))
-                    ),
-                    child: CreateNewVendorMerchant(
-                      model: model,
-                      reservation: reservation,
-                      activityForm: activity,
-                      resOwner: reservationOwner,
-                      isFromInvite: false,
-                    )
-                ),
-              ),
-            ),
-          );
-        },
-        transitionBuilder: (context, anim1, anim2, child) {
-          return Transform.scale(
-              scale: anim1.value,
-              child: Opacity(
-                  opacity: anim1.value,
-                  child: child
-              )
-          );
-        }
-    );
-  } else {
-    Navigator.push(context, MaterialPageRoute(
-        builder: (_) {
-          return CreateNewVendorMerchant(
-            model: model,
-            reservation: reservation,
-            activityForm: activity,
-            resOwner: reservationOwner,
-            isFromInvite: false,
-          );
-        }
-      )
-    );
-  }
-
-}
 
 void presentMoreOptions(BuildContext context, DashboardModel model, bool isReservationOwner, UserProfileModel currentUser, ActivityManagerForm? activity, ReservationItem reservation, ListingManagerForm listing, List<AttendeeItem> allAttendees, AttendeeItem? currentAttendee, {required Function(ResSettingMarker) didUpdateMarkerWeb, required Function didLeaveListing}) {
   showDialog(context: context, builder: (context) {
@@ -546,7 +246,7 @@ void presentMoreOptions(BuildContext context, DashboardModel model, bool isReser
                                           Navigator.of(context).push(MaterialPageRoute(builder: (_) {
                                             return SendInvitationRequest(
                                               model: model,
-                                              currentUser: currentUser,
+                                              currentUserId: currentUser.userId.getOrCrash(),
                                               attendeeType: AttendeeType.free,
                                               reservationItem: reservation,
                                               inviteType: InvitationType.reservation,
@@ -632,7 +332,8 @@ void presentMoreOptions(BuildContext context, DashboardModel model, bool isReser
                                             model: model,
                                             reservationItem: reservation,
                                             activityManagerForm: activity,
-                                            currentUser: currentUser,
+                                            attendeeTypeTab: null,
+                                            currentUser: currentUser.userId.getOrCrash(),
                                             didSelectAttendee: (AttendeeItem attendee, UserProfileModel user) {
                                               Navigator.of(newContext).push(MaterialPageRoute(builder: (_) {
                                                   return ReviewCurrentProfile(
@@ -641,6 +342,7 @@ void presentMoreOptions(BuildContext context, DashboardModel model, bool isReser
                                                     didSelectEditProfile: (profile) {
 
                                                     },
+                                                    showBack: true,
                                                   );
                                                 },
                                               )

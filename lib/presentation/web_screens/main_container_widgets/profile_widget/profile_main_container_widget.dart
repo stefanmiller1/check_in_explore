@@ -1,7 +1,4 @@
-import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/profile_settings/components/review_current_profile.dart';
-import 'package:check_in_web_mobile_explore/presentation/web_screens/main_container_widgets/reservations_widget/reservation_helper_core.dart';
 import 'package:flutter/material.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 
@@ -35,6 +32,7 @@ class _ProfileMainContainerWidgetState extends State<ProfileMainContainerWidget>
           didSelectEditProfile: (profile) {
 
           },
+          showBack: true,
         )
       )
     );

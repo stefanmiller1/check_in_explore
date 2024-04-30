@@ -50,6 +50,7 @@ class _ReservationAffiliateOnBoardingState extends State<ReservationAffiliateOnB
           reservation: widget.reservation,
           activityForm: widget.activityManagerForm,
           resOwner: widget.reservationOwner,
+          isPreview: false,
           isFromInvite: true
         );
       case AttendeeType.partner:

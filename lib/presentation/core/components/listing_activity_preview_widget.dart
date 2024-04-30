@@ -1,11 +1,7 @@
 import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
-import 'package:check_in_web_mobile_explore/presentation/core/core_helper.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/activity_preview/activity_preview_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:provider/provider.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
@@ -25,7 +21,8 @@ Widget getListingActivityPreviewWidget(BuildContext context, DashboardModel mode
                currentListingId: listing.listingServiceId,
                currentReservationId: reservationItem.reservationId,
                listing: listing,
-               reservation: reservationItem
+               reservation: reservationItem,
+               didSelectBack: () {  },
              );
            }
        ));

@@ -4,19 +4,13 @@ import 'package:beamer/beamer.dart';
 import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
-import 'package:check_in_web_mobile_explore/presentation/core/core_helper.dart';
-import 'package:check_in_web_mobile_explore/presentation/core/responsive/responsive.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/activity_preview/activity_preview_screen.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/facility_preview/facility_preview_screen.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/discovery_search_component.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/helper.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/list_search_component.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/listing_components/listing_result_main_card.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/map_helper.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/map_search_component.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/search_components/search_explore_filter.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/search_components/search_helper.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/pop_over_screen/search_where_when_pop_over.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/pop_over_screen/web/search_when_web.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/pop_over_screen/web/search_where_web.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/pop_over_screen/web/search_who_web.dart';
@@ -346,7 +340,8 @@ class _SearchExploreMainContainerWidgetState extends State<SearchExploreMainCont
                             currentListingId: ExploreWebHelperCore.currentFacilityItemId!,
                             currentReservationId: ExploreWebHelperCore.currentReservationItemId!,
                             listing: ExploreWebHelperCore.selectedFacilityItem,
-                            reservation: ExploreWebHelperCore.selectedReservationItem
+                            reservation: ExploreWebHelperCore.selectedReservationItem,
+                            didSelectBack: () {  },
                     ),
                       ),
                   ],

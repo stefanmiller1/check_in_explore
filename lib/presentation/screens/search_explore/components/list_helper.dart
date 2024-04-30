@@ -2,12 +2,10 @@ import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_application/un_auth/watcher_services/attendee_watcher_service/attendee_manager_watcher_bloc.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/listing_components/listing_helper.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/listing_components/listing_result_main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../core/components/reservation_card.dart';
 
 Widget loadExploreItems() {
   return Container();
@@ -102,22 +100,46 @@ Widget reservationSearchItem(DashboardModel model, UniqueId currentUserId, Listi
                 return baseSearchItemContainer(
                         model: model,
                         backgroundWidget: getReservationMediaFrame(context, model, 400, 400, listingManagerForm, item.item, reservationItem, didSelectItem: didSelectReservation),
-                        bottomWidget: getSearchFooterWidget(context, model, currentUserId, model.paletteColor, model.disabledTextColor, model.accentColor, listingManagerForm, item.item, reservationItem, didSelectItem: didSelectReservation)
+                        bottomWidget: getSearchFooterWidget(
+                            context,
+                            model,
+                            currentUserId,
+                            model.paletteColor,
+                            model.disabledTextColor,
+                            model.accentColor,
+                            listingManagerForm,
+                            item.item,
+                            reservationItem,
+                            false,
+                            didSelectItem: didSelectReservation,
+                            didSelectInterested: () {  }
+                  )
                 );
               },
               orElse: () {
                 return  baseSearchItemContainer(
                     model: model,
                     backgroundWidget: getReservationMediaFrame(context, model, 400, 400, listingManagerForm, ActivityManagerForm.empty(), reservationItem, didSelectItem: didSelectReservation),
-                    bottomWidget: getSearchFooterWidget(context, model, currentUserId, model.paletteColor, model.disabledTextColor, model.accentColor, listingManagerForm, ActivityManagerForm.empty(), reservationItem, didSelectItem: didSelectReservation)
+                    bottomWidget: getSearchFooterWidget(
+                        context,
+                        model,
+                        currentUserId,
+                        model.paletteColor,
+                        model.disabledTextColor,
+                        model.accentColor,
+                        listingManagerForm,
+                        ActivityManagerForm.empty(),
+                        reservationItem,
+                        false,
+                        didSelectItem: didSelectReservation,
+                        didSelectInterested: () {  }
+                    )
             );
           }
         );
       },
     ),
   );
-
-
 }
 
 Widget activitySearchItem() {
@@ -145,41 +167,3 @@ Widget communitySearchItem() {
   return Container();
 }
 
-
-Widget baseSearchItemContainer({required DashboardModel model, required Widget backgroundWidget, required Widget bottomWidget}) {
-  return Container(
-    height: 500,
-    width: 400,
-    child: Stack(
-      alignment: Alignment.center,
-      children: [
-        Positioned(
-          top: 0,
-          child: SizedBox(
-            height: 400,
-            width: 400,
-            child: ClipRRect(
-                borderRadius: BorderRadius.circular(15),
-                  child: backgroundWidget
-            ),
-          ),
-        ),
-        Positioned(
-          top: 15,
-          child: IconButton(onPressed: () {}, icon: Icon(Icons.favorite_border_rounded, size: 25, color: model.accentColor)),
-        ),
-        Positioned(
-          bottom: 0,
-          child: SizedBox(
-              height: 100,
-              width: 400,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: bottomWidget,
-            )
-          ),
-        )
-      ],
-    ),
-  );
-}

@@ -2,14 +2,7 @@ import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_domain/domain/misc/attendee_services/attendee_item/attendee_item.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
-import 'package:check_in_web_mobile_explore/presentation/core/components/reservation_card.dart';
-import 'package:check_in_web_mobile_explore/presentation/core/loading_containers/loading_widgets.dart';
-import 'package:check_in_web_mobile_explore/presentation/core/notifications/notification_core.dart';
-import 'package:check_in_web_mobile_explore/presentation/core/responsive/responsive.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/facility_preview/facility_preview_screen_helper.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/reservations/components/reservation_results_main.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/reservations/components/widgets/reservation_notification_helper.dart';
-import 'package:check_in_web_mobile_explore/presentation/web_screens/main_container_widgets/reservations_widget/reservation_helper_core.dart';
+import 'package:check_in_web_mobile_explore/presentation/core/components/reservation_details_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jumping_dot/jumping_dot.dart';
@@ -53,7 +46,7 @@ class ReservationScreen extends StatelessWidget {
         builder: (context, authState) {
           return authState.maybeMap(
               loadInProgress: (_) => emptyLoadingListView(context, isBrowser),
-              loadProfileFailure: (_) => (isBrowser) ? GetLoginSignUpWidget(model: model) : emptyLoadingListView(context, true),
+              loadProfileFailure: (_) => (isBrowser) ? GetLoginSignUpWidget(model: model, didLoginSuccess: () {  },) : emptyLoadingListView(context, true),
               loadUserProfileSuccess: (item) => getNotificationsForAllReservations(context, item.profile),
               orElse: () {
                 return emptyLoadingListView(context, isBrowser);
@@ -95,7 +88,7 @@ class ReservationScreen extends StatelessWidget {
   }
 
   Widget getInvitationBasedReservations(BuildContext context, UserProfileModel currentUser, List<AccountNotificationItem> notifications) {
-    return BlocProvider(create: (_) => getIt<UserProfileWatcherBloc>()..add(const UserProfileWatcherEvent.watchProfileAllAttendingResStarted()),
+    return BlocProvider(create: (_) => getIt<UserProfileWatcherBloc>()..add(const UserProfileWatcherEvent.watchProfileAllAttendingResStarted(null, null, null)),
       child: BlocBuilder<UserProfileWatcherBloc, UserProfileWatcherState>(
         builder: (context, state) {
           return state.maybeMap(
@@ -137,10 +130,22 @@ class ReservationScreen extends StatelessWidget {
                                                         ActivityManagerForm activity,
                                                         AttendeeItem? attendeeItem,
                                                         List<TicketItem> currentUsersTickets) {
-
-
                                                       didSelectReservation(listing, reservation, currentUser, activity, attendeeItem, currentUsersTickets);
-                                                },
+                                                    },
+                                                    didSelectResDetail: (model, listing, reservation, isResOwner, isFromChat, currentUser) {
+                                                      Navigator.of(context).push(MaterialPageRoute(builder: (_) {
+                                                        return ReservationDetailsWidget(
+                                                          model: model,
+                                                          listing: listing,
+                                                          reservationItem: reservation,
+                                                          isReservationOwner: false,
+                                                          allAttendees: [],
+                                                          isFromChat: true,
+                                                          currentUser: currentUser,
+                                                        );
+                                                      })
+                                                    );
+                                                  }
                                               );
                                             } else {
                                               return Container();
@@ -192,7 +197,11 @@ class ReservationScreen extends StatelessWidget {
                                                         LocalNotificationCore.updateNotificationToRead(context, notifications.where((element) => element.reservationId == reservation.reservationId && element.notificationType == AccountNotificationType.invite).map((e) => e.notificationId).toList(), model.paletteColor, model.accentColor);
                                                         // updateNotificationToRead
                                                         didSelectReservation(listing, reservation, currentUser, activity, attendeeItem, currentUsersTickets);
-                                              },
+                                                      },
+                                                      didSelectResDetail: (model, listing, reservation, isResOwner, isFromChat, currentUser) {
+
+
+                                              }
                                             );
                                           },
                                           orElse: () => Container()
@@ -204,7 +213,7 @@ class ReservationScreen extends StatelessWidget {
                             )
                           ],
                         )
-                    ),
+                      ),
 
                   ],
                 );
@@ -269,6 +278,20 @@ class ReservationScreen extends StatelessWidget {
                                     List<TicketItem> currentUsersTickets) {
                                     didSelectReservation(listing, reservation, currentUser, activity, attendeeItem, currentUsersTickets);
                                   },
+                                didSelectResDetail: (model, listing, reservation, isResOwner, isFromChat, currentUser) {
+                                  Navigator.of(context).push(MaterialPageRoute(builder: (_) {
+                                      return ReservationDetailsWidget(
+                                        model: model,
+                                        listing: listing,
+                                        reservationItem: reservation,
+                                        isReservationOwner: false,
+                                        allAttendees: [],
+                                        isFromChat: true,
+                                        currentUser: currentUser,
+                                        );
+                                      })
+                                    );
+                                  }
                                 )
                               ).toList(),
                               const SizedBox(height: 10),
@@ -325,6 +348,20 @@ class ReservationScreen extends StatelessWidget {
                             List<TicketItem> currentUsersTickets) {
                           didSelectReservation(listing, reservation, currentUser, activity, attendeeItem, currentUsersTickets);
                         },
+                        didSelectResDetail: (model, listing, reservation, isResOwner, isFromChat, currentUser) {
+                          Navigator.of(context).push(MaterialPageRoute(builder: (_) {
+                            return ReservationDetailsWidget(
+                              model: model,
+                              listing: listing,
+                              reservationItem: reservation,
+                              isReservationOwner: false,
+                              allAttendees: [],
+                              isFromChat: true,
+                              currentUser: currentUser,
+                            );
+                          })
+                          );
+                        }
                       )
                     ).toList(),
                   ]
@@ -371,6 +408,20 @@ class ReservationScreen extends StatelessWidget {
                           ) {
                         didSelectReservation(listing, reservation, currentUser, activity, attendeeItem, currentUsersTickets);
                       },
+                        didSelectResDetail: (model, listing, reservation, isResOwner, isFromChat, currentUser) {
+                          Navigator.of(context).push(MaterialPageRoute(builder: (_) {
+                            return ReservationDetailsWidget(
+                              model: model,
+                              listing: listing,
+                              reservationItem: reservation,
+                              isReservationOwner: false,
+                              allAttendees: [],
+                              isFromChat: true,
+                              currentUser: currentUser,
+                            );
+                          })
+                          );
+                        }
                     )
                     ).toList(),
                   ]

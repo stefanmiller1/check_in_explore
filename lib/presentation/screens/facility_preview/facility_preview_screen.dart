@@ -7,22 +7,11 @@ import 'package:check_in_credentials/check_in_credentials.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_facade/check_in_facade.dart' as facade;
 import 'package:check_in_presentation/check_in_presentation.dart';
-import 'package:check_in_web_mobile_explore/presentation/core/components/user_card.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/facility_preview/components/add_new_reservation_slots.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/facility_preview/components/facility_activity_programming.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/facility_preview/components/facility_overview_info_widget.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/facility_preview/components/map_listing_component.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/facility_preview/facility_preview_screen_helper.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/profile_settings/profile_settings_screen_helper.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/listing_components/listing_helper.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/map_helper.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/pop_over_screen/search_when_where_helper.dart';
-import 'package:check_in_web_mobile_explore/presentation/web_screens/main_container_widgets/search_explore_widgets/search_explore_helper_core.dart';
-import 'package:dismissible_page/dismissible_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:intl/intl.dart';
 import 'package:jumping_dot/jumping_dot.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -361,7 +350,6 @@ class _FacilityPreviewScreenState extends State<FacilityPreviewScreen> with Sing
                           reservations: reservations,
                           listingOwnerProfile: listingOwnerProfile,
                           listing: listing,
-                          marker: marker,
                           selectedReservationsSlots: widget.selectedReservationsSlots,
                           selectedActivityType: state.selectedActivityType,
                           currentListingActivityOption: state.currentListingActivityOption,
@@ -921,7 +909,7 @@ class _FacilityPreviewScreenState extends State<FacilityPreviewScreen> with Sing
         builder: (context, authState) {
           return authState.maybeMap(
             loadInProgress: (_) => loadingConfirmReservation(),
-            loadProfileFailure: (_) => GetLoginSignUpWidget(model: widget.model),
+            loadProfileFailure: (_) => GetLoginSignUpWidget(model: widget.model, didLoginSuccess: () {  },),
             loadUserProfileSuccess: (item) {
               return Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -969,7 +957,7 @@ class _FacilityPreviewScreenState extends State<FacilityPreviewScreen> with Sing
                 ],
               );
             },
-            orElse: () => GetLoginSignUpWidget(model: widget.model)
+            orElse: () => GetLoginSignUpWidget(model: widget.model, didLoginSuccess: () {  },)
           );
         },
       ),
@@ -1105,8 +1093,7 @@ class _FacilityPreviewScreenState extends State<FacilityPreviewScreen> with Sing
                 width: MediaQuery.of(context).size.width,
                 color: widget.model.mobileBackgroundColor,
               ),
-              CreateNewMain(
-                  child: reservationContainerModel.firstWhere((element) => element.markerItem == reservationMarker).childWidget),
+              reservationContainerModel.firstWhere((element) => element.markerItem == reservationMarker).childWidget,
             ],
           );
         }

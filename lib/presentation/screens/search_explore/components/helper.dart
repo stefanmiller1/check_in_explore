@@ -18,51 +18,7 @@ double searchHeaderHeight(BuildContext context) => 120;
 double panelHeight(BuildContext context) => MediaQuery.of(context).size.height - searchHeaderHeight(context);
 
 
-class MapMarker extends Clusterable {
 
-  final String markerId;
-  final LatLng position;
-  bool? isSelected;
-  String? markerTitle;
-  String? markerImageUrl;
-  BitmapDescriptor? icon;
-  Function()? onMarkerTap;
-
-  MapMarker({
-    required this.markerId,
-    required this.position,
-    this.icon,
-    this.isSelected,
-    this.markerTitle,
-    this.markerImageUrl,
-    this.onMarkerTap,
-    isCluster = false,
-    clusterId,
-    pointsSize,
-    childMarkerId,
-  }) : super(
-    markerId: markerId,
-    latitude: position.latitude,
-    longitude: position.longitude,
-    isCluster: isCluster,
-    clusterId: clusterId,
-    pointsSize: pointsSize,
-    childMarkerId: childMarkerId,
-  );
-
-
-  Marker toMarker() => Marker(
-    markerId: MarkerId(markerId),
-    position: LatLng(
-      position.latitude,
-      position.longitude,
-    ),
-    onTap: onMarkerTap,
-    icon: icon ?? BitmapDescriptor.defaultMarker,
-    // onTap: isCluster! ? (onMarkerTap != null) ? onMarkerTap!(this) : null : null
-  );
-
-}
 
 class LocationOptionModel {
 

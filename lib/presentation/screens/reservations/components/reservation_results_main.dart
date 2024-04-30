@@ -9,20 +9,11 @@ import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_domain/domain/auth/reservation_manager/post.dart';
 import 'package:check_in_domain/domain/auth/reservation_manager/reservation_post/image_post.dart';
 import 'package:check_in_domain/domain/misc/attendee_services/attendee_item/attendee_item.dart';
-import 'package:check_in_web_mobile_explore/presentation/core/components/invite_widgets/send_invitation_request.dart';
-import 'package:check_in_web_mobile_explore/presentation/core/components/reservation_card.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/posts/post_helper.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/posts/post_widget_builder.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/activity_settings_screen.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/chat_inbox/direct_chat_screen.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/facility_preview/components/facility_overview_info_widget.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/facility_preview/facility_preview_screen_helper.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/profile_settings/components/review_current_profile.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/reservations/components/widgets/reservation_activity_info_widget.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/reservations/components/pop_over_screen/reservation_affiliate_onboarding_widget.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/reservations/components/reservation_helper.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/reservations/components/widgets/reservation_footer_widget.dart';
-import 'package:check_in_web_mobile_explore/presentation/web_screens/main_container_widgets/reservations_widget/reservation_helper_core.dart';
+import 'package:check_in_web_mobile_explore/presentation/screens/reservations/reservation_helper.dart';
 import 'package:dartz/dartz.dart' as bloc;
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:check_in_facade/check_in_facade.dart' as facade;
@@ -44,6 +35,8 @@ import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 import '../../activity_tickets/activity_attendee_ticket_results_main.dart';
+import 'pop_over_screen/reservation_affiliate_onboarding_widget.dart';
+
 
 class ReservationResultMain extends StatefulWidget {
 
@@ -269,7 +262,7 @@ class _ReservationResultMainState extends State<ReservationResultMain> with Tick
                        height: 750,
                        child: SendInvitationRequest(
                          model: widget.model,
-                         currentUser: widget.currentUser!,
+                         currentUserId: widget.currentUser!.userId.getOrCrash(),
                          attendeeType: AttendeeType.free,
                          reservationItem: reservation,
                          inviteType: InvitationType.reservation,
@@ -327,13 +320,6 @@ class _ReservationResultMainState extends State<ReservationResultMain> with Tick
                ///TODO: THIS NEEDS TO BE THE LISTING OWNER!!!!!
                listingOwnerProfile: currentUser,
                listing: listing,
-               marker: Marker(markerId: MarkerId(
-                   listing.listingServiceId.getOrCrash()),
-                   position: LatLng(listing.listingProfileService
-                       .listingLocationSetting.locationPosition
-                       ?.latitude ?? 0, listing.listingProfileService
-                       .listingLocationSetting.locationPosition
-                       ?.longitude ?? 0)),
                selectedReservationsSlots: [],
                selectedActivityType: null,
                currentListingActivityOption: null,
@@ -376,7 +362,7 @@ class _ReservationResultMainState extends State<ReservationResultMain> with Tick
                allAttendees,
                reservation.reservationState == ReservationSlotState.completed,
                false,
-               currentUser.userId,
+               currentUser.userId.getOrCrash(),
                currentAttendee,
                didSelectCreateActivity: () {
                  setState(() {
@@ -516,7 +502,7 @@ class _ReservationResultMainState extends State<ReservationResultMain> with Tick
                    reservation,
                    currentAttendee,
                    allAttendees,
-                   currentUser.userId,
+                   currentUser.userId.getOrCrash(),
                    isOwner,
                    false,
                    didSelectJoin: () {
@@ -873,6 +859,7 @@ class _ReservationResultMainState extends State<ReservationResultMain> with Tick
                   didSelectEditProfile: (profile) {
 
                 },
+                  showBack: true,
               );
             }));
           }
@@ -1428,13 +1415,6 @@ class _ReservationResultMainState extends State<ReservationResultMain> with Tick
                         /// THIS NEEDS TO BE THE LISTING OWNER!!!!!
                         listingOwnerProfile: currentUser,
                         listing: listing,
-                        marker: Marker(markerId: MarkerId(
-                            listing.listingServiceId.getOrCrash()),
-                            position: LatLng(listing.listingProfileService
-                                .listingLocationSetting.locationPosition
-                                ?.latitude ?? 0, listing.listingProfileService
-                                .listingLocationSetting.locationPosition
-                                ?.longitude ?? 0)),
                         selectedReservationsSlots: [],
                         selectedActivityType: null,
                         currentListingActivityOption: null,

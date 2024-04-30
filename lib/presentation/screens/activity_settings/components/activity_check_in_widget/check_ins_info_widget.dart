@@ -43,7 +43,7 @@ class _CheckInSettingWidgetState extends State<CheckInSettingWidget> {
     return SingleChildScrollView(
       controller: _scrollController,
       child: Container(
-        width: 675,
+        width: MediaQuery.of(context).size.width,
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Column(
@@ -51,105 +51,105 @@ class _CheckInSettingWidgetState extends State<CheckInSettingWidget> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               minContainerForCheckIn(
-                  context: context,
-                  model: widget.model,
-                  editSelectCheckInForm: (value) {
-                    showGeneralDialog(
-                      context: context,
-                      barrierDismissible: true,
-                      barrierLabel: AppLocalizations.of(context)!.facilityCreateFormNavLocation1,
-                      barrierColor: widget.model.disabledTextColor.withOpacity(0.34),
-                      transitionDuration: Duration(milliseconds: 650),
-                      pageBuilder: (BuildContext contexts, anim1, anim2) {
-                        return Scaffold(
-                            backgroundColor: Colors.transparent,
-                            body: Align(
-                              alignment: Alignment.bottomCenter,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                    color: widget.model.accentColor,
-                                    borderRadius: BorderRadius.only(topRight: Radius.circular(17.5), topLeft: Radius.circular(17.5))
-                                ),
-                                width: 600,
-                                height: 750,
-                                child: CheckInFormEditWidget(
-                                  model: widget.model,
-                                  currentCheckInForm: value,
-                                  spaces: null,
-                                  reservations: context.read<UpdateActivityFormBloc>().state.reservationItem.reservationSlotItem,
-                                  didSaveCheckIn: (checkIn) {
-                                    setState(() {
-                                      final List<CheckInSetting> newCheckIn = [];
-                                      newCheckIn.addAll(context.read<UpdateActivityFormBloc>().state.activitySettingsForm.rulesService.checkInSetting);
-                                      newCheckIn.add(checkIn);
-
-                                      context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.checkInSettingsChanged(newCheckIn));
-                                    });
-                                  },
-                                ),
+                context: context,
+                model: widget.model,
+                editSelectCheckInForm: (value) {
+                  showGeneralDialog(
+                    context: context,
+                    barrierDismissible: true,
+                    barrierLabel: AppLocalizations.of(context)!.facilityCreateFormNavLocation1,
+                    barrierColor: widget.model.disabledTextColor.withOpacity(0.34),
+                    transitionDuration: Duration(milliseconds: 650),
+                    pageBuilder: (BuildContext contexts, anim1, anim2) {
+                      return Scaffold(
+                          backgroundColor: Colors.transparent,
+                          body: Align(
+                            alignment: Alignment.bottomCenter,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                  color: widget.model.accentColor,
+                                  borderRadius: BorderRadius.only(topRight: Radius.circular(17.5), topLeft: Radius.circular(17.5))
                               ),
-                            )
-                        );
-                      },
-                      transitionBuilder: (context, anim1, anim2, child) {
-                        return SlideTransition(
-                          position: Tween(begin: Offset(0, 1), end: Offset(0, 0.01)).animate(anim1),
-                          child: child,
-                        );
-                      },
-                    );
-                  },
-                  checkInSettingsChanged: (checkIns) {
-                    setState(() {
-                      context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.checkInSettingsChanged(checkIns));
-                    });
-                  },
-                  createNewCheckInForm: () {
-                    showGeneralDialog(
-                      context: context,
-                      barrierDismissible: true,
-                      barrierLabel: AppLocalizations.of(context)!.facilityCreateFormNavLocation1,
-                      barrierColor: widget.model.disabledTextColor.withOpacity(0.34),
-                      transitionDuration: Duration(milliseconds: 650),
-                      pageBuilder: (BuildContext contexts, anim1, anim2) {
-                        return Scaffold(
-                            backgroundColor: Colors.transparent,
-                            body: Align(
-                              alignment: Alignment.bottomCenter,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                    color: widget.model.accentColor,
-                                    borderRadius: BorderRadius.only(topRight: Radius.circular(17.5), topLeft: Radius.circular(17.5))
-                                ),
-                                width: 600,
-                                height: 750,
-                                child: CheckInFormEditWidget(
-                                  model: widget.model,
-                                  currentCheckInForm: CheckInSetting.empty(),
-                                  spaces: null,
-                                  reservations: context.read<UpdateActivityFormBloc>().state.reservationItem.reservationSlotItem,
-                                  didSaveCheckIn: (checkIn) {
-                                    setState(() {
-                                      final List<CheckInSetting> newCheckIn = [];
-                                      newCheckIn.addAll(context.read<UpdateActivityFormBloc>().state.activitySettingsForm.rulesService.checkInSetting);
-                                      newCheckIn.add(checkIn);
+                              width: 600,
+                              height: 750,
+                              child: CheckInFormEditWidget(
+                                model: widget.model,
+                                currentCheckInForm: value,
+                                spaces: null,
+                                reservations: context.read<UpdateActivityFormBloc>().state.reservationItem.reservationSlotItem,
+                                didSaveCheckIn: (checkIn) {
+                                  setState(() {
+                                    final List<CheckInSetting> newCheckIn = [];
+                                    newCheckIn.addAll(context.read<UpdateActivityFormBloc>().state.activitySettingsForm.rulesService.checkInSetting);
+                                    newCheckIn.add(checkIn);
 
-                                      context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.checkInSettingsChanged(newCheckIn));
-                                    });
-                                  },
-                                ),
+                                    context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.checkInSettingsChanged(newCheckIn));
+                                  });
+                                },
                               ),
-                            )
-                        );
-                      },
-                      transitionBuilder: (context, anim1, anim2, child) {
-                        return SlideTransition(
-                          position: Tween(begin: Offset(0, 1), end: Offset(0, 0.01)).animate(anim1),
-                          child: child,
-                        );
-                      },
-                    );
-                  }
+                            ),
+                          )
+                      );
+                    },
+                    transitionBuilder: (context, anim1, anim2, child) {
+                      return SlideTransition(
+                        position: Tween(begin: Offset(0, 1), end: Offset(0, 0.01)).animate(anim1),
+                        child: child,
+                      );
+                    },
+                  );
+                },
+                checkInSettingsChanged: (checkIns) {
+                  setState(() {
+                    context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.checkInSettingsChanged(checkIns));
+                  });
+                },
+                createNewCheckInForm: () {
+                  showGeneralDialog(
+                    context: context,
+                    barrierDismissible: true,
+                    barrierLabel: AppLocalizations.of(context)!.facilityCreateFormNavLocation1,
+                    barrierColor: widget.model.disabledTextColor.withOpacity(0.34),
+                    transitionDuration: Duration(milliseconds: 650),
+                    pageBuilder: (BuildContext contexts, anim1, anim2) {
+                      return Scaffold(
+                        backgroundColor: Colors.transparent,
+                        body: Align(
+                          alignment: Alignment.bottomCenter,
+                          child: Container(
+                            decoration: BoxDecoration(
+                                color: widget.model.accentColor,
+                                borderRadius: BorderRadius.only(topRight: Radius.circular(17.5), topLeft: Radius.circular(17.5))
+                            ),
+                            width: 600,
+                            height: 750,
+                            child: CheckInFormEditWidget(
+                              model: widget.model,
+                              currentCheckInForm: CheckInSetting.empty(),
+                              spaces: null,
+                              reservations: context.read<UpdateActivityFormBloc>().state.reservationItem.reservationSlotItem,
+                              didSaveCheckIn: (checkIn) {
+                                setState(() {
+                                  final List<CheckInSetting> newCheckIn = [];
+                                  newCheckIn.addAll(context.read<UpdateActivityFormBloc>().state.activitySettingsForm.rulesService.checkInSetting);
+                                  newCheckIn.add(checkIn);
+
+                                  context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.checkInSettingsChanged(newCheckIn));
+                                });
+                              },
+                            ),
+                          ),
+                        )
+                      );
+                    },
+                    transitionBuilder: (context, anim1, anim2, child) {
+                      return SlideTransition(
+                        position: Tween(begin: Offset(0, 1), end: Offset(0, 0.01)).animate(anim1),
+                        child: child,
+                      );
+                    },
+                  );
+                }
               ),
             ],
           ),

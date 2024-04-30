@@ -43,6 +43,8 @@ class ActivityAttendeeSettingsMainContainerWidget extends StatelessWidget {
           );
         case SettingNavMarker.checkIns:
           break;
+        default:
+          return Container();
       }
       return Container();
   }
