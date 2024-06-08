@@ -46,7 +46,7 @@ class ReservationScreen extends StatelessWidget {
         builder: (context, authState) {
           return authState.maybeMap(
               loadInProgress: (_) => emptyLoadingListView(context, isBrowser),
-              loadProfileFailure: (_) => (isBrowser) ? GetLoginSignUpWidget(model: model, didLoginSuccess: () {  },) : emptyLoadingListView(context, true),
+              loadProfileFailure: (_) => (isBrowser) ? GetLoginSignUpWidget(showFullScreen: true, model: model, didLoginSuccess: () {  },) : emptyLoadingListView(context, true),
               loadUserProfileSuccess: (item) => getNotificationsForAllReservations(context, item.profile),
               orElse: () {
                 return emptyLoadingListView(context, isBrowser);

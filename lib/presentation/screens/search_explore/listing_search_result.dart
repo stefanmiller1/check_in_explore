@@ -10,6 +10,8 @@ import 'package:shimmer/shimmer.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 
+import '../create_activity/create_activity_screen_helper.dart';
+
 class ListingSearchResult extends StatefulWidget {
 
   final bool isOpen;
@@ -147,7 +149,12 @@ class _ListingSearchResultState extends State<ListingSearchResult> {
               showReservations: true,
               isLoading: isLoading,
               didSelectMainImage: (listing) {
-
+                didSelectCreateNewActivity(
+                    context,
+                    widget.model,
+                    listing,
+                    2
+                );
               },
               didSelectFooter: (ListingManagerForm listing) {
 

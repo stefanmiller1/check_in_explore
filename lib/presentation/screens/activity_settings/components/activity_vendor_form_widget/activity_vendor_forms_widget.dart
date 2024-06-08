@@ -1,5 +1,6 @@
 import 'package:check_in_presentation/check_in_presentation.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:check_in_application/auth/update_services/listing_update_create_services/settings_update_create_services/activity_settings/activity_settings_form_bloc.dart';
 import 'package:flutter/material.dart';
@@ -64,8 +65,8 @@ class _VendorFormsWidgetState extends State<VendorFormsWidget> {
                       color: widget.model.accentColor,
                       borderRadius: BorderRadius.all(Radius.circular(17.5))
                   ),
-                  width: 1050,
-                  height: 950,
+                  width: 1200,
+                  height: 1050,
                   child: VendorFormEditorWidget(
                     model: widget.model,
                     form: form,
@@ -157,13 +158,49 @@ class _VendorFormsWidgetState extends State<VendorFormsWidget> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          createNewVendorPreviews(
-                              context: context,
-                              model: widget.model,
-                              hasForms: context.read<UpdateActivityFormBloc>().state.activitySettingsForm.rulesService.vendorMerchantForms?.isNotEmpty == true,
-                              createNewForm: () {
-                                editCreateForm(context, null);
-                            }
+                          const SizedBox(height: 30),
+                          Container(
+                            width: 675,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('Vendor or Merchant are supported?', style: TextStyle(fontSize: widget.model.secondaryQuestionTitleFontSize, color: widget.model.paletteColor,)),
+                                    Text('Attendees can join as a Vendor or Merchant based on a form created by you.', style: TextStyle(color: widget.model.disabledTextColor))
+                                  ],
+                                )
+                                ),
+                                FlutterSwitch(
+                                  width: 60,
+                                  inactiveColor: widget.model.accentColor,
+                                  activeColor: widget.model.paletteColor,
+                                  value: context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.eventActivityRulesRequirement?.isMerchantSupported ?? false,
+                                  onToggle: (value) {
+                                    setState(() {
+                                      if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.eventActivityRulesRequirement?.isMerchantSupported == true) {
+                                        context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.isMerchantSupportedChanged(false));
+                                      } else {
+                                        context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.isMerchantSupportedChanged(true));
+                                      }
+                                    });
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                          Visibility(
+                            visible: context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.eventActivityRulesRequirement?.isMerchantSupported == true,
+                            child: createNewVendorPreviews(
+                                context: context,
+                                model: widget.model,
+                                hasForms: context.read<UpdateActivityFormBloc>().state.activitySettingsForm.rulesService.vendorMerchantForms?.isNotEmpty == true,
+                                createNewForm: () {
+                                  editCreateForm(context, null);
+                              }
+                            ),
                           ),
                           const SizedBox(height: 25),
 

@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 
+import '../create_activity/create_activity_screen_helper.dart';
+
 
 
 class SearchExploreScreen extends StatefulWidget {
@@ -80,8 +82,13 @@ class _SearchExploreScreenState extends State<SearchExploreScreen> {
               setState(() {
               });
             },
-            didSelectListingPreview: (ListingManagerForm ) {
-
+            didSelectListingPreview: (listing) {
+              didSelectCreateNewActivity(
+                  context,
+                  widget.model,
+                  listing,
+                  2
+              );
             },
           ),
           panelBuilder: (pc) {

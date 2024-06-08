@@ -55,7 +55,16 @@ Widget getVendorFormListTile(BuildContext context, DashboardModel model, int? in
           width: 130,
           child: Row(
           children: [
-              c
+              Container(
+                  decoration: BoxDecoration(
+                      color: getStatusColor(model, form.formStatus).withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(30)
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(form.formStatus.name, style: TextStyle(color: getStatusColor(model, form.formStatus))),
+                  )
+              ),
                 const SizedBox(width: 4),
                 IconButton(
                 icon: Icon(Icons.more_vert, color: model.paletteColor),

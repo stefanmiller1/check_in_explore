@@ -32,7 +32,6 @@ class _BackgroundInfoSettingsWidgetState extends State<BackgroundInfoSettingsWid
 
   @override
   void initState() {
-    // TODO: implement initState
     _scrollController = ScrollController();
     super.initState();
   }
@@ -252,7 +251,7 @@ class _BackgroundInfoSettingsWidgetState extends State<BackgroundInfoSettingsWid
                                 getInstructorAttendees: getInstructorAttendees(attendees.where((element) => element.attendeeType == AttendeeType.instructor).toList()),
                                 didSelectCreateInstructor: () {
                                   _handleCreateNewAttendeeInstructor(context);
-                                }
+                              },
                             ),
                             const SizedBox(height: 25),
                             if (widget.activityManagerForm.profileService.isActivityPost == null || widget.activityManagerForm.profileService.isActivityPost == true) mainActivityBackgroundContainerFooter(
@@ -337,7 +336,7 @@ class _BackgroundInfoSettingsWidgetState extends State<BackgroundInfoSettingsWid
                                   getInstructorAttendees: getInstructorAttendees(attendees.where((element) => element.attendeeType == AttendeeType.instructor).toList()),
                                   didSelectCreateInstructor: () {
                                     _handleCreateNewAttendeeInstructor(context);
-                                  }
+                                  },
                                 ),
                               ),
                             if (MediaQuery.of(context).size.width >= 1300) SizedBox(width: MediaQuery.of(context).size.width * 0.1)

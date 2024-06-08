@@ -655,6 +655,40 @@ PODS:
     - Flutter
   - device_info_plus (0.0.1):
     - Flutter
+  - DKImagePickerController/Core (4.3.8):
+    - DKImagePickerController/ImageDataManager
+    - DKImagePickerController/Resource
+  - DKImagePickerController/ImageDataManager (4.3.8)
+  - DKImagePickerController/PhotoGallery (4.3.8):
+    - DKImagePickerController/Core
+    - DKPhotoGallery
+  - DKImagePickerController/Resource (4.3.8)
+  - DKPhotoGallery (0.0.18):
+    - DKPhotoGallery/Core (= 0.0.18)
+    - DKPhotoGallery/Model (= 0.0.18)
+    - DKPhotoGallery/Preview (= 0.0.18)
+    - DKPhotoGallery/Resource (= 0.0.18)
+    - SDWebImage
+    - SwiftyGif
+  - DKPhotoGallery/Core (0.0.18):
+    - DKPhotoGallery/Model
+    - DKPhotoGallery/Preview
+    - SDWebImage
+    - SwiftyGif
+  - DKPhotoGallery/Model (0.0.18):
+    - SDWebImage
+    - SwiftyGif
+  - DKPhotoGallery/Preview (0.0.18):
+    - DKPhotoGallery/Model
+    - DKPhotoGallery/Resource
+    - SDWebImage
+    - SwiftyGif
+  - DKPhotoGallery/Resource (0.0.18):
+    - SDWebImage
+    - SwiftyGif
+  - file_picker (0.0.1):
+    - DKImagePickerController/PhotoGallery
+    - Flutter
   - Firebase/Auth (10.22.0):
     - Firebase/CoreOnly
     - FirebaseAuth (~> 10.22.0)
@@ -904,6 +938,9 @@ PODS:
     - Flutter
   - PromisesObjC (2.4.0)
   - RecaptchaInterop (100.0.0)
+  - SDWebImage (5.19.1):
+    - SDWebImage/Core (= 5.19.1)
+  - SDWebImage/Core (5.19.1)
   - share_plus (0.0.1):
     - Flutter
   - shared_preferences_foundation (0.0.1):
@@ -952,10 +989,14 @@ PODS:
     - StripeUICore (= 23.22.1)
   - StripeUICore (23.22.1):
     - StripeCore (= 23.22.1)
+  - SwiftyGif (5.4.5)
   - url_launcher_ios (0.0.1):
     - Flutter
   - vibration (1.7.5):
     - Flutter
+  - video_player_avfoundation (0.0.1):
+    - Flutter
+    - FlutterMacOS
   - webview_flutter_wkwebview (0.0.1):
     - Flutter
 
@@ -965,6 +1006,7 @@ DEPENDENCIES:
   - cloud_firestore (from `.symlinks/plugins/cloud_firestore/ios`)
   - cloud_functions (from `.symlinks/plugins/cloud_functions/ios`)
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
+  - file_picker (from `.symlinks/plugins/file_picker/ios`)
   - firebase_auth (from `.symlinks/plugins/firebase_auth/ios`)
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
   - firebase_dynamic_links (from `.symlinks/plugins/firebase_dynamic_links/ios`)
@@ -991,6 +1033,7 @@ DEPENDENCIES:
   - stripe_ios (from `.symlinks/plugins/stripe_ios/ios`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
   - vibration (from `.symlinks/plugins/vibration/ios`)
+  - video_player_avfoundation (from `.symlinks/plugins/video_player_avfoundation/darwin`)
   - webview_flutter_wkwebview (from `.symlinks/plugins/webview_flutter_wkwebview/ios`)
 
 SPEC REPOS:
@@ -998,6 +1041,8 @@ SPEC REPOS:
     - abseil
     - AppAuth
     - BoringSSL-GRPC
+    - DKImagePickerController
+    - DKPhotoGallery
     - Firebase
     - FirebaseAppCheckInterop
     - FirebaseAuth
@@ -1027,6 +1072,7 @@ SPEC REPOS:
     - OpenSSL-Universal
     - PromisesObjC
     - RecaptchaInterop
+    - SDWebImage
     - Stripe
     - StripeApplePay
     - StripeCore
@@ -1035,6 +1081,7 @@ SPEC REPOS:
     - StripePaymentSheet
     - StripePaymentsUI
     - StripeUICore
+    - SwiftyGif
 
 EXTERNAL SOURCES:
   add_2_calendar:
@@ -1047,6 +1094,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/cloud_functions/ios"
   device_info_plus:
     :path: ".symlinks/plugins/device_info_plus/ios"
+  file_picker:
+    :path: ".symlinks/plugins/file_picker/ios"
   firebase_auth:
     :path: ".symlinks/plugins/firebase_auth/ios"
   firebase_core:
@@ -1099,6 +1148,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/url_launcher_ios/ios"
   vibration:
     :path: ".symlinks/plugins/vibration/ios"
+  video_player_avfoundation:
+    :path: ".symlinks/plugins/video_player_avfoundation/darwin"
   webview_flutter_wkwebview:
     :path: ".symlinks/plugins/webview_flutter_wkwebview/ios"
 
@@ -1111,6 +1162,9 @@ SPEC CHECKSUMS:
   cloud_firestore: 204a2db57e7249e0cbbeee32d510580280b13016
   cloud_functions: 038ea30a247f20a9b57c1c27fe5efbeb619cfb53
   device_info_plus: c6fb39579d0f423935b0c9ce7ee2f44b71b9fce6
+  DKImagePickerController: a7836546cfdfe014171694f643a7d575bc8ace7f
+  DKPhotoGallery: acbd8a3bab19cf6e5fe64a853fc07bfbd247a8f6
+  file_picker: 09aa5ec1ab24135ccd7a1621c46c84134bfd6655
   Firebase: 797fd7297b7e1be954432743a0b3f90038e45a71
   firebase_auth: cd5d79ba9a9a81151066d75f7cc8f6e698e33ed9
   firebase_core: 8e100adc478919c6f3224f854ce8fa0bd98e36fd
@@ -1158,6 +1212,7 @@ SPEC CHECKSUMS:
   pointer_interceptor_ios: 9280618c0b2eeb80081a343924aa8ad756c21375
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
   RecaptchaInterop: 7d1a4a01a6b2cb1610a47ef3f85f0c411434cb21
+  SDWebImage: 40b0b4053e36c660a764958bff99eed16610acbb
   share_plus: c3fef564749587fc939ef86ffb283ceac0baf9f5
   shared_preferences_foundation: b4c3b4cddf1c21f02770737f147a3f5da9d39695
   sign_in_with_apple: f3bf75217ea4c2c8b91823f225d70230119b8440
@@ -1172,8 +1227,10 @@ SPEC CHECKSUMS:
   StripePaymentSheet: a25d920bb3bb5e2580696476482dc7df9cb5e4e2
   StripePaymentsUI: 66088abec88754bbdd522ef227dfdbb2265a653e
   StripeUICore: b193c7d35e9cd1b04bc9ed4a6fb8c548fcee83fa
+  SwiftyGif: 706c60cf65fa2bc5ee0313beece843c8eb8194d4
   url_launcher_ios: 6116280ddcfe98ab8820085d8d76ae7449447586
   vibration: 7d883d141656a1c1a6d8d238616b2042a51a1241
+  video_player_avfoundation: 7c6c11d8470e1675df7397027218274b6d2360b3
   webview_flutter_wkwebview: be0f0d33777f1bfd0c9fdcb594786704dbf65f36
 
 PODFILE CHECKSUM: 819463e6a0290f5a72f145ba7cde16e8b6ef0796

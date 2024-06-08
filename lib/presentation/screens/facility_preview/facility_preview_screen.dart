@@ -155,6 +155,7 @@ class _FacilityPreviewScreenState extends State<FacilityPreviewScreen> with Sing
                     model: widget.model,
                     listing: listing,
                     reservations: reservations,
+                    isPopOver: true,
                     listingOwnerProfile: listingOwnerProfile,
                     selectedFacilityBooking: context.read<ReservationFormBloc>().state.newFacilityBooking,
                     selectedSpace: context.read<ReservationFormBloc>().state.currentSelectedSpace ?? listing.listingProfileService.spaceSetting.spaceTypes.value.fold((l) => SpaceOption.empty(), (r) => r.first),
@@ -191,6 +192,7 @@ class _FacilityPreviewScreenState extends State<FacilityPreviewScreen> with Sing
               listing: listing,
               reservations: reservations,
               listingOwnerProfile: listingOwnerProfile,
+              isPopOver: true,
               selectedFacilityBooking: context.read<ReservationFormBloc>().state.newFacilityBooking,
               selectedSpace: context.read<ReservationFormBloc>().state.currentSelectedSpace ?? listing.listingProfileService.spaceSetting.spaceTypes.value.fold((l) => SpaceOption.empty(), (r) => r.first),
               selectedSportSpace: context.read<ReservationFormBloc>().state.currentSelectedSpaceOption,
@@ -436,7 +438,7 @@ class _FacilityPreviewScreenState extends State<FacilityPreviewScreen> with Sing
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
                       child: Column(
-                          children: getSpacesFromSelectedReservationSlot(context, listing, state.newFacilityBooking).map(
+                          children: getSpacesFromSelectedReservationSlot(context, listing, state.newFacilityBooking.reservationSlotItem).map(
                             (e) => Padding(
                               padding: const EdgeInsets.symmetric(vertical: 8.0),
                               child: getSelectedSpaces(context, e, widget.model),
@@ -880,7 +882,7 @@ class _FacilityPreviewScreenState extends State<FacilityPreviewScreen> with Sing
       child: BlocBuilder<ReservationManagerWatcherBloc, ReservationManagerWatcherState>(
         builder: (context, state) {
           return state.maybeMap(
-              resLoadInProgress: (_) => progressOverlay(widget.model),
+              // resLoadInProgress: (_) => progressOverlay(widget.model),
               loadReservationListSuccess: (e) => retrieveFacilityOwner(e.item, listing),
               loadReservationListFailure: (_) => retrieveFacilityOwner([], listing),
               ///TODO: add failure of type empty
@@ -895,7 +897,7 @@ class _FacilityPreviewScreenState extends State<FacilityPreviewScreen> with Sing
     return BlocBuilder<UserProfileWatcherBloc, UserProfileWatcherState>(
       builder: (context, state) {
         return state.maybeMap(
-        loadInProgress: (_) => loadingListingProfile(listing),
+        // loadInProgress: (_) => loadingListingProfile(listing),
         loadSelectedProfileFailure: (_) => couldNotRetrieveListingProfile(),
         loadSelectedProfileSuccess: (item) => retrieveMainContainerForReservation(reservations, item.profile, listing),
         orElse: () => couldNotRetrieveListingProfile()
@@ -909,7 +911,7 @@ class _FacilityPreviewScreenState extends State<FacilityPreviewScreen> with Sing
         builder: (context, authState) {
           return authState.maybeMap(
             loadInProgress: (_) => loadingConfirmReservation(),
-            loadProfileFailure: (_) => GetLoginSignUpWidget(model: widget.model, didLoginSuccess: () {  },),
+            loadProfileFailure: (_) => GetLoginSignUpWidget(showFullScreen: true, model: widget.model, didLoginSuccess: () {  },),
             loadUserProfileSuccess: (item) {
               return Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -930,7 +932,7 @@ class _FacilityPreviewScreenState extends State<FacilityPreviewScreen> with Sing
                       } else {
                         context.read<ReservationFormBloc>().add(ReservationFormEvent.isFinishedCreatingReservation(
                             item.profile,
-                            completeTotalPriceForCheckoutFormat(getListingTotalPriceDouble(state.newFacilityBooking.reservationSlotItem, state.newFacilityBooking.cancelledSlotItem ?? []) + getListingTotalPriceDouble(state.newFacilityBooking.reservationSlotItem, state.newFacilityBooking.cancelledSlotItem ?? []) * CICOReservationPercentageFee + getListingTotalPriceDouble(state.newFacilityBooking.reservationSlotItem, state.newFacilityBooking.cancelledSlotItem ?? []) * CICOTaxesFee, listing.listingProfileService.backgroundInfoServices.currency),
+                            (getListingTotalPriceDouble(state.newFacilityBooking.reservationSlotItem, state.newFacilityBooking.cancelledSlotItem ?? []) + getListingTotalPriceDouble(state.newFacilityBooking.reservationSlotItem, state.newFacilityBooking.cancelledSlotItem ?? []) * CICOReservationPercentageFee + getListingTotalPriceDouble(state.newFacilityBooking.reservationSlotItem, state.newFacilityBooking.cancelledSlotItem ?? []) * CICOTaxesFee).toInt(),
                             listing.listingProfileService.backgroundInfoServices.currency,
                             null,
                             listing.listingReservationService.accessVisibilitySetting.isReviewRequired ?? false)
@@ -957,7 +959,7 @@ class _FacilityPreviewScreenState extends State<FacilityPreviewScreen> with Sing
                 ],
               );
             },
-            orElse: () => GetLoginSignUpWidget(model: widget.model, didLoginSuccess: () {  },)
+            orElse: () => GetLoginSignUpWidget(showFullScreen: true, model: widget.model, didLoginSuccess: () {  },)
           );
         },
       ),

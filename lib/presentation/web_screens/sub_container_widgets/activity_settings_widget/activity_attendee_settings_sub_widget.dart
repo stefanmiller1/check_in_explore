@@ -1,5 +1,6 @@
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
+import 'package:check_in_domain/domain/misc/attendee_services/attendee_item/attendee_item.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -8,10 +9,11 @@ class AttendeeSettingsListContainer extends StatefulWidget {
   final DashboardModel model;
   late SettingsItemModel currentSelectedSettingItem;
   final ReservationItem currentReservationItem;
+  final AttendeeItem? currentAttendee;
   final ActivityManagerForm? currentActivityManagerForm;
   final Function(SettingsItemModel navItem) didSelectNavItem;
 
-  AttendeeSettingsListContainer({super.key, required this.model, required this.currentSelectedSettingItem, required this.currentReservationItem, required this.currentActivityManagerForm, required this.didSelectNavItem});
+  AttendeeSettingsListContainer({super.key, required this.model, required this.currentSelectedSettingItem, required this.currentReservationItem, required this.currentActivityManagerForm, required this.didSelectNavItem, this.currentAttendee});
 
   @override
   State<AttendeeSettingsListContainer> createState() => _AttendeeSettingsListContainerState();
@@ -21,7 +23,7 @@ class _AttendeeSettingsListContainerState extends State<AttendeeSettingsListCont
 
   @override
   void initState() {
-    widget.currentSelectedSettingItem = subActivityAttendeeSettingItems(widget.currentActivityManagerForm)[0];
+    widget.currentSelectedSettingItem = subActivityAttendeeSettingItems(widget.currentActivityManagerForm, widget.currentAttendee)[0];
     super.initState();
   }
 
@@ -45,7 +47,7 @@ class _AttendeeSettingsListContainerState extends State<AttendeeSettingsListCont
                         Text(e.settingTitle, style: TextStyle(color: (widget.currentSelectedSettingItem.sectionNavItem == e.sectionMarker) ? widget.model.paletteColor : widget.model.disabledTextColor, fontWeight: FontWeight.bold, fontSize: widget.model.secondaryQuestionTitleFontSize),),
                         const SizedBox(height: 5),
                         Column(
-                          children: subActivityAttendeeSettingItems(widget.currentActivityManagerForm).where((element) => element.sectionNavItem == e.sectionMarker).map(
+                          children: subActivityAttendeeSettingItems(widget.currentActivityManagerForm, widget.currentAttendee).where((element) => element.sectionNavItem == e.sectionMarker).map(
                                   (f) {
                                 return ListTile(
                                   onTap: () {

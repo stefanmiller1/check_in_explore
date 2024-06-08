@@ -49,7 +49,7 @@ class ActivityAttendeeTicketSettingMainContainerWidget extends StatelessWidget {
               loadInProgress: (_) => JumpingDots(color: model.paletteColor, numberOfDots: 3),
               loadProfileFailure: (_) => Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: GetLoginSignUpWidget(model: model, didLoginSuccess: () {  },),
+                child: GetLoginSignUpWidget(showFullScreen: true, model: model, didLoginSuccess: () {  },),
               ),
               loadUserProfileSuccess: (item) => (reservationItem != null && activityManagerForm != null) ?  ActivityAttendeeTicketsResultMain(
                   model: model,

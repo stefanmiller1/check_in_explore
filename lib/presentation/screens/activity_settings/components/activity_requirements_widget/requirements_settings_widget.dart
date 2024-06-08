@@ -88,17 +88,6 @@ class _RequirementSettingsWidgetState extends State<RequirementSettingsWidget> {
     });
   }
 
-  void _handleCreateNewAttendeeVendor(BuildContext context) {
-    didSelectInvitationRequest(
-        context: context,
-        model: widget.model,
-        currentUser: widget.currentUser.userId.getOrCrash(),
-        attendeeType: AttendeeType.vendor,
-        reservationItem: widget.reservationItem,
-        inviteType: InvitationType.reservation,
-        activityManagerForm: widget.activityManagerForm
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -180,15 +169,6 @@ class _RequirementSettingsWidgetState extends State<RequirementSettingsWidget> {
                                   }
                                 });
                               },
-                              isVendorMerchInviteOnly: () {
-                                setState(() {
-                                  if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.eventActivityRulesRequirement?.isMerchantInviteOnly == true) {
-                                    context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.isMerchantInviteOnlyChanged(false));
-                                  } else {
-                                    context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.isMerchantInviteOnlyChanged(true));
-                                  }
-                                });
-                              },
                               isFoodForSale: () {
                                 setState(() {
                                   if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.eventActivityRulesRequirement?.isFoodForSale == true) {
@@ -198,16 +178,6 @@ class _RequirementSettingsWidgetState extends State<RequirementSettingsWidget> {
                                   }
                                 });
                               },
-                              getVendorAttendees: getVendorAttendeesList(widget.activityManagerForm),
-                              didSelectCreateVendor: () {
-                                _handleCreateNewAttendeeVendor(context);
-                              },
-                              didChangeMerchVenLimit: (limit) {
-                                context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.merchantLimitChanged(int.parse(limit)));
-                              },
-                              didChangeMerchVenFee: (fee) {
-                                context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.merchantFeeChanged(int.parse(fee)));
-                              }
                           ),
                           mainContainerForSectionFooterReq(
                               context: context,
@@ -338,15 +308,6 @@ class _RequirementSettingsWidgetState extends State<RequirementSettingsWidget> {
                                     }
                                   });
                                 },
-                                isVendorMerchInviteOnly: () {
-                                  setState(() {
-                                    if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.eventActivityRulesRequirement?.isMerchantInviteOnly == true) {
-                                      context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.isMerchantInviteOnlyChanged(false));
-                                    } else {
-                                      context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.isMerchantInviteOnlyChanged(true));
-                                    }
-                                  });
-                                },
                                 isFoodForSale: () {
                                   setState(() {
                                     if (context.read<UpdateActivityFormBloc>().state.activitySettingsForm.profileService.activityRequirements.eventActivityRulesRequirement?.isFoodForSale ?? false) {
@@ -356,17 +317,7 @@ class _RequirementSettingsWidgetState extends State<RequirementSettingsWidget> {
                                     }
                                   });
                                 },
-                                getVendorAttendees: getVendorAttendeesList(widget.activityManagerForm),
-                                didSelectCreateVendor: () {
-                                  _handleCreateNewAttendeeVendor(context);
-                                },
-                                didChangeMerchVenLimit: (limit) {
-                                  context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.merchantLimitChanged(int.parse(limit)));
-                                },
-                                didChangeMerchVenFee: (fee) {
-                                  context.read<UpdateActivityFormBloc>().add(UpdateActivityFormEvent.merchantFeeChanged(int.parse(fee)));
-                                }
-                            )
+                              )
                             ),
                             if (MediaQuery.of(context).size.width >= 1300) SizedBox(width: MediaQuery.of(context).size.width * 0.1)
                           ],

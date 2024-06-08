@@ -39,7 +39,7 @@ class ActivityAttendeeMainContainerWidget extends StatelessWidget {
               loadInProgress: (_) => JumpingDots(color: model.paletteColor, numberOfDots: 3),
               loadProfileFailure: (_) => Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: GetLoginSignUpWidget(model: model, didLoginSuccess: () {  },),
+                child: GetLoginSignUpWidget(showFullScreen: true, model: model, didLoginSuccess: () {  },),
               ),
               loadUserProfileSuccess: (item) => (selectedProfile != null && attendee != null) ?  ActivityAttendeesResultMain(
                   model: model,

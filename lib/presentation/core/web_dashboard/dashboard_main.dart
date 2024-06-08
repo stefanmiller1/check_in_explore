@@ -35,7 +35,10 @@ class _WebDashboardMainState extends State<WebDashboardMain> {
   DashboardMarker? currentMarker;
 
 
-  Widget? updateMainContainer(DashboardMarker dashboardMarker) {
+  Widget updateMainContainer(DashboardMarker dashboardMarker) {
+    if (dashboardMarker == DashboardMarker.settings) {
+      return widget.optionsMarkerItem.mainContainer.mainContainer;
+    }
     if (widget.dashboardContainerItems.where((element) => element.dashboardMarker == dashboardMarker).isNotEmpty) {
     return widget.dashboardContainerItems.firstWhere((element) => element.dashboardMarker == dashboardMarker).mainContainer.mainContainer;
     } else {
@@ -52,6 +55,9 @@ class _WebDashboardMainState extends State<WebDashboardMain> {
   }
 
   Widget? updateSubContainer(DashboardMarker dashboardMarker) {
+    if (dashboardMarker == DashboardMarker.settings) {
+      return widget.optionsMarkerItem.subContainer;
+    }
     if (widget.dashboardContainerItems.where((element) => element.dashboardMarker == dashboardMarker).isNotEmpty) {
       return widget.dashboardContainerItems.firstWhere((element) => element.dashboardMarker == dashboardMarker).subContainer;
     } else {
@@ -60,6 +66,9 @@ class _WebDashboardMainState extends State<WebDashboardMain> {
   }
 
   bool subContainerIsHidden(DashboardMarker dashboardMarker) {
+    if (dashboardMarker == DashboardMarker.settings) {
+      return widget.optionsMarkerItem.mainContainer.isSubContainerAllowed;
+    }
     if (widget.dashboardContainerItems.where((element) => element.dashboardMarker == dashboardMarker).isNotEmpty) {
       return widget.dashboardContainerItems.firstWhere((element) => element.dashboardMarker == dashboardMarker).mainContainer.isSubContainerAllowed;
     } else {
@@ -68,6 +77,9 @@ class _WebDashboardMainState extends State<WebDashboardMain> {
   }
 
   bool presentSidePanelContainer(DashboardMarker dashboardMarker) {
+    if (widget.dashboardMarker == DashboardMarker.settings) {
+      return widget.optionsMarkerItem.mainContainer.presentSidePanel;
+    }
     if (widget.dashboardContainerItems.where((element) => element.dashboardMarker == dashboardMarker).isNotEmpty) {
       return widget.dashboardContainerItems.firstWhere((element) => element.dashboardMarker == dashboardMarker).mainContainer.presentSidePanel;
     } else {
@@ -242,7 +254,7 @@ class _WebDashboardMainState extends State<WebDashboardMain> {
               ),
             ),
             if (subContainerIsHidden(currentMarker!) && (!(Responsive.isMobile(context)))) Expanded(
-              flex: _size.width > 1340 ? 3 : 6,
+              flex: _size.width > 1340 ? 3 : 5,
               child: AnimatedContainer(
                 duration: Duration(milliseconds: 750),
                 child: SubContainer(

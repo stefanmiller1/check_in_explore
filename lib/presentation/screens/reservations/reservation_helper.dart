@@ -210,6 +210,7 @@ void presentMoreOptions(BuildContext context, DashboardModel model, bool isReser
                                 e.icon,
                                 e.title,
                                 false,
+                                true,
                                 didSelectItem: () {
                                   Navigator.of(context).pop();
 

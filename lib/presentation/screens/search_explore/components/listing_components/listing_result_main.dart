@@ -126,8 +126,9 @@ class _ListingResultMainState extends State<ListingResultMain> {
             return state.maybeMap(
               resLoadInProgress: (_) => isLoadingMainContainer(context),
               loadReservationListSuccess: (e) {
+
                 return ActivityResultMain(
-                    reservations: e.item,
+                    reservations: e.item.where((element) => element.isActivity == true).toList(),
                     model: widget.model,
                     listing: widget.listing,
                     didSelectEmbeddedRes: (listing, res) => didSelectEmbeddedRes(listing, res)

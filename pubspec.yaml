@@ -43,6 +43,8 @@ dependencies:
   beamer: ^1.5.6
   social_share: ^2.3.1
   file_picker: ^8.0.0+1
+  excel: ^4.0.3
+  video_player: ^2.8.6
   auth_buttons:
     git:
       url: https://github.com/elbeicktalat/flutter_auth_buttons.git
@@ -121,6 +123,7 @@ flutter:
     - assets/payment_icons/unionpay.svg
     - assets/payment_icons/verve.svg
     - assets/payment_icons/visa.svg
+    - assets/logo_icon/CIRCLE_LOGO_LIGHT.png
     - assets/icons_svg/add_to_wallet/US-UK_Add_to_Apple_Wallet_RGB_101421.svg
     - assets/profile-avatar.png
     - assets/html/checkout.html
@@ -132,6 +135,7 @@ flutter:
     - assets/images/activity_creator/provider_options/provided_activity_options_Referee_Officiator.png
     - assets/images/activity_creator/provider_options/provided_activity_options_Security.png
     - assets/images/activity_creator/provider_options/provided_activity_options_Statistics.png
+    - assets/videos/Circle_Homepage_Animation.mp4
     - assets/lottie_animations/
 
   # An image asset can refer to one or more resolution-specific "variants", see

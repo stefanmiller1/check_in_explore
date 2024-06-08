@@ -57,7 +57,7 @@ class _RequirementsSettingsMobileEditorState extends State<RequirementsSettingsM
                     Navigator.of(context).pop();
                     widget.didSave();
                   }
-                  )
+                )
               );
             },
             buildWhen: (p, c) => p.showErrorMessages != c.showErrorMessages || p.isSaving != c.isSaving || p.isEditingForm != c.isEditingForm || p.activitySettingsForm != c.activitySettingsForm,

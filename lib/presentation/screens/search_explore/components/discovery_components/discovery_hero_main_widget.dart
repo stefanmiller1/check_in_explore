@@ -46,7 +46,7 @@ class _DiscoveryHeroMainWidgetState extends State<DiscoveryHeroMainWidget> {
         );
 
         /// is looking for vend. or merch
-        if (activityManagerForm?.profileService.activityRequirements.eventActivityRulesRequirement?.isMerchantInviteOnly == true) {
+        if (activityManagerForm?.profileService.activityRequirements.eventActivityRulesRequirement?.isMerchantSupported == true) {
           weight += 2;
         }
         /// has hero images (10 points)

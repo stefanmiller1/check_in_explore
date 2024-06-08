@@ -58,7 +58,7 @@ class _DirectChatRoomsScreenState extends State<DirectChatRoomsScreen> {
         builder: (context, authState) {
           return authState.maybeMap(
               loadInProgress: (_) => emptyLoadingListView(context, isBrowser),
-              loadProfileFailure: (_) => (isBrowser) ? GetLoginSignUpWidget(model: widget.model, didLoginSuccess: () {  },) : emptyLoadingListView(context, true),
+              loadProfileFailure: (_) => (isBrowser) ? GetLoginSignUpWidget(showFullScreen: true, model: widget.model, didLoginSuccess: () {  },) : emptyLoadingListView(context, true),
               loadUserProfileSuccess: (item) => getChatRooms(context, item.profile),
               orElse: () {
                 return emptyLoadingListView(context, isBrowser);

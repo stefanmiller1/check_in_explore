@@ -155,7 +155,7 @@ class _SettingsMainContainerWidgetState extends State<SettingsMainContainerWidge
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: SizedBox(
-                  width: 440,
+                  width: ReservationHelperCore.previewerWidth - 30,
                   child: Column(
                     children: [
                       getActivityBackgroundForPreview(
@@ -182,7 +182,7 @@ class _SettingsMainContainerWidgetState extends State<SettingsMainContainerWidge
             scrollDirection: Axis.horizontal,
             physics: NeverScrollableScrollPhysics(),
             child: SizedBox(
-              width: 440,
+              width: ReservationHelperCore.previewerWidth - 30,
               child: Column(
                 children: [
                   getActivityRequirementsColumn(
@@ -262,7 +262,7 @@ class _SettingsMainContainerWidgetState extends State<SettingsMainContainerWidge
         return SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Container(
-              width: 400,
+              width: ReservationHelperCore.previewerWidth - 30,
               child: getActivityTicketOptionsColumn(
                   context,
                   widget.model,
@@ -282,7 +282,25 @@ class _SettingsMainContainerWidgetState extends State<SettingsMainContainerWidge
       case null:
         // TODO: Handle this case.
       case SettingNavMarker.vendorForm:
-        // TODO: Handle this case.
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Container(
+            width: ReservationHelperCore.previewerWidth - 27,
+            child: getActivityVendorOptionColumn(
+              context,
+              widget.model,
+              context.read<UpdateActivityFormBloc>().state.reservationItem,
+              context.read<UpdateActivityFormBloc>().state.activitySettingsForm,
+              reservationOwner,
+              true,
+              ReservationHelperCore.previewerWidth,
+              false,
+              didSelectManage: () {
+
+              },
+            ),
+          ),
+        );
     }
     return Container();
   }
@@ -366,7 +384,7 @@ class _SettingsMainContainerWidgetState extends State<SettingsMainContainerWidge
                 buildWhen: (p,c) => p.showErrorMessages != c.showErrorMessages || p.isSaving != c.isSaving || p.isEditingForm != c.isEditingForm || p.activitySettingsForm != c.activitySettingsForm,
                 builder: (context, state) {
 
-                  bool showPreviewer = widget.currentNavItem?.navItem == SettingNavMarker.backgroundInfo || widget.currentNavItem?.navItem == SettingNavMarker.requirementsInfo || widget.currentNavItem?.navItem == SettingNavMarker.ticketBased;
+                  bool showPreviewer = widget.currentNavItem?.navItem == SettingNavMarker.backgroundInfo || widget.currentNavItem?.navItem == SettingNavMarker.requirementsInfo || widget.currentNavItem?.navItem == SettingNavMarker.ticketBased || widget.currentNavItem?.navItem == SettingNavMarker.vendorForm;
 
                   return Stack(
                     children: [

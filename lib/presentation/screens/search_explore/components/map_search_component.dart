@@ -81,7 +81,7 @@ class _MapSearchContainerState extends State<MapSearchContainer> {
     //   context.read<ListingsSearchRequirementsBloc>().add(const ListingsSearchRequirementsEvent.isMarkersLoading(true));
     //   widget.selectedListing(null);
     // });
-    //
+
     Future.delayed(const Duration(seconds: 2), () async {
     //   setState(() {
         MapHelper.showMapReload = true;
@@ -221,7 +221,7 @@ class _MapSearchContainerState extends State<MapSearchContainer> {
           context,
           widget.model,
           context.read<ListingsSearchRequirementsBloc>().state.isMarkersLoading,
-          (kIsWeb) ? 180 : 150 + (MediaQuery.of(context).size.height * 0.21),
+          (kIsWeb) ? 20 : 150 + (MediaQuery.of(context).size.height * 0.21),
           context.read<ListingsSearchRequirementsBloc>().state.listings.toList(),
           context.read<ListingsSearchRequirementsBloc>().state.selectedListingId,
           didChangePage: (page) {
@@ -241,25 +241,27 @@ class _MapSearchContainerState extends State<MapSearchContainer> {
             context.read<ListingsSearchRequirementsBloc>().add(ListingsSearchRequirementsEvent.selectedListingIdChanged(listing.listingServiceId));
           },
           didSelectListing: (listing) {
-              if (kIsWeb) {
-                widget.didSelectListingPreview(listing);
-              } else {
-                Navigator.push(context, MaterialPageRoute(
-                    builder: (_) {
-                      return FacilityPreviewScreen(
-                        listing: listing,
-                        listingId: listing.listingServiceId,
-                        model: widget.model,
-                        isAutoImplyLeading: false,
-                        selectedReservationsSlots: context.read<ListingsSearchRequirementsBloc>().state.selectedReservationsSlots?.toList() ?? [],
-                        didSelectBack: () {},
-                        didSelectReservation: (listing, res) {
 
-                      },
-                    );
-                  }
-              ));
-            }
+            widget.didSelectListingPreview(listing);
+            //   if (kIsWeb) {
+            //     widget.didSelectListingPreview(listing);
+            //   } else {
+            //     Navigator.push(context, MaterialPageRoute(
+            //         builder: (_) {
+            //           return FacilityPreviewScreen(
+            //             listing: listing,
+            //             listingId: listing.listingServiceId,
+            //             model: widget.model,
+            //             isAutoImplyLeading: false,
+            //             selectedReservationsSlots: context.read<ListingsSearchRequirementsBloc>().state.selectedReservationsSlots?.toList() ?? [],
+            //             didSelectBack: () {},
+            //             didSelectReservation: (listing, res) {
+            //
+            //           },
+            //         );
+            //       }
+            //   ));
+            // }
           }
         ),
 

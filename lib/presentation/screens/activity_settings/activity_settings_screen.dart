@@ -51,9 +51,7 @@ class _ActivitySettingsScreenMobileState extends State<ActivitySettingsScreenMob
 
 
   /// depending on activity show list of items
-
   Widget getMainListTile(BuildContext context, SettingNavMarker currentNav, ActivityManagerForm activityForm, UserProfileModel activityOwner) {
-
     switch (currentNav) {
       case SettingNavMarker.backgroundInfo:
         return Column(
@@ -576,9 +574,7 @@ class _ActivitySettingsScreenMobileState extends State<ActivitySettingsScreenMob
       default:
         return Container();
     }
-
     return Container();
-
   }
 
 

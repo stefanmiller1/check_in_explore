@@ -49,10 +49,10 @@ class _DiscoverySearchComponentState extends State<DiscoverySearchComponent> {
               children: [
                 const SizedBox(height: 85),
                 getWeeklyDiscoveryMainContainer(),
-                const SizedBox(height: 12),
-                getDiscoveryFeedNearYou(),
-                const SizedBox(height: 12),
-                getDiscoveryFeedCommunities(),
+                // const SizedBox(height: 12),
+                // getDiscoveryFeedNearYou(),
+                // const SizedBox(height: 12),
+                // getDiscoveryFeedCommunities(),
                 const SizedBox(height: 12),
                 getNextFewHoursMainContainer(),
                 const SizedBox(height: 12),
@@ -150,7 +150,7 @@ class _DiscoverySearchComponentState extends State<DiscoverySearchComponent> {
 
 
   Widget getListingsBasedOnTypeMainContainer() {
-    return BlocProvider(create: (_) => getIt<PublicListingWatcherBloc>()..add(PublicListingWatcherEvent.watchAllPublicListingsSearchStarted([ManagerListingStatusType.inProgress], null, null, true)),
+    return BlocProvider(create: (_) => getIt<PublicListingWatcherBloc>()..add(PublicListingWatcherEvent.watchAllPublicListingsSearchStarted([ManagerListingStatusType.finishSetup], null, null, null)),
           child: BlocBuilder<PublicListingWatcherBloc, PublicListingWatcherState>(
             builder: (context, state) {
               return state.maybeMap(
@@ -169,6 +169,11 @@ class _DiscoverySearchComponentState extends State<DiscoverySearchComponent> {
   /// call all listings? (sort/order by latest first? or last booking made time?)
 
   Widget getDiscoveryFeedHeader(List<ReservationItem> resPreview) {
+
+    if (resPreview.isEmpty) {
+      return Container();
+    }
+
     return SizedBox(
       width: MediaQuery.of(context).size.width,
       child: Column(
@@ -230,6 +235,9 @@ class _DiscoverySearchComponentState extends State<DiscoverySearchComponent> {
   /// see all options
   /// show number of all
   Widget getDiscoveryUpComingTodayOrHalfDay(List<ReservationItem> reservations) {
+    if (reservations.isEmpty) {
+      return Container();
+    }
     return SizedBox(
       width: MediaQuery.of(context).size.width,
       child: Column(
@@ -274,7 +282,7 @@ class _DiscoverySearchComponentState extends State<DiscoverySearchComponent> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 12),
-          Text('Great for Vendors', style: TextStyle(color: widget.model.paletteColor, fontWeight: FontWeight.bold, fontSize: widget.model.questionTitleFontSize)),
+          Text('Great for Organizers', style: TextStyle(color: widget.model.paletteColor, fontWeight: FontWeight.bold, fontSize: widget.model.questionTitleFontSize)),
           const SizedBox(height: 8),
 
           /// number of slots this week?

@@ -189,11 +189,11 @@ class _DiscoveryListingWidgetState extends State<DiscoveryListingWidget> {
                               },
                               didSelectFooter: (ListingManagerForm listing) {
                                 widget.didSelectListing(listing);
-                              },
-                            ),
+                            },
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
+                    ),
                   );
                 }
               ),

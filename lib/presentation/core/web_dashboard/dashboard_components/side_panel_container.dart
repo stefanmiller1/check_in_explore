@@ -2,7 +2,12 @@ import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/web_dashboard/dashboard_helper.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/web_dashboard/widgets/menu_marker_item.dart';
+import 'package:check_in_web_mobile_explore/presentation/screens/create_activity/create_activity_screen_helper.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+
+import '../../../screens/create_activity/create_activity_screen.dart';
 
 class SidePanelContainer extends StatefulWidget {
 
@@ -47,6 +52,7 @@ class _SidePanelContainerState extends State<SidePanelContainer> {
       padding: EdgeInsets.only(),
       color: widget.model.accentColor,
       child: Stack(
+        alignment: Alignment.topCenter,
         children: [
 
           Container(
@@ -54,43 +60,57 @@ class _SidePanelContainerState extends State<SidePanelContainer> {
             height: MediaQuery.of(context).size.height,
           ),
 
+          Positioned(
+            top: 40,
+            child: Container(
+              width: 60,
+              child: Container(
+                  child: Image.asset('assets/logo_icon/CIRCLE_LOGO_LIGHT.png')
+              ),
+            ),
+          ),
+
           Padding(
-            padding: const EdgeInsets.only(top: 50.0, bottom: 80),
+            padding: const EdgeInsets.only(top: 100.0, bottom: 80),
             child: Container(
               height: MediaQuery.of(context).size.width,
               width: 80,
               child: ListView(
-                children: widget.sideMarkerItems.where((element) => element.isVisible == true).toList().asMap().map((i, e) => MapEntry(i, MouseRegion(
-                    onEnter: (g) {
-                        setState(() {
-                          e.isHovering = true;
-                        });
-                    },
-                    onExit: (f) {
-                        setState(() {
-                          e.isHovering = false;
-                        });
-                    },
-                    child: MenuMarkerItem(
-                          isActive: (selectedMarker == e.dashboardMarker),
-                          isHover: e.isHovering,
-                          isPrivate: e.isPrivate,
-                          model: widget.model,
-                          didPress: () {
-                            setState(() {
-                              selectedMarker = e.dashboardMarker;
-                            });
-                            widget.didSelectMarker(e.dashboardMarker);
-                          },
-                          iconSrc: e.iconTab,
-                          imageUrl: e.imageUrl,
-                          title: e.tabTitle,
-                          isLive: e.isLive,
-                          isLast: e.dashboardMarker == DashboardMarker.profile,
-                          notifications: e.notificationCount,
+                children: widget.sideMarkerItems.where((element) => element.isVisible == true).toList().asMap().map(
+                  (i, e) {
+
+                    return MapEntry(i, MouseRegion(
+                      onEnter: (g) {
+                          setState(() {
+                            e.isHovering = true;
+                          });
+                      },
+                      onExit: (f) {
+                          setState(() {
+                            e.isHovering = false;
+                          });
+                      },
+                      child: MenuMarkerItem(
+                            isActive: (selectedMarker == e.dashboardMarker),
+                            isHover: e.isHovering,
+                            isPrivate: e.isPrivate,
+                            model: widget.model,
+                            didPress: () {
+                              setState(() {
+                                selectedMarker = e.dashboardMarker;
+                              });
+                              widget.didSelectMarker(e.dashboardMarker);
+                            },
+                            iconSrc: e.iconTab,
+                            imageUrl: e.imageUrl,
+                            title: e.tabTitle,
+                            isLive: e.isLive,
+                            isLast: e.dashboardMarker == DashboardMarker.profile,
+                            notifications: e.notificationCount,
+                          ),
                         ),
-                      ),
-                    ),
+                      );
+                    }
                   ).values.toList()
                 )
               ),
@@ -100,25 +120,41 @@ class _SidePanelContainerState extends State<SidePanelContainer> {
               bottom: 0,
               child: Container(
                 width: 80,
-                height: 80,
+                // height: 80,
                 color: widget.model.accentColor,
-                child: MenuMarkerItem(
-                  isActive: (selectedMarker == widget.optionsMarkerItem.dashboardMarker),
-                  isHover: widget.optionsMarkerItem.isHovering,
-                  model: widget.model,
-                  didPress: () {
-                    setState(() {
-                      selectedMarker = widget.optionsMarkerItem.dashboardMarker;
-                    });
-                    widget.didSelectMarker(widget.optionsMarkerItem.dashboardMarker);
-                  },
-                  iconSrc: widget.optionsMarkerItem.iconTab,
-                  title: widget.optionsMarkerItem.tabTitle,
-                  isLive: widget.optionsMarkerItem.isLive,
-                  isLast: false,
-                ),
+                child: Column(
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        didSelectCreateNewActivity(
+                          context,
+                          widget.model,
+                          null,
+                          null
+                        );
+                      },
+                      icon: Icon(Icons.add_box_outlined, color: widget.model.disabledTextColor, size: 30),
+                    ),
+                    const SizedBox(height: 8),
+                    MenuMarkerItem(
+                      isActive: (selectedMarker == widget.optionsMarkerItem.dashboardMarker),
+                      isHover: widget.optionsMarkerItem.isHovering,
+                      model: widget.model,
+                      didPress: () {
+                        setState(() {
+                          selectedMarker = widget.optionsMarkerItem.dashboardMarker;
+                        });
+                        widget.didSelectMarker(widget.optionsMarkerItem.dashboardMarker);
+                      },
+                      iconSrc: widget.optionsMarkerItem.iconTab,
+                      title: widget.optionsMarkerItem.tabTitle,
+                      isLive: widget.optionsMarkerItem.isLive,
+                      isLast: false,
+                  ),
+                ],
               ),
-            )
+            ),
+          )
         ],
       ),
     );

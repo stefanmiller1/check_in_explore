@@ -172,12 +172,16 @@ class _MainMobileScreenState extends State<MainMobileScreen> {
             centerTitle: true,
           ),
           mainWidgetItem: ProfileSettingsScreen(
-            model: widget.model,
-            isActivityApp: false,
-            didSelectLogOut: () {  },
-            didDeleteAccount: () {  },
+              model: widget.model,
+              isActivityApp: false,
+              didSelectLogOut: () {  },
+              didDeleteAccount: () {  },
+              isWeb: false,
+              didSelectNav: (item) {
+
+            },
           ),
-          isSelected: false
+        isSelected: false
       ),
     ];
 

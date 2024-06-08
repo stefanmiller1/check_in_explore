@@ -23,7 +23,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:jumping_dot/jumping_dot.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -528,6 +527,7 @@ class _ReservationResultMainState extends State<ReservationResultMain> with Tick
                       } else {
                         Navigator.push(context, MaterialPageRoute(
                             builder: (_) {
+                              /// if owner else show attendee manage options
                               return ActivitySettingsScreenMobile(
                                 model: widget.model,
                                 reservationItem: reservation,
@@ -1332,17 +1332,17 @@ class _ReservationResultMainState extends State<ReservationResultMain> with Tick
                               badgeContent: Text(notifications.where((element) => element.notificationType == AccountNotificationType.reservation).length.toString(), style: TextStyle(color: widget.model.accentColor)),
                               child: Tab(text: 'Reservation'),
                             )
-                       ],
+                         ],
+                       ),
                      ),
                    ),
                  ),
                ),
-             ),
+             )
            )
          )
-       )
-     ],
-   );
+       ],
+     );
   }
 
 
@@ -1385,6 +1385,12 @@ class _ReservationResultMainState extends State<ReservationResultMain> with Tick
                         isOwner: isOwner,
                         activitySetupComplete: activitySetupComplete(activityForm) || !isOwner,
                         showSuggestions: ReservationCoreHelper.showSuggestions && isOwner,
+                        didSelectShowReservation: () {
+                          setState(() {
+                            _tabController?.animateTo(1);
+                            ReservationCoreHelper.pageController?.animateToPage(1, duration: const Duration(milliseconds: 350), curve: Curves.easeInOut);
+                          });
+                        },
                         didSelectActivityTicket: (ticket) {
                           setState(() {
                             if (reservationOwner != null) {

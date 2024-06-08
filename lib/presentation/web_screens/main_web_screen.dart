@@ -24,9 +24,11 @@ import 'focused_main_container_widgets/activity_attendee_ticket_settings_widget/
 import 'focused_main_container_widgets/activity_ticket_settings_widget/activity_ticket_helper.dart';
 import 'focused_main_container_widgets/activity_vendor_form_manage_widget/activity_vendor_form_manage_container_widget.dart';
 import 'focused_main_container_widgets/activity_vendor_form_manage_widget/actvity_vendor_form_manager_helper.dart';
+import 'main_container_widgets/settings_widget/settings_main_container_widget.dart';
 import 'sub_container_widgets/activity_settings_widget/activity_settings_sub_main_widget.dart';
 import 'sub_container_widgets/activity_ticket_settings_widget/activity_ticket_sub_container_widget.dart';
 import 'sub_container_widgets/activity_vendor_manager_widget/activity_vendor_manager_sub_container_widget.dart';
+import 'sub_container_widgets/settings_widget/settings_sub_container_widget.dart';
 
 class MainWebScreen extends StatefulWidget {
 
@@ -206,6 +208,7 @@ class _MainWebScreenState extends State<MainWebScreen> {
         model: widget.model,
         currentUser: ReservationHelperCore.currentUserProfile,
         currentSelectedSettingItem: ReservationHelperCore.currentSettingsItemModel,
+        currentAttendee: ActivityAttendeeHelperCore.selectedAttendeeItem,
         didSelectNavItem: (selectedNav) {
           setState(() {
             ReservationHelperCore.currentSettingsItemModel = selectedNav;
@@ -219,6 +222,7 @@ class _MainWebScreenState extends State<MainWebScreen> {
       model: widget.model,
       reservationItem: ReservationHelperCore.selectedReservationItem,
       activityManagerForm: ReservationHelperCore.currentActivityForm,
+      selectedForm: ActivityVendorHelperCore.selectedForm,
       rebuild: () {
         setState(() {
         });
@@ -291,18 +295,47 @@ class _MainWebScreenState extends State<MainWebScreen> {
 
     final getLoginSignUpMainContainer = Padding(
       padding: const EdgeInsets.all(8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Flexible(child: Container(
-            constraints: BoxConstraints(
-              maxWidth: 600
-            ),
-            child: GetLoginSignUpWidget(model: widget.model, didLoginSuccess: () {  },),
-            )
-          ),
-        ],
+      child: GetLoginSignUpWidget(showFullScreen: true, model: widget.model, didLoginSuccess: () {
+        setState(() {
+          });
+        },
       ),
+    );
+
+    final accountSettingsMainContainer = SettingsMainContainerWidget(
+      model: widget.model,
+      currentMarker: ReservationHelperCore.currentProfileSettingsMarker,
+      currentUser: currentUser,
+      didRebuild: () {
+        setState(() {
+          Beamer.of(context).update(
+              configuration: RouteInformation(
+                  location: '/home'
+              ),
+              rebuild: true
+          );
+        });
+      },
+    );
+
+    final accountSettingsSubContainer = SettingsSubContainer(
+      model: widget.model,
+      currentUser: currentUser,
+      didSelectItem: (ProfileSettingMarker navItem) {
+        setState(() {
+          ReservationHelperCore.currentProfileSettingsMarker = navItem;
+        });
+      },
+      rebuild: () {
+        setState(() {
+          Beamer.of(context).update(
+              configuration: RouteInformation(
+                  location: '/home'
+              ),
+              rebuild: true
+          );
+        });
+      },
     );
 
     List<DashboardContainerModel> dashboardContent(UserProfileModel? currentUser, List<ReservationItem> currentRes, List<ActivityManagerForm> currentAct) => [
@@ -472,21 +505,18 @@ class _MainWebScreenState extends State<MainWebScreen> {
 
     final DashboardContainerModel optionsDashboardItem = DashboardContainerModel(
         mainContainer: DashboardMainContainerModel(
-            mainContainer: Container(),
-            sidePanelMainContainer: Container(),
-            isSubContainerAllowed: false,
-            presentSidePanel: false
+            mainContainer: (currentUser != null) ? accountSettingsMainContainer : getLoginSignUpMainContainer,
+            sidePanelMainContainer: accountSettingsSubContainer,
+            isSubContainerAllowed: currentUser != null,
+            presentSidePanel: ReservationHelperCore.didPresentSidePanel,
         ),
-        subContainer: Container(
-          color: Colors.lime,
-        ),
-        dashboardMarker: DashboardMarker.settings,
-        iconTab: Icons.more_horiz_rounded,
-        tabTitle: 'Settings'
+      subContainer: accountSettingsSubContainer,
+      dashboardMarker: DashboardMarker.settings,
+      iconTab: Icons.more_horiz_rounded,
+      tabTitle: 'Settings',
+      isVisible: !Responsive.isMobile(context)
     );
-
     return retrieveMainDashboardContainer(context, dashboardContent(currentUser, reservations, activities), reservations, activities, notifications, optionsDashboardItem);
-
   }
 
 
@@ -497,7 +527,6 @@ class _MainWebScreenState extends State<MainWebScreen> {
       dashboardContainerItems: dashboardContainerModel,
       didSelectDashboardMarkerItem: (marker) {
         setState(() {
-
           switch (marker) {
             case DashboardMarker.resProfile:
               Beamer.of(context).update(
@@ -518,6 +547,13 @@ class _MainWebScreenState extends State<MainWebScreen> {
                 widget.model.accentColor
               );
               break;
+            case DashboardMarker.resVendorForms:
+              ActivityVendorHelperCore.isLoading = true;
+              Future.delayed(const Duration(seconds: 1, milliseconds: 250), () {
+              setState(() {
+                ActivityVendorHelperCore.isLoading = false;
+                });
+              });
             case DashboardMarker.resTicket:
               // TODO: Handle this case.
               break;

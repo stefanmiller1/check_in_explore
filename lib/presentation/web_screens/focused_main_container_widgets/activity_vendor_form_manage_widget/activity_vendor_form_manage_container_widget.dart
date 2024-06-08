@@ -6,14 +6,17 @@ import 'package:flutter/material.dart';
 import 'package:jumping_dot/jumping_dot.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../screens/activity_vendors/activity_vendors_results_main.dart';
+
 class ActivityVendorFormManageMainContainerWidget extends StatelessWidget {
 
   final DashboardModel model;
   final ReservationItem? reservationItem;
   final ActivityManagerForm? activityManagerForm;
+  final VendorMerchantForm? selectedForm;
   final Function() rebuild;
 
-  const ActivityVendorFormManageMainContainerWidget({super.key, required this.model, required this.reservationItem, required this.activityManagerForm, required this.rebuild});
+  const ActivityVendorFormManageMainContainerWidget({super.key, required this.model, required this.reservationItem, required this.activityManagerForm, required this.rebuild, this.selectedForm});
 
   @override
   Widget build(BuildContext context) {
@@ -32,13 +35,13 @@ class ActivityVendorFormManageMainContainerWidget extends StatelessWidget {
                   color: model.accentColor,
                   borderRadius: BorderRadius.all(Radius.circular(20))
               ),
-              child: retrieveAuthenticationState(context)
+              child: (selectedForm != null) ? retrieveAuthenticationState(context, selectedForm!) : defaultPagePreview()
           )
       ),
     );
   }
 
-  Widget retrieveAuthenticationState(BuildContext context) {
+  Widget retrieveAuthenticationState(BuildContext context, VendorMerchantForm selectedForm) {
     return BlocProvider(create: (_) => getIt<UserProfileWatcherBloc>()..add(const UserProfileWatcherEvent.watchUserProfileStarted()),
       child: BlocBuilder<UserProfileWatcherBloc, UserProfileWatcherState>(
         builder: (context, authState) {
@@ -46,10 +49,15 @@ class ActivityVendorFormManageMainContainerWidget extends StatelessWidget {
               loadInProgress: (_) => JumpingDots(color: model.paletteColor, numberOfDots: 3),
               loadProfileFailure: (_) => Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: GetLoginSignUpWidget(model: model, didLoginSuccess: () {  },),
+                child: GetLoginSignUpWidget(showFullScreen: true, model: model, didLoginSuccess: () {  },),
               ),
-              loadUserProfileSuccess: (item) =>
-              (reservationItem != null && activityManagerForm != null) ? Container() :
+              loadUserProfileSuccess: (item) => (reservationItem != null && activityManagerForm != null) ? ActivityVendorApplicationsResultMain(
+                model: model,
+                selectedForm: selectedForm,
+                reservationItem: reservationItem!,
+                activityOwnerProfile: item.profile,
+                activityManagerForm: activityManagerForm!,
+              ) :
               settingsFailureToLoadContainer(),
               orElse: () {
                 return JumpingDots(color: model.paletteColor, numberOfDots: 3);
@@ -68,9 +76,25 @@ class ActivityVendorFormManageMainContainerWidget extends StatelessWidget {
         children: [
           Icon(Icons.info_outline, color: model.disabledTextColor, size: 85),
           const SizedBox(height: 10),
-          Text('Sorry, Cannot Manage Applications', style: TextStyle(color: model.disabledTextColor, fontSize: model.secondaryQuestionTitleFontSize)),
+          Text('Sorry, Cannot Manage Vendor Forms', style: TextStyle(color: model.disabledTextColor, fontSize: model.secondaryQuestionTitleFontSize)),
           const SizedBox(height: 10),
           Text('Start your own reservation and be able to see & manage your own applicants', style: TextStyle(color: model.disabledTextColor)),
+        ],
+      ),
+    );
+  }
+
+  Widget defaultPagePreview() {
+    return Container(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Icon(Icons.note_alt_outlined, color: model.disabledTextColor, size: 85),
+          const SizedBox(height: 10),
+          Text('Your Vendors', style: TextStyle(color: model.disabledTextColor, fontSize: model.secondaryQuestionTitleFontSize)),
+          const SizedBox(height: 10),
+          Text('Select any Vendor Form from the list and get things started!', style: TextStyle(color: model.disabledTextColor)),
         ],
       ),
     );

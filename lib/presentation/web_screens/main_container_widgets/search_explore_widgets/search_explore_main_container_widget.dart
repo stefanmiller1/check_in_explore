@@ -4,6 +4,7 @@ import 'package:beamer/beamer.dart';
 import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
+import 'package:check_in_web_mobile_explore/presentation/screens/create_activity/create_activity_screen_helper.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/facility_preview/facility_preview_screen.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/discovery_search_component.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/list_search_component.dart';
@@ -22,6 +23,8 @@ import 'package:jumping_dot/jumping_dot.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
+
+import '../../../screens/create_activity/create_activity_screen.dart';
 
 class SearchExploreMainContainerWidget extends StatefulWidget {
 
@@ -64,21 +67,27 @@ class _SearchExploreMainContainerWidgetState extends State<SearchExploreMainCont
                         });
                       },
                       didSelectListingPreview: (listing) {
-                        setState(() {
-                          ExploreWebHelperCore.didSelectFacilityItem(context, listing);
-                        });
-                          Future.delayed(const Duration(seconds: 2), () {
-                            setState(() {
-                              ExploreWebHelperCore.isLoading = false;
-                            });
 
-                        });
+                        didSelectCreateNewActivity(
+                          context,
+                          widget.model,
+                          listing,
+                          2
+                        );
+                        // setState(() {
+                        //   ExploreWebHelperCore.didSelectFacilityItem(context, listing);
+                        // });
+                        //   Future.delayed(const Duration(seconds: 2), () {
+                        //     setState(() {
+                        //       ExploreWebHelperCore.isLoading = false;
+                        //    });
+                        // });
                       },
                     ),
                   ),
 
                  getSearchHeaderToggleTopBar(),
-                 getFooterFilterBar(),
+                 // getFooterFilterBar(),
 
                   ],
                 ),
@@ -136,15 +145,21 @@ class _SearchExploreMainContainerWidgetState extends State<SearchExploreMainCont
                                     );
                                   },
                                   didSelectFooter: (ListingManagerForm listing) {
-                                    setState(() {
-                                      ExploreWebHelperCore.didSelectFacilityItem(context, listing);
-                                    });
-                                      Future.delayed(const Duration(seconds: 2), () {
-                                        setState(() {
-                                          ExploreWebHelperCore.isLoading = false;
-                                        });
-
-                                    });
+                                    didSelectCreateNewActivity(
+                                        context,
+                                        widget.model,
+                                        listing,
+                                        2
+                                    );
+                                    // setState(() {
+                                    //   ExploreWebHelperCore.didSelectFacilityItem(context, listing);
+                                    // });
+                                    //   Future.delayed(const Duration(seconds: 2), () {
+                                    //     setState(() {
+                                    //       ExploreWebHelperCore.isLoading = false;
+                                    //     });
+                                    //
+                                    // });
                                   },
                                 ),
                               ),
@@ -227,7 +242,7 @@ class _SearchExploreMainContainerWidgetState extends State<SearchExploreMainCont
               },
             ),
             getSearchHeaderToggleTopBar(),
-            getFooterFilterBar(),
+            // getFooterFilterBar(),
          ],
       );
     }
@@ -262,14 +277,20 @@ class _SearchExploreMainContainerWidgetState extends State<SearchExploreMainCont
                           child: DiscoverySearchComponent(
                             model: widget.model,
                             didSelectListing: (listing) {
-                              setState(() {
-                                ExploreWebHelperCore.didSelectFacilityItem(context, listing);
-                              });
-                            Future.delayed(const Duration(seconds: 2), () {
-                              setState(() {
-                                ExploreWebHelperCore.isLoading = false;
-                              });
-                            });
+                              didSelectCreateNewActivity(
+                                  context,
+                                  widget.model,
+                                  listing,
+                                  2
+                              );
+                            //   setState(() {
+                            //     ExploreWebHelperCore.didSelectFacilityItem(context, listing);
+                            //   });
+                            // Future.delayed(const Duration(seconds: 2), () {
+                            //   setState(() {
+                            //     ExploreWebHelperCore.isLoading = false;
+                            //   });
+                            // });
                         },
                       ),
                     ),

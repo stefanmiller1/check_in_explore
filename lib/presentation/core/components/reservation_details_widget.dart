@@ -77,7 +77,7 @@ class _ReservationDetailsWidgetState extends State<ReservationDetailsWidget> {
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
                       child: Column(
-                          children: getSpacesFromSelectedReservationSlot(context, widget.listing, widget.reservationItem).map(
+                          children: getSpacesFromSelectedReservationSlot(context, widget.listing, widget.reservationItem.reservationSlotItem).map(
                                   (e) => Padding(
                                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                                 child: getSelectedSpaces(context, e, widget.model),
@@ -451,6 +451,7 @@ class _ReservationDetailsWidgetState extends State<ReservationDetailsWidget> {
                       Icons.verified_user,
                       'Contact CICO Support',
                       false,
+                      true,
                       didSelectItem: () {
 
                     }

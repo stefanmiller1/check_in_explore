@@ -75,34 +75,7 @@ class _ListingResultMainCardState extends State<ListingResultMainCard> {
                     true,
                     didTap: () {
                       setState(() {
-                        if (kIsWeb) {
-                          widget.didSelectFooter(widget.listing);
-                        } else {
-                        Navigator.push(context, MaterialPageRoute(
-                            builder: (_) {
-                              return DismissiblePage(
-                                startingOpacity: 0.75,
-                                backgroundColor: Colors.transparent,
-                                direction: DismissiblePageDismissDirection.startToEnd,
-                                isFullScreen: true,
-                                onDismissed: () {
-                                  Navigator.of(context).pop();
-                                },
-                                child: FacilityPreviewScreen(
-                                    listing: widget.listing,
-                                    listingId: widget.listing.listingServiceId,
-                                    model: widget.model,
-                                    isAutoImplyLeading: false,
-                                    selectedReservationsSlots: context.read<ListingsSearchRequirementsBloc>().state.selectedReservationsSlots?.toList() ?? [],
-                                    didSelectBack: () {},
-                                    didSelectReservation: (listing, res) {
-
-                                  },
-                                ),
-                              );
-                            }
-                        ));
-                      }
+                        widget.didSelectFooter(widget.listing);
                     });
                 })
             ),

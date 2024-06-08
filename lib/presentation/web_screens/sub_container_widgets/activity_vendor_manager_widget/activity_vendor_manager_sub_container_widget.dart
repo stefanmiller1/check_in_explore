@@ -2,15 +2,14 @@ import 'dart:ui';
 
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
-import 'package:check_in_application/check_in_application.dart';
-import 'package:check_in_web_mobile_explore/presentation/web_screens/focused_main_container_widgets/activity_ticket_settings_widget/activity_ticket_helper.dart';
 import 'package:check_in_domain/domain/misc/attendee_services/attendee_item/attendee_item.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:check_in_facade/check_in_facade.dart' as facade;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:check_in_application/un_auth/watcher_services/attendee_watcher_service/attendee_manager_watcher_bloc.dart';
+
+import '../../../screens/activity_settings/components/activity_vendor_form_widget/activity_vendor_form_helper.dart';
 
 
 class ActivityVendorManagerSubContainer extends StatefulWidget {
@@ -58,7 +57,7 @@ class _ActivityVendorManagerSubContainerState extends State<ActivityVendorManage
                 children: [
                   const SizedBox(height: 30),
                   Padding(
-                    padding: const EdgeInsets.only(left: 4.0),
+                    padding: const EdgeInsets.only(left: 4.0, right: 4.0),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: widget.currentActivityManagerForm?.rulesService.vendorMerchantForms?.toList().asMap().map((i, form) {
@@ -74,20 +73,17 @@ class _ActivityVendorManagerSubContainerState extends State<ActivityVendorManage
                               ),
                               child: Padding(
                                 padding: const EdgeInsets.all(9.0),
-                                child: InkWell(
-                                  onTap: () {
-                                    widget.didSelectFormItem(form);
-                                  },
-                                  child: Stack(
-                                    children: [
-                                      Positioned(
-                                        child: zzz,
-                                      ),
-                                      Container(
-                                        decoration: BoxDecoration(
-                                            color: widget.model.accentColor,
-                                         borderRadius: BorderRadius.all(Radius.circular(17.5))
-                                          ),
+                                child: Stack(
+                                  children: [
+                                    Container(
+                                      decoration: BoxDecoration(
+                                          color: widget.model.accentColor,
+                                       borderRadius: BorderRadius.all(Radius.circular(17.5))
+                                        ),
+                                        child: InkWell(
+                                          onTap: () {
+                                            widget.didSelectFormItem(form);
+                                          },
                                           child: Column(
                                             children: [
                                               const SizedBox(height: 15),
@@ -103,6 +99,8 @@ class _ActivityVendorManagerSubContainerState extends State<ActivityVendorManage
                                               ),
                                               const SizedBox(height: 15),
                                               Text(form.formTitle ?? 'Form', style: TextStyle(color: widget.model.paletteColor, fontWeight: FontWeight.bold, fontSize: widget.model.secondaryQuestionTitleFontSize)),
+                                              // Divider(color: widget.model.disabledTextColor),
+                                              const SizedBox(height: 25),
                                               if (form.welcomeMessage != null && form.welcomeMessage!.isNotEmpty) ListTile(
                                                 leading: Icon(Icons.favorite_border_rounded, color: widget.model.disabledTextColor),
                                                 title: Text('Welcome Message', style: TextStyle(color: widget.model.paletteColor)),
@@ -157,7 +155,7 @@ class _ActivityVendorManagerSubContainerState extends State<ActivityVendorManage
                                                     ),
                                                   ]
                                                 ),
-                                                subtitle: Text('This will Cover ${widget.currentReservationItem?.reservationSlotItem.map((element) => element.selectedDate).toSet().toList().length} different Days'),
+                                                subtitle: Text('1 Option to Choose From'),
                                               ),
 
                                               if (form.availableTimeSlots != null) ListTile(
@@ -174,20 +172,59 @@ class _ActivityVendorManagerSubContainerState extends State<ActivityVendorManage
                                                 subtitle: Text('${form.availableTimeSlots?.length} different Dates to choose From'),
                                               ),
 
+                                              if (form.boothPaymentOptions != null) ListTile(
+                                                leading: Icon(Icons.storefront, color: widget.model.disabledTextColor),
+                                                title: Wrap(
+                                                  children: form.boothPaymentOptions?.map(
+                                                          (e) => Container(
+                                                            height: 30,
+                                                            width: 30,
+                                                            child: Icon(Icons.local_convenience_store_rounded),
+                                                          ),
+                                                  ).toList() ?? [],
+                                                ),
+                                                subtitle: Text((form.boothPaymentOptions?.length == 1) ? '1 Custom Booth Type' : '${form.boothPaymentOptions?.length ?? 0} Custom Booth Types'),
+                                              ),
+
+                                              if (form.customOptions != null && form.customOptions?.isNotEmpty == true) ListTile(
+                                                leading: Icon(Icons.note_alt_outlined, color: widget.model.disabledTextColor),
+                                                title: Text('Requires Documents', style: TextStyle(color: widget.model.paletteColor, overflow: TextOverflow.ellipsis), maxLines: 1),
+                                              ),
+
+                                              if (form.disclaimerOptions != null && form.disclaimerOptions?.isNotEmpty == true) ListTile(
+                                                leading: Icon(Icons.info_outline, color: widget.model.disabledTextColor),
+                                                title: Text((form.disclaimerOptions?.length == 1) ? '1 Disclaimer' : '${form.disclaimerOptions?.length ?? 0} Disclaimers', style: TextStyle(color: widget.model.paletteColor, overflow: TextOverflow.ellipsis), maxLines: 1),
+                                              ),
+
+                                              Divider(color: widget.model.disabledTextColor),
+
                                               const SizedBox(height: 25),
                                               Text('Last opened at: ${DateFormat.MMMd().add_jm().format(DateTime.fromMillisecondsSinceEpoch(form.lastOpenedAt))}', style: TextStyle(color: widget.model.disabledTextColor)),
-                                              const SizedBox(height: 25),
+                                              const SizedBox(height: 15),
                                             ],
                                           ),
-
                                         ),
+                                      ),
+                                    Positioned(
+                                      right: 8,
+                                      top: 10,
+                                      child: Container(
+                                          decoration: BoxDecoration(
+                                              color: getStatusColor(widget.model, form.formStatus).withOpacity(0.15),
+                                              borderRadius: BorderRadius.circular(30)
+                                          ),
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Text(form.formStatus.name, style: TextStyle(color: getStatusColor(widget.model, form.formStatus))),
+                                          )
+                                        ),
+                                      ),
                                     ],
                                   ),
                                 ),
                               ),
                             ),
-                            ),
-                        )
+                          )
                         );
                       }).values.toList() ?? [],
                     ),
@@ -236,14 +273,14 @@ class _ActivityVendorManagerSubContainerState extends State<ActivityVendorManage
     if (widget.currentReservationItem == null && widget.currentActivityManagerForm == null) {
       return getLoadingForOverviewFooter(context);
     }
-    return BlocProvider(create: (context) => getIt<AttendeeManagerWatcherBloc>()..add(AttendeeManagerWatcherEvent.watchAllAttendance(widget.currentReservationItem!.reservationId.getOrCrash())),
+    return BlocProvider(create: (context) => getIt<AttendeeManagerWatcherBloc>()..add(AttendeeManagerWatcherEvent.watchAllAttendanceByType(AttendeeType.vendor.toString(), widget.currentReservationItem!.reservationId.getOrCrash())),
         child: BlocBuilder<AttendeeManagerWatcherBloc, AttendeeManagerWatcherState>(
             builder: (context, state) {
               return state.maybeMap(
                   attLoadInProgress: (_) => getLoadingForOverviewFooter(context),
                   /// earnings from all vendors
-                  loadAllAttendanceActivitySuccess: (allAttendees) {
-                    return applicantsReceivedFooterWidget(allAttendees.item.where((element) => element.attendeeType == AttendeeType.vendor && element.vendorForm != null && (element.vendorForm?.boothPaymentOptions?.map((e) => e.status).contains(AvailabilityStatus.accepted) == true)).toList());
+                  loadAllAttendanceSuccess: (allAttendees) {
+                    return applicantsReceivedFooterWidget(allAttendees.item.where((element) => element.vendorForm != null && (element.vendorForm?.boothPaymentOptions?.map((e) => e.status).contains(AvailabilityStatus.confirmed) == true)).toList());
                   },
                   /// no earnings yet.
                   orElse: () => getNoApplicantsFooter()
@@ -331,31 +368,34 @@ class _ActivityVendorManagerSubContainerState extends State<ActivityVendorManage
   }
 
   Widget getNoApplicantsFooter() {
-    return Align(
-      alignment: Alignment.center,
-      child: Column(
-        children: [
-          Icon(Icons.airplane_ticket_outlined, color: widget.model.disabledTextColor, size: 35),
-          const SizedBox(height: 10),
-          Text('Applicant Info will appear here', style: TextStyle(color: widget.model.disabledTextColor, fontSize: widget.model.secondaryQuestionTitleFontSize)),
-          const SizedBox(height: 10),
-          InkWell(
-            onTap: () {
-                widget.didSelectManageVendorForm();
-            },
-            child: Container(
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(25),
-                    color: widget.model.webBackgroundColor
-                ),
-                height: 50,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                  child: Center(child: Text('Manage Vendor Forms', style: TextStyle(color: widget.model.disabledTextColor, fontWeight: FontWeight.bold))),
-                )
-            ),
-          )
-        ],
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Align(
+        alignment: Alignment.center,
+        child: Column(
+          children: [
+            Icon(Icons.note_alt_outlined, color: widget.model.disabledTextColor, size: 35),
+            const SizedBox(height: 10),
+            Text('Applicant Info will appear here', style: TextStyle(color: widget.model.disabledTextColor, fontSize: widget.model.secondaryQuestionTitleFontSize)),
+            const SizedBox(height: 10),
+            InkWell(
+              onTap: () {
+                  widget.didSelectManageVendorForm();
+              },
+              child: Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(25),
+                      color: widget.model.webBackgroundColor
+                  ),
+                  height: 50,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                    child: Center(child: Text('Manage Vendor Forms', style: TextStyle(color: widget.model.disabledTextColor, fontWeight: FontWeight.bold))),
+                  )
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
