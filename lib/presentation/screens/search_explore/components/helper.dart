@@ -6,16 +6,6 @@ import 'package:intl/intl.dart';
 
 enum SearchWhereWhenMarker {where, when, who}
 
-class SearchExploreCoreHelper {
-
-  static SearchListingType currentSearchListingType = SearchListingType.facilities;
-
-}
-
-final double listingHeaderHeight = 15;
-double searchHeaderHeight(BuildContext context) => 120;
-// double panelHeight(BuildContext context) => MediaQuery.of(context).size.height - searchHeaderHeight(context) - 65;
-double panelHeight(BuildContext context) => MediaQuery.of(context).size.height - searchHeaderHeight(context);
 
 
 

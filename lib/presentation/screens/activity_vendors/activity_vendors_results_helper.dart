@@ -2,7 +2,6 @@ import 'package:check_in_domain/domain/misc/attendee_services/form/merchant_vend
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_domain/domain/misc/attendee_services/attendee_item/attendee_item.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
-import 'package:check_in_presentation/core/pdf_viewer_mobile.dart' if (dart.library.html) 'package:check_in_presentation/core/pdf_viewer.dart';
 import 'package:excel/excel.dart' as ex;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -300,55 +299,6 @@ void showFilterOptions(BuildContext context, DashboardModel model, ActivityManag
             filterModel: filterModel,
             model: model,
             didFinishUpdatingFilter: (VendorContactFilterModel ) {  },
-          );
-        })
-    );
-  }
-}
-
-void showSelectedDocumentButton(BuildContext context, DashboardModel model, List<DocumentFormOption> documents) {
-  if (kIsWeb) {
-    showGeneralDialog(
-      context: context,
-      barrierDismissible: false,
-      barrierLabel: 'Documents',
-      transitionDuration: Duration(milliseconds: 350),
-      pageBuilder: (BuildContext contexts, anim1, anim2) {
-        return  Align(
-            alignment: Alignment.center,
-            child: ClipRRect(
-                borderRadius: BorderRadius.all(Radius.circular(25)),
-                child: Container(
-                    decoration: BoxDecoration(
-                        color: model.accentColor,
-                        borderRadius: BorderRadius.all(Radius.circular(17.5))
-                    ),
-                    width: 770,
-                    height: 900,
-                    child: MultiplePdfViewerScrollable(
-                      model: model,
-                      pdfs: documents
-                    )
-                )
-            )
-        );
-      },
-      transitionBuilder: (context, anim1, anim2, child) {
-        return Transform.scale(
-            scale: anim1.value,
-            child: Opacity(
-                opacity: anim1.value,
-                child: child
-            )
-        );
-      },
-    );
-  } else {
-    Navigator.push(context, MaterialPageRoute(
-        builder: (_) {
-          return MultiplePdfViewerScrollable(
-              model: model,
-              pdfs: documents
           );
         })
     );

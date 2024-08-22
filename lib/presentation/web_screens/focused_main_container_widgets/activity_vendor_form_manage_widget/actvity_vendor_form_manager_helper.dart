@@ -4,4 +4,5 @@ class ActivityVendorHelperCore {
 
   static VendorMerchantForm? selectedForm;
   static bool isLoading = false;
+  static bool isLoadingSubContainer = false;
 }

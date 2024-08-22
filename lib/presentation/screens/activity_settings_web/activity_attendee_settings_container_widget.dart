@@ -31,7 +31,7 @@ class ActivityAttendeeSettingsMainContainerWidget extends StatelessWidget {
   });
 
 
-  Widget getMainSettingsContainer(SettingsItemModel? navItem) {
+  Widget getMainSettingsContainer(BuildContext context, SettingsItemModel? navItem, UserProfileModel reservationOwner) {
       switch (navItem?.navItem) {
         case SettingNavMarker.reservation:
           return AttendeeGeneralSettingsWidget(
@@ -40,6 +40,28 @@ class ActivityAttendeeSettingsMainContainerWidget extends StatelessWidget {
             attendeeItem: attendeeItem,
             userProfileModel: userProfileModel,
             reservationItem: reservationItem,
+          );
+        case SettingNavMarker.vendorForm:
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20.0),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(25),
+              child: Container(
+                // height: MediaQuery.of(context).size.height,
+                // width:  MediaQuery.of(context).size.width,
+                color: model.webBackgroundColor,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(25),
+                  child: ActivityApplicationSettingsWidget(
+                      model: model,
+                      attendeeItem: attendeeItem,
+                      reservationItem: reservationItem,
+                      activityManagerForm: activityManagerForm,
+                      activityOwnerProfile: reservationOwner
+                  ),
+                ),
+              ),
+            ),
           );
         case SettingNavMarker.checkIns:
           break;
@@ -114,7 +136,9 @@ class ActivityAttendeeSettingsMainContainerWidget extends StatelessWidget {
 
                     SingleChildScrollView(
                       child: getMainSettingsContainer(
+                          context,
                           currentNavItem,
+                          resOwnerModel
                       ),
                     ),
 

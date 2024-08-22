@@ -12,14 +12,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class ActivitySettingsMainContainerWidget extends StatelessWidget {
 
   final DashboardModel model;
-  final ReservationItem? reservationItem;
+  final ReservationItem? initialReservation;
+  // final ListingManagerForm? listingForm;
+  // final ReservationItem? reservationItem;
   final UserProfileModel? currentUser;
-  final ActivityManagerForm? activityManagerForm;
+  // final ActivityManagerForm? activityManagerForm;
   final SettingsItemModel? currentNavItem;
   final Function() rebuild;
   final Function() didPresentSidePanel;
 
-  const ActivitySettingsMainContainerWidget({super.key, required this.model, this.reservationItem, this.currentUser, this.activityManagerForm, required this.currentNavItem, required this.rebuild, required this.didPresentSidePanel});
+  const ActivitySettingsMainContainerWidget({super.key, required this.model,  this.currentUser, required this.currentNavItem, required this.rebuild, required this.didPresentSidePanel, this.initialReservation});
 
 
   @override
@@ -27,59 +29,98 @@ class ActivitySettingsMainContainerWidget extends StatelessWidget {
     return Padding(
         padding: const EdgeInsets.only(right: 30.0, left: 30.0, bottom: 30.0, top: 40.0),
         child: Container(
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height,
-            decoration: BoxDecoration(
-                color: model.accentColor,
-                borderRadius: BorderRadius.all(Radius.circular(20))
-            ),
-            child: retrieveAuthenticationState(context)
+        width: MediaQuery.of(context).size.width,
+        height: MediaQuery.of(context).size.height,
+          decoration: BoxDecoration(
+          color: model.accentColor,
+          borderRadius: BorderRadius.all(Radius.circular(20))
+        ),
+          child: retrieveReservationSource(),
       )
     );
   }
 
+  Widget retrieveReservationSource() {
+    if (initialReservation != null) {
+      return getReservationListing(initialReservation!);
+    } else {
+      return settingsFailureToLoadContainer(model);
+    }
+  }
 
-  Widget retrieveAuthenticationState(BuildContext context) {
-    return BlocProvider(create: (_) => getIt<UserProfileWatcherBloc>()..add(const UserProfileWatcherEvent.watchUserProfileStarted()),
-      child: BlocBuilder<UserProfileWatcherBloc, UserProfileWatcherState>(
-        builder: (context, authState) {
-          return authState.maybeMap(
-              loadInProgress: (_) => JumpingDots(color: model.paletteColor, numberOfDots: 3),
-              loadProfileFailure: (_) => Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: GetLoginSignUpWidget(showFullScreen: true, model: model, didLoginSuccess: () {  },),
-              ),
-              loadUserProfileSuccess: (item) {
-                  if (reservationItem != null && activityManagerForm != null) {
-                      if (reservationItem?.reservationOwnerId == item.profile.userId) {
-                            return Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: SettingsMainContainerWidget(
-                                  model: model,
-                                  userProfileModel: item.profile,
-                                  activityForm: activityManagerForm!,
-                                  reservationItem: reservationItem!,
-                                  currentNavItem: currentNavItem,
-                                  rebuild: rebuild,
-                                  didPresentSidePanel: () {
-                                    didPresentSidePanel();
-                                  }
-                              ),
-                            );
-                        } else {
-                         return retrieveCurrentAttendee(reservationItem!, activityManagerForm!, item.profile);
-                      }
-                    }
-                  return settingsFailureToLoadContainer(model);
+  Widget getReservationListing(ReservationItem reservation) {
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => getIt<ListingManagerWatcherBloc>()..add(ListingManagerWatcherEvent.watchListingManagerItemStarted(reservation.instanceId.getOrCrash()))),
+        BlocProvider(create: (_) => getIt<ActivityManagerWatcherBloc>()..add(ActivityManagerWatcherEvent.watchActivityManagerFormStarted(reservation.reservationId.getOrCrash()))),
+        BlocProvider(create: (_) => getIt<UserProfileWatcherBloc>()..add(const UserProfileWatcherEvent.watchUserProfileStarted()))
+      ],
+        child: BlocBuilder<ListingManagerWatcherBloc, ListingManagerWatcherState>(
+          builder: (context, state) {
+            return state.maybeMap(
+                loadListingManagerItemSuccess: (item) {
+                  return getActivityForm(reservation, item.failure);
                 },
-              orElse: () {
-                return JumpingDots(color: model.paletteColor, numberOfDots: 3);
-              }
+                orElse: () => settingsFailureToLoadContainer(model)
           );
         },
       ),
     );
   }
+
+  Widget getActivityForm(ReservationItem reservation, ListingManagerForm listingForm) {
+    return BlocBuilder<ActivityManagerWatcherBloc, ActivityManagerWatcherState>(
+      builder: (context, state) {
+        return state.maybeMap(
+            loadInProgress: (_) => JumpingDots(color: model.paletteColor, numberOfDots: 3),
+            loadActivityManagerFormSuccess: (item) {
+              return getMainContainer(reservation, listingForm, item.item);
+            },
+            orElse: () => getMainContainer(reservation, listingForm, ActivityManagerForm.empty())
+        );
+      },
+    );
+  }
+
+  Widget getMainContainer(ReservationItem reservation, ListingManagerForm listingForm, ActivityManagerForm activityManagerForm) {
+    return BlocBuilder<UserProfileWatcherBloc, UserProfileWatcherState>(
+      builder: (context, authState) {
+        return authState.maybeMap(
+            loadInProgress: (_) => JumpingDots(color: model.paletteColor, numberOfDots: 3),
+            loadProfileFailure: (_) => Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: GetLoginSignUpWidget(showFullScreen: true, model: model, didLoginSuccess: () {  },),
+            ),
+            loadUserProfileSuccess: (item) {
+                if (reservation.reservationOwnerId == item.profile.userId) {
+                  return Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: SettingsMainContainerWidget(
+                        model: model,
+                        userProfileModel: item.profile,
+                        activityForm: activityManagerForm,
+                        reservationItem: reservation,
+                        listingForm: listingForm,
+                        currentNavItem: currentNavItem,
+                        rebuild: rebuild,
+                        didPresentSidePanel: () {
+                          didPresentSidePanel();
+                        }
+                    ),
+                  );
+                } else {
+                  return retrieveCurrentAttendee(reservation, activityManagerForm, item.profile);
+                }
+              return settingsFailureToLoadContainer(model);
+            },
+            orElse: () {
+              return JumpingDots(color: model.paletteColor, numberOfDots: 3);
+            }
+        );
+      },
+    );
+  }
+
 
 
   Widget retrieveCurrentAttendee(ReservationItem reservationItem, ActivityManagerForm activityManagerForm, UserProfileModel user) {

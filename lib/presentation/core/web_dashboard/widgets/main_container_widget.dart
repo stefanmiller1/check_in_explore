@@ -17,11 +17,11 @@ class MainDashboardContainer extends StatefulWidget {
 
 class _MainDashboardContainerState extends State<MainDashboardContainer> {
 
-  final ScrollController _sidePanelScrollController = ScrollController();
+  // final ScrollController _sidePanelScrollController = ScrollController();
 
   @override
   void dispose() {
-    _sidePanelScrollController.dispose();
+    // _sidePanelScrollController.dispose();
     super.dispose();
   }
 
@@ -49,7 +49,7 @@ class _MainDashboardContainerState extends State<MainDashboardContainer> {
         //           height: MediaQuery.of(context).size.height - 120,
         //           child: widget.sidePanelContainer,
         //     ),
-        //       ),
+        //    ),
         //   ),
         // ),
 

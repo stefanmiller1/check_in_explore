@@ -58,7 +58,7 @@ class ActivityVendorConfirmationPopOver extends StatelessWidget {
                       Navigator.of(context).pop();
                       didSelectSave();
                     },
-                    child: Text('   Send   ', style: TextStyle(color: model.accentColor, fontSize: model.secondaryQuestionTitleFontSize))),
+                    child: Text('  Send  ', style: TextStyle(color: model.accentColor, fontSize: model.secondaryQuestionTitleFontSize))),
                 ),
               )
           /// list tile of what they will be reminded of - show disclaimers on confirmation?

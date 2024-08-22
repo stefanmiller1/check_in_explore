@@ -1,7 +1,6 @@
 import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/helper.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/pop_over_screen/search_by_slots_time_duration.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/pop_over_screen/search_when_where_helper.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +9,8 @@ import 'package:pointer_interceptor/pointer_interceptor.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
+import '../../components/helper.dart';
 
 class SearchWhenWeb extends StatefulWidget {
 

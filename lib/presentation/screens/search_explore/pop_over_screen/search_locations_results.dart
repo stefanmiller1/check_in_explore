@@ -143,7 +143,7 @@ class _SearchLocationsResultsState extends State<SearchLocationsResults> {
                     MapHelper.currentZoom = 12;
 
                     final listing = await MapHelper.listingStream.first;
-                    MapHelper.initMarkers(context, widget.model, listing);
+                    MapHelper.initMarkers(context, mounted, widget.model, listing);
 
                   },
                   currentCountry: '',
@@ -226,7 +226,7 @@ class _SearchLocationsResultsState extends State<SearchLocationsResults> {
                                       MapHelper.currentZoom = 12;
 
                                       final listing = await MapHelper.listingStream.first;
-                                      MapHelper.initMarkers(context, widget.model, listing);
+                                      MapHelper.initMarkers(context, mounted, widget.model, listing);
                                     }
                                   },
                                   title: Text('${e.address}'),

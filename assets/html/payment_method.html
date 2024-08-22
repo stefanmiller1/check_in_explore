@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Stripe Payment</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+       body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #f9f9f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        #payment-form {
+            width: 100%;
+            max-width: 450px;
+            padding: 20px;
+            background: white;
+            border-radius: 18px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .title {
+            font-size: 20px;
+            font-weight: bold;
+            text-align: left;
+            margin-bottom: 20px;
+        }
+        .input-container {
+            background-color: #f6f7f9;
+            border-radius: 18px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            padding: 10px;
+        }
+        .StripeElement-wrapper {
+            padding: 10px 0px;
+            background-color: transparent;
+            position: relative;
+        }
+        .StripeElement {
+            height: 40px;
+            background-color: transparent;
+            z-index: 1;
+        }
+        .divider {
+            height: 1px;
+            background-color: #ccc;
+            position: relative;
+            z-index: 2;
+            margin: 0 -10px;
+        }
+        #postal-code-container {
+            display: flex;
+            align-items: center;
+            height: 55px;
+        }
+        #postal-code {
+            box-sizing: border-box;
+            height: 100%;
+            padding: 10px 12px;
+            border: none;
+            background-color: transparent;
+            font-size: 16px;
+            color: #31325F;
+            font-weight: 300;
+            font-family: "Helvetica Neue", Helvetica, sans-serif;
+            width: calc(100% - 34px);
+            text-transform: uppercase;
+        }
+        #postal-code:focus {
+            outline: none;
+        }
+        .flag-icon {
+            width: 24px;
+            height: 24px;
+            margin-right: 10px;
+        }
+        .version-label {
+            text-align: left;
+            margin-top: 10px;
+            font-size: 12px;
+            color: #ccc;
+        }
+        #submit {
+            display: block;
+            width: 100%;
+            margin-top: 20px;
+            padding: 14px;
+            font-size: 16px;
+            color: #31325F;
+            background-color: #f6f7f9;
+            border: none;
+            border-radius: 18px;
+            cursor: not-allowed;
+            text-align: center;
+            transition: background-color 150ms ease;
+        }
+        #submit.enabled {
+            background-color: black;
+            color: white;
+            cursor: pointer;
+        }
+        #error-message {
+            color: red;
+            margin-top: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <form id="payment-form">
+        <div class="title">Credit or Debit Card</div>
+        <div class="input-container">
+            <div class="StripeElement-wrapper">
+                <div id="card-element" class="StripeElement"></div>
+            </div>
+            <div class="divider"></div>
+            <div id="postal-code-container">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/c/cf/Flag_of_Canada.svg" alt="Canadian Flag" class="flag-icon">
+                <input type="text" id="postal-code" placeholder="Postal Code" maxlength="7" pattern="[A-Za-z]\d[A-Za-z][ -]?\d[A-Za-z]\d" required />
+            </div>
+        </div>
+        <button id="submit" type="submit" disabled>Add Card</button>
+        <div class="version-label">Version 1.1</div>
+        <div id="error-message"></div>
+    </form>
+<script>
+        if (typeof Stripe === 'undefined') {
+            console.error('Stripe.js failed to load.');
+        }
+
+        var stripe = Stripe('pk_live_51JEcLgBZ5oSwwStvYYnw2YdEmVmzwIWc2DVGqt3GE8hihczLbaDwLhSXO0W5C3nFDiLti4SF301OvVRPXbA56Mjx003sJdM5fT');
+<!--        var stripe = Stripe('pk_test_51JEcLgBZ5oSwwStvcLDezAJYxKeP1Ms6wKmAGlgTc4hLdjRL3fNHzHENFa3sgmJp2aMfD63sTItSWSdBCNjbfYyS00cFnAK3MB');-->
+        var elements = stripe.elements({
+            locale: 'en'
+        });
+
+        var cardElement = elements.create('card', {
+            style: {
+                base: {
+                    iconColor: '#666EE8',
+                    color: '#31325F',
+                    lineHeight: '35px',
+                    fontWeight: 300,
+                    fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
+                    fontSize: '18px',
+                    '::placeholder': {
+                        color: '#CFD7E0',
+                    },
+                    border: '1px solid #ccc',
+                    borderRadius: '18px',
+                    backgroundColor: 'transparent',
+                },
+                complete: {
+                    iconColor: '#cbf4c9',
+                },
+                invalid: {
+                    iconColor: '#fa755a',
+                    color: '#fa755a',
+                },
+            },
+            hidePostalCode: true
+        });
+        cardElement.mount('#card-element');
+
+        var form = document.getElementById('payment-form');
+        var submitButton = document.getElementById('submit');
+        var errorMessage = document.getElementById('error-message');
+        var postalCodeInput = document.getElementById('postal-code');
+
+        cardElement.on('change', function(event) {
+            if (event.complete && postalCodeInput.value.match(/^[A-Za-z]\d[A-Za-z][ -]?\d[A-Za-z]\d$/)) {
+                submitButton.classList.add('enabled');
+                submitButton.disabled = false;
+                submitButton.textContent = 'Submit';
+            } else {
+                submitButton.classList.remove('enabled');
+                submitButton.disabled = true;
+                submitButton.textContent = 'Add Card';
+            }
+
+            if (event.error) {
+                errorMessage.textContent = event.error.message;
+                errorMessage.style.display = 'block';
+            } else {
+                errorMessage.style.display = 'none';
+            }
+        });
+
+        postalCodeInput.addEventListener('input', function() {
+            this.value = this.value.toUpperCase();
+            postalCodeInput.classList.remove('invalid');
+            if (postalCodeInput.value.match(/^[A-Za-z]\d[A-Za-z][ -]?\d[A-Za-z]\d$/)) {
+                cardElement.update({value: {postalCode: postalCodeInput.value}});
+                if (cardElement._complete) {
+                    submitButton.classList.add('enabled');
+                    submitButton.textContent = 'Submit';
+                    submitButton.disabled = false;
+                }
+            } else {
+                submitButton.classList.remove('enabled');
+                submitButton.textContent = 'Add Card';
+                submitButton.disabled = true;
+            }
+        });
+
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            console.log('Form submitted'); // Add log to check if form submission is triggered
+            if (!postalCodeInput.value.match(/^[A-Za-z]\d[A-Za-z][ -]?\d[A-Za-z]\d$/)) {
+                postalCodeInput.classList.add('invalid');
+                return;
+            }
+
+            submitButton.disabled = true;
+            submitButton.textContent = 'Processing...';
+
+            stripe.createToken(cardElement, {
+                address_zip: postalCodeInput.value
+            }).then(function(result) {
+                console.log('createToken result', result); // Add log to check createToken result
+                if (result.error) {
+                    errorMessage.textContent = result.error.message;
+                    errorMessage.style.display = 'block';
+                    submitButton.disabled = false;
+                    submitButton.textContent = 'Add Card';
+                } else {
+                    errorMessage.style.display = 'block';
+                    // Send the token ID to your server
+                    console.log('Token created:', result.token.id); // Add log to check if token is created
+                    window.parent.postMessage({type: 'paymentToken', tokenId: result.token.id}, '*');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

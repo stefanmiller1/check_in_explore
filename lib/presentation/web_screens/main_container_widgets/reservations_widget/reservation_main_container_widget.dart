@@ -1,22 +1,19 @@
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/reservations/components/reservation_results_main.dart';
+import 'package:check_in_domain/domain/misc/attendee_services/attendee_item/attendee_item.dart';
 import 'package:flutter/material.dart';
 
 class ReservationMainContainerWidget extends StatelessWidget {
 
   final DashboardModel model;
   final UniqueId? initialReservationId;
+  final UserProfileModel? currentUserProfile;
 
-  const ReservationMainContainerWidget({super.key, required this.model, this.initialReservationId});
+  const ReservationMainContainerWidget({super.key, required this.model, this.initialReservationId, this.currentUserProfile});
 
   @override
   Widget build(BuildContext context) {
 
-    /// in which case load from initialRes;
-    final bool isFromInitialLoad = ReservationHelperCore.selectedReservationItem == null;
-    /// in which case load from selectedReservation;
-    final bool isFromSelectedReservation = ReservationHelperCore.selectedReservationItem != null;
 
     return Padding(
       padding: const EdgeInsets.only(right: 30.0, left: 30.0, bottom: 30.0, top: 40.0),
@@ -35,8 +32,7 @@ class ReservationMainContainerWidget extends StatelessWidget {
               model: model,
               isReply: false,
               listing: ReservationHelperCore.currentListingManagerForm,
-              currentUser: ReservationHelperCore.currentUserProfile,
-              currentUserId: ReservationHelperCore.currentUserProfile?.userId.getOrCrash(),
+              currentUser: currentUserProfile,
               reservationId: ReservationHelperCore.selectedReservationItem!.reservationId.getOrCrash(),
             ),
           ),
@@ -48,8 +44,7 @@ class ReservationMainContainerWidget extends StatelessWidget {
               model: model,
               isReply: false,
               listing: ReservationHelperCore.currentListingManagerForm,
-              currentUser: ReservationHelperCore.currentUserProfile,
-              currentUserId: ReservationHelperCore.currentUserProfile?.userId.getOrCrash(),
+              currentUser: currentUserProfile,
               reservationId: initialReservationId!.getOrCrash(),
             ),
           ),

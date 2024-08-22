@@ -7,16 +7,17 @@ import 'package:jumping_dot/jumping_dot.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../screens/activity_vendors/activity_vendors_results_main.dart';
+import 'actvity_vendor_form_manager_helper.dart';
 
 class ActivityVendorFormManageMainContainerWidget extends StatelessWidget {
 
   final DashboardModel model;
-  final ReservationItem? reservationItem;
-  final ActivityManagerForm? activityManagerForm;
+  final ReservationItem? initialReservation;
+  // final ActivityManagerForm? activityManagerForm;
   final VendorMerchantForm? selectedForm;
   final Function() rebuild;
 
-  const ActivityVendorFormManageMainContainerWidget({super.key, required this.model, required this.reservationItem, required this.activityManagerForm, required this.rebuild, this.selectedForm});
+  const ActivityVendorFormManageMainContainerWidget({super.key, required this.model, required this.initialReservation, required this.rebuild, this.selectedForm});
 
   @override
   Widget build(BuildContext context) {
@@ -35,13 +36,54 @@ class ActivityVendorFormManageMainContainerWidget extends StatelessWidget {
                   color: model.accentColor,
                   borderRadius: BorderRadius.all(Radius.circular(20))
               ),
-              child: (selectedForm != null) ? retrieveAuthenticationState(context, selectedForm!) : defaultPagePreview()
-          )
+              child: (selectedForm != null) ? retrieveReservationSource(selectedForm!) : defaultPagePreview()
+        )
       ),
     );
   }
 
-  Widget retrieveAuthenticationState(BuildContext context, VendorMerchantForm selectedForm) {
+  Widget retrieveReservationSource(VendorMerchantForm selectedForm) {
+    if (initialReservation != null) {
+      return getReservationListing(selectedForm, initialReservation!);
+    } else {
+      return settingsFailureToLoadContainer();
+    }
+  }
+
+  Widget getReservationListing(VendorMerchantForm selectedForm, ReservationItem reservation) {
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => getIt<ListingManagerWatcherBloc>()..add(ListingManagerWatcherEvent.watchListingManagerItemStarted(reservation.instanceId.getOrCrash()))),
+        BlocProvider(create: (_) => getIt<ActivityManagerWatcherBloc>()..add(ActivityManagerWatcherEvent.watchActivityManagerFormStarted(reservation.reservationId.getOrCrash()))),
+        BlocProvider(create: (_) => getIt<UserProfileWatcherBloc>()..add(const UserProfileWatcherEvent.watchUserProfileStarted()))
+      ],
+      child: BlocBuilder<ListingManagerWatcherBloc, ListingManagerWatcherState>(
+        builder: (context, state) {
+          return state.maybeMap(
+              loadListingManagerItemSuccess: (item) {
+                return getActivityForm(reservation, item.failure, selectedForm);
+              },
+              orElse: () => settingsFailureToLoadContainer()
+          );
+        },
+      ),
+    );
+  }
+
+  Widget getActivityForm(ReservationItem reservation, ListingManagerForm listingForm, VendorMerchantForm selectedForm) {
+    return BlocBuilder<ActivityManagerWatcherBloc, ActivityManagerWatcherState>(
+      builder: (context, state) {
+        return state.maybeMap(
+            loadActivityManagerFormSuccess: (item) {
+              return retrieveAuthenticationState(context, reservation, listingForm, item.item, selectedForm);
+            },
+            orElse: () => settingsFailureToLoadContainer()
+        );
+      },
+    );
+  }
+
+  Widget retrieveAuthenticationState(BuildContext context, ReservationItem reservation, ListingManagerForm listingForm, ActivityManagerForm activityForm, VendorMerchantForm selectedForm) {
     return BlocProvider(create: (_) => getIt<UserProfileWatcherBloc>()..add(const UserProfileWatcherEvent.watchUserProfileStarted()),
       child: BlocBuilder<UserProfileWatcherBloc, UserProfileWatcherState>(
         builder: (context, authState) {
@@ -51,14 +93,14 @@ class ActivityVendorFormManageMainContainerWidget extends StatelessWidget {
                 padding: const EdgeInsets.all(8.0),
                 child: GetLoginSignUpWidget(showFullScreen: true, model: model, didLoginSuccess: () {  },),
               ),
-              loadUserProfileSuccess: (item) => (reservationItem != null && activityManagerForm != null) ? ActivityVendorApplicationsResultMain(
+              loadUserProfileSuccess: (item) => ActivityVendorApplicationsResultMain(
                 model: model,
                 selectedForm: selectedForm,
-                reservationItem: reservationItem!,
+                reservationItem: reservation,
+                listingForm: listingForm,
                 activityOwnerProfile: item.profile,
-                activityManagerForm: activityManagerForm!,
-              ) :
-              settingsFailureToLoadContainer(),
+                activityManagerForm: activityForm,
+              ),
               orElse: () {
                 return JumpingDots(color: model.paletteColor, numberOfDots: 3);
               }
@@ -83,6 +125,7 @@ class ActivityVendorFormManageMainContainerWidget extends StatelessWidget {
       ),
     );
   }
+
 
   Widget defaultPagePreview() {
     return Container(

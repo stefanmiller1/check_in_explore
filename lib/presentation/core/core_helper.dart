@@ -43,3 +43,8 @@ class HeroDialogRoute<T> extends PageRoute<T> {
   String? get barrierLabel => barrierLabelString;
 
 }
+
+
+void didSelectRefresh() {
+
+}

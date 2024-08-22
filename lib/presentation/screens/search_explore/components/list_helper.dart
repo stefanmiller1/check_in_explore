@@ -2,7 +2,6 @@ import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_application/un_auth/watcher_services/attendee_watcher_service/attendee_manager_watcher_bloc.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/listing_components/listing_result_main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -61,7 +60,10 @@ Widget facilitySearchItem(BuildContext context, DashboardModel model, ListingMan
 
   return Container(
     child: baseSearchItemContainer(
+        isSelected: null,
         model: model,
+        height: 600,
+        width: 600,
         backgroundWidget: ListingResultMain(
             showReservations: true,
             listing: listingManagerForm,
@@ -98,7 +100,10 @@ Widget reservationSearchItem(DashboardModel model, UniqueId currentUserId, Listi
           return state.maybeMap(
               loadActivityManagerFormSuccess: (item) {
                 return baseSearchItemContainer(
+                        isSelected: null,
                         model: model,
+                        height: 400,
+                        width: 400,
                         backgroundWidget: getReservationMediaFrame(context, model, 400, 400, listingManagerForm, item.item, reservationItem, didSelectItem: didSelectReservation),
                         bottomWidget: getSearchFooterWidget(
                             context,
@@ -107,9 +112,12 @@ Widget reservationSearchItem(DashboardModel model, UniqueId currentUserId, Listi
                             model.paletteColor,
                             model.disabledTextColor,
                             model.accentColor,
-                            listingManagerForm,
-                            item.item,
-                            reservationItem,
+                            ReservationPreviewer(
+                                reservation: reservationItem,
+                                listing: listingManagerForm,
+                                activityManagerForm: item.item,
+                                previewWeight: 0
+                            ),
                             false,
                             didSelectItem: didSelectReservation,
                             didSelectInterested: () {  }
@@ -118,7 +126,10 @@ Widget reservationSearchItem(DashboardModel model, UniqueId currentUserId, Listi
               },
               orElse: () {
                 return  baseSearchItemContainer(
+                    isSelected: null,
                     model: model,
+                    height: 400,
+                    width: 400,
                     backgroundWidget: getReservationMediaFrame(context, model, 400, 400, listingManagerForm, ActivityManagerForm.empty(), reservationItem, didSelectItem: didSelectReservation),
                     bottomWidget: getSearchFooterWidget(
                         context,
@@ -127,9 +138,12 @@ Widget reservationSearchItem(DashboardModel model, UniqueId currentUserId, Listi
                         model.paletteColor,
                         model.disabledTextColor,
                         model.accentColor,
-                        listingManagerForm,
-                        ActivityManagerForm.empty(),
-                        reservationItem,
+                        ReservationPreviewer(
+                            reservation: reservationItem,
+                            listing: listingManagerForm,
+                            activityManagerForm: ActivityManagerForm.empty(),
+                            previewWeight: 0
+                        ),
                         false,
                         didSelectItem: didSelectReservation,
                         didSelectInterested: () {  }

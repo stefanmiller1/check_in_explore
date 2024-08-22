@@ -1,7 +1,11 @@
 // This is your test publishable API key.
-const stripe = Stripe('pk_test_51JEcLgBZ5oSwwStvcLDezAJYxKeP1Ms6wKmAGlgTc4hLdjRL3fNHzHENFa3sgmJp2aMfD63sTItSWSdBCNjbfYyS00cFnAK3MB', {
+const stripe = Stripe('pk_live_51JEcLgBZ5oSwwStvYYnw2YdEmVmzwIWc2DVGqt3GE8hihczLbaDwLhSXO0W5C3nFDiLti4SF301OvVRPXbA56Mjx003sJdM5fT', {
     apiVersion: '2020-08-27',
 });
+
+//const stripe = Stripe('sk_test_51JEcLgBZ5oSwwStvxrODBvRmrf2AEzpugCaOzoHGk2QBDVH5ouxFlUPo0nwLJVb4yatx3ZaLCj5NWU8QKtqyZew400sC20c0Z2', {
+//    apiVersion: '2020-08-27',
+//});
 
 
 let elements;
@@ -72,7 +76,7 @@ try {
         redirect: 'if_required',
         confirmParams: {
           // Make sure to change this to your payment completion page
-          return_url: "http://www.cincout.ca/#/reservations",
+          return_url: "http://www.cincout.ca/reservations",
         },
     });
 

@@ -43,8 +43,8 @@ class SettingsSubContainer extends StatelessWidget {
       } else {
         return Container(
           height: MediaQuery.of(context).size.height,
-        );
-      }
+      );
+    }
   }
 
 

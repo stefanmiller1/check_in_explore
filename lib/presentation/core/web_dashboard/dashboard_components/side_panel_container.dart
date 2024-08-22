@@ -2,12 +2,10 @@ import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/web_dashboard/dashboard_helper.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/web_dashboard/widgets/menu_marker_item.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/create_activity/create_activity_screen_helper.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../../screens/create_activity/create_activity_screen.dart';
 
 class SidePanelContainer extends StatefulWidget {
 
@@ -61,19 +59,19 @@ class _SidePanelContainerState extends State<SidePanelContainer> {
           ),
 
           Positioned(
-            top: 40,
-            child: Container(
-              width: 60,
+              top: 40,
               child: Container(
-                  child: Image.asset('assets/logo_icon/CIRCLE_LOGO_LIGHT.png')
+                width: 60,
+                child: Container(
+                    child: Image.asset('assets/logo_icon/CIRCLE_LOGO_LIGHT.png')
               ),
             ),
           ),
 
           Padding(
-            padding: const EdgeInsets.only(top: 100.0, bottom: 80),
+            padding: const EdgeInsets.only(top: 100.0, bottom: 180),
             child: Container(
-              height: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height,
               width: 80,
               child: ListView(
                 children: widget.sideMarkerItems.where((element) => element.isVisible == true).toList().asMap().map(
@@ -88,7 +86,7 @@ class _SidePanelContainerState extends State<SidePanelContainer> {
                       onExit: (f) {
                           setState(() {
                             e.isHovering = false;
-                          });
+                        });
                       },
                       child: MenuMarkerItem(
                             isActive: (selectedMarker == e.dashboardMarker),

@@ -1,9 +1,10 @@
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
+
+import '../components/helper.dart';
 
 List<String> tabWhenList = ['Slots', 'I\'m Flexible', 'Custom'];
 List<String> tabWhoList = ['A General Amount','A Range'];

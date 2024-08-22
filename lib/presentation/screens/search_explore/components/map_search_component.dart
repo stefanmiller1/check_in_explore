@@ -2,9 +2,6 @@ import 'dart:async';
 import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
-import 'package:check_in_web_mobile_explore/presentation/core/core_helper.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/facility_preview/facility_preview_screen.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/listing_components/listing_quick_preview.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -58,7 +55,7 @@ class _MapSearchContainerState extends State<MapSearchContainer> {
     // }
 
     final listing = await MapHelper.listingStream.first;
-    MapHelper.initMarkers(context, widget.model, listing);
+    MapHelper.initMarkers(context, mounted, widget.model, listing);
 
   }
 
@@ -98,7 +95,7 @@ class _MapSearchContainerState extends State<MapSearchContainer> {
 
     final listing = await MapHelper.listingStream.first;
     setState(() {
-      MapHelper.initMarkers(context, widget.model, listing);
+      MapHelper.initMarkers(context, mounted, widget.model, listing);
     });
 }
 
@@ -140,13 +137,20 @@ class _MapSearchContainerState extends State<MapSearchContainer> {
                   MapHelper.lat = position.target.latitude;
                   MapHelper.lng = position.target.longitude;
 
-                  print(position.zoom);
-                  if (MapHelper.currentZoom >= position.zoom + 1.5 || MapHelper.currentZoom <= position.zoom - 1.5 || MapHelper.currentZoom == position.zoom) return;
+                  if (kIsWeb) {
+                    if (MapHelper.currentZoom >= position.zoom + 1.5 || MapHelper.currentZoom <= position.zoom - 1.5 || MapHelper.currentZoom == position.zoom) return;
 
-                  MapHelper.initMarkers(context, widget.model, context.read<ListingsSearchRequirementsBloc>().state.listings.toList());
+                    MapHelper.initMarkers(context, mounted, widget.model, context.read<ListingsSearchRequirementsBloc>().state.listings.toList());
+                    MapHelper.currentZoom = position.zoom;
+                  }
 
-                  MapHelper.currentZoom = position.zoom;
+                  if (!(kIsWeb)) {
+                    if (MapHelper.currentZoom >= position.zoom + 0.6 || MapHelper.currentZoom <= position.zoom - 0.6)  {
 
+                    MapHelper.initMarkers(context, mounted, widget.model, context.read<ListingsSearchRequirementsBloc>().state.listings.toList());
+                    MapHelper.currentZoom = position.zoom;
+                   }
+                 }
               });
             }
           ),
@@ -191,7 +195,7 @@ class _MapSearchContainerState extends State<MapSearchContainer> {
                 Position position = await MapHelper.determineCurrentPosition(context, widget.model);
                 MapHelper.listingStream = FirebaseMapFacade.instance.mapListings(latitude: position.latitude, longitude: position.longitude, selectedRadius: 14);
                 final listing = await MapHelper.listingStream.first;
-                MapHelper.initMarkers(context, widget.model, listing);
+                MapHelper.initMarkers(context, mounted, widget.model, listing);
 
                 setState(() {
                   MapHelper.mapController.animateCamera(

@@ -1,5 +1,7 @@
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
+import 'package:check_in_application/check_in_application.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -8,10 +10,10 @@ class OwnerSettingsListContainer extends StatefulWidget {
   final DashboardModel model;
   late SettingsItemModel currentSelectedSettingItem;
   final ReservationItem currentReservationItem;
-  final ActivityManagerForm currentActivityManagerForm;
+  // final ActivityManagerForm currentActivityManagerForm;
   final Function(SettingsItemModel navItem) didSelectNavItem;
 
-  OwnerSettingsListContainer({Key? key, required this.model, required this.currentSelectedSettingItem, required this.didSelectNavItem, required this.currentReservationItem, required this.currentActivityManagerForm}) : super(key: key);
+  OwnerSettingsListContainer({Key? key, required this.model, required this.currentSelectedSettingItem, required this.didSelectNavItem, required this.currentReservationItem}) : super(key: key);
 
   @override
   State<OwnerSettingsListContainer> createState() => _OwnerSettingsListContainerState();
@@ -21,25 +23,23 @@ class _OwnerSettingsListContainerState extends State<OwnerSettingsListContainer>
 
   @override
   void initState() {
-    widget.currentSelectedSettingItem = subActivitySettingItems(widget.currentActivityManagerForm)[0];
+    // widget.currentSelectedSettingItem = subActivitySettingItems(widget.currentActivityManagerForm)[0];
     super.initState();
   }
 
-  List<SettingsItemModel> updateListWithReservationOptions(BuildContext context) {
 
+  List<SettingsItemModel> updateListWithReservationOptions(BuildContext context, ActivityManagerForm? activityForm) {
     List<SettingsItemModel> settingsList = [];
-    settingsList.addAll(subActivitySettingItems(widget.currentActivityManagerForm));
+    settingsList.addAll(subActivitySettingItems(activityForm));
 
     for (ReservationSlotItem reservationSlot in widget.currentReservationItem.reservationSlotItem) {
       settingsList.insert(3, SettingsItemModel(settingIcon: getIconDataForActivity(context, reservationSlot.selectedActivityType), sectionNavItem: SettingSectionMarker.profile, navItem: SettingNavMarker.reservation, settingsTitle: '${DateFormat.MMMd().format(reservationSlot.selectedDate)} Activity', settingSubTitle: getTitleForActivityOption(context, reservationSlot.selectedActivityType) ?? '', resSlotItem: reservationSlot));
-
     }
     return settingsList;
   }
 
-  @override
-  Widget build(BuildContext context) {
 
+  Widget retrieveActivityForm(ActivityManagerForm? activityForm) {
     return Container(
       height: MediaQuery.of(context).size.height,
       child: SingleChildScrollView(
@@ -58,7 +58,7 @@ class _OwnerSettingsListContainerState extends State<OwnerSettingsListContainer>
                         Text(e.settingTitle, style: TextStyle(color: (widget.currentSelectedSettingItem.sectionNavItem == e.sectionMarker) ? widget.model.paletteColor : widget.model.disabledTextColor, fontWeight: FontWeight.bold, fontSize: widget.model.secondaryQuestionTitleFontSize),),
                         const SizedBox(height: 5),
                         Column(
-                          children: updateListWithReservationOptions(context).where((element) => element.sectionNavItem == e.sectionMarker).map(
+                          children: updateListWithReservationOptions(context, activityForm).where((element) => element.sectionNavItem == e.sectionMarker).map(
                                   (f) {
                                 return Padding(
                                   padding: (f.navItem == SettingNavMarker.reservation) ? EdgeInsets.only(left: 30.0) : EdgeInsets.zero,
@@ -74,21 +74,38 @@ class _OwnerSettingsListContainerState extends State<OwnerSettingsListContainer>
                                     subtitle: (f.settingSubTitle != '') ? Padding(
                                       padding: const EdgeInsets.only(top: 4.0),
                                       child: Text(f.settingSubTitle, style: TextStyle(color:(widget.currentSelectedSettingItem.navItem == f.navItem && f.navItem != SettingNavMarker.reservation || widget.currentSelectedSettingItem.settingSpaceOption == f.settingSpaceOption && f.navItem == SettingNavMarker.reservation && f.settingsTitle == widget.currentSelectedSettingItem.settingsTitle) ? widget.model.paletteColor : widget.model.disabledTextColor)),
-                                  ) : null,
-                                ),
-                              );
-                            }
+                                    ) : null,
+                                  ),
+                                );
+                              }
                           ).toList(),
                         ),
                         const SizedBox(height: 15),
                         Divider(color: widget.model.disabledTextColor, thickness: 0.25),
-
-                  ],
-                ),
-              )
-            ).toList(),
-          ]
+                      ],
+                    ),
+                  )
+              ).toList(),
+            ]
         ),
+      ),
+    );
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(create: (_) => getIt<ActivityManagerWatcherBloc>()..add(ActivityManagerWatcherEvent.watchActivityManagerFormStarted(widget.currentReservationItem.reservationId.getOrCrash())),
+      child: BlocBuilder<ActivityManagerWatcherBloc, ActivityManagerWatcherState>(
+        builder: (context, state) {
+          return state.maybeMap(
+            loadActivityManagerFormSuccess: (item) {
+              // ReservationHelperCore.currentActivityForm ??= item.item;
+              return retrieveActivityForm(item.item);
+            },
+            orElse: () => retrieveActivityForm(null)
+          );
+        },
       ),
     );
   }

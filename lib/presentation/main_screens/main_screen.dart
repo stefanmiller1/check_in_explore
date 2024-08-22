@@ -8,15 +8,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../mobile_screens/main_mobile_screen.dart';
 import '../web_screens/main_web_screen.dart';
-import 'package:check_in_facade/auth/notification_facade/notification_core_config.dart';
+import 'package:check_in_facade/check_in_facade.dart';
+
+import 'main_screen_web_mobile.dart';
 
 
 class MainScreen extends StatefulWidget {
 
   final DashboardMarker initialDashboardMarker;
+  final bool? isCreatingNewActivity;
   final UniqueId? initialReservationId;
 
-  const MainScreen({super.key, required this.initialDashboardMarker, this.initialReservationId});
+  const MainScreen({super.key, required this.initialDashboardMarker, this.initialReservationId, this.isCreatingNewActivity});
 
   @override
   State<MainScreen> createState() => _MainScreenState();
@@ -108,13 +111,26 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Widget retrieveMainResponsiveScreen({required DashboardModel model}) {
-    if (kIsWeb) {
-      return MainWebScreen(
-          model: model,
-          initialDashboardMarker: widget.initialDashboardMarker,
-          initialReservationId: widget.initialReservationId,
+    final isWebMobile = kIsWeb &&
+        (defaultTargetPlatform == TargetPlatform.iOS ||
+            defaultTargetPlatform == TargetPlatform.android);
+
+    if (isWebMobile) {
+      return MainScreenWebMobile(
+        model: model
       );
+    } else if (kIsWeb) {
+      return MainWebScreen(
+        model: model,
+        initialDashboardMarker: widget.initialDashboardMarker,
+        initialReservationId: widget.initialReservationId,
+        isCreatingNewActivity: widget.isCreatingNewActivity,
+      );
+    } else if (defaultTargetPlatform == TargetPlatform.iOS) {
+      return MainMobileScreen(model: model);
     }
-    return MainMobileScreen(model: model);
+
+    return Container();
+
   }
 }

@@ -23,7 +23,7 @@ class ProfileSettingsScreenWeb extends StatelessWidget {
           model: model,
           profile: userProfileModel,
           didDeleteAccount: () {
-
+            rebuild();
           },
         );
       case ProfileSettingMarker.payments:

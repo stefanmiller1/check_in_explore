@@ -2,12 +2,11 @@ import 'package:beamer/beamer.dart';
 import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
+import 'package:check_in_presentation/core/router_helper.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/web_dashboard/dashboard_helper.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/web_dashboard/dashboard_main.dart';
 import 'package:check_in_web_mobile_explore/presentation/web_screens/focused_main_container_widgets/activity_attendee_widget/activity_attendee_container_widget.dart';
 import 'package:check_in_web_mobile_explore/presentation/web_screens/focused_main_container_widgets/activity_settings_widet/activity_settings_container_widget.dart';
-import 'package:check_in_web_mobile_explore/presentation/web_screens/focused_main_container_widgets/activity_ticket_settings_widget/activity_ticket_settings_container_widget.dart';
-import 'package:check_in_web_mobile_explore/presentation/web_screens/main_container_widgets/chat_widget/chat_helper_core.dart';
 import 'package:check_in_web_mobile_explore/presentation/web_screens/main_container_widgets/chat_widget/chat_main_container_widget.dart';
 import 'package:check_in_web_mobile_explore/presentation/web_screens/main_container_widgets/profile_widget/profile_main_container_widget.dart';
 import 'package:check_in_web_mobile_explore/presentation/web_screens/main_container_widgets/reservations_widget/reservation_main_container_widget.dart';
@@ -17,26 +16,30 @@ import 'package:check_in_web_mobile_explore/presentation/web_screens/sub_contain
 import 'package:check_in_web_mobile_explore/presentation/web_screens/sub_container_widgets/reservation_widget/reservation_sub_container_widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:jumping_dot/jumping_dot.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:check_in_facade/auth/notification_facade/notification_core_config.dart';
-import 'focused_main_container_widgets/activity_attendee_ticket_settings_widget/activity_attendee_ticket_settings_container_widget.dart';
-import 'focused_main_container_widgets/activity_ticket_settings_widget/activity_ticket_helper.dart';
+import '../screens/activity_settings/pop_over_screen/activity_onboarding_widget.dart';
 import 'focused_main_container_widgets/activity_vendor_form_manage_widget/activity_vendor_form_manage_container_widget.dart';
 import 'focused_main_container_widgets/activity_vendor_form_manage_widget/actvity_vendor_form_manager_helper.dart';
 import 'main_container_widgets/settings_widget/settings_main_container_widget.dart';
 import 'sub_container_widgets/activity_settings_widget/activity_settings_sub_main_widget.dart';
-import 'sub_container_widgets/activity_ticket_settings_widget/activity_ticket_sub_container_widget.dart';
 import 'sub_container_widgets/activity_vendor_manager_widget/activity_vendor_manager_sub_container_widget.dart';
 import 'sub_container_widgets/settings_widget/settings_sub_container_widget.dart';
+import 'package:check_in_facade/check_in_facade.dart';
+import 'package:check_in_domain/domain/misc/attendee_services/attendee_item/attendee_item.dart';
+import 'package:check_in_application/un_auth/watcher_services/attendee_watcher_service/attendee_manager_watcher_bloc.dart';
+import 'package:check_in_web_mobile_explore/presentation/core/core_helper.dart' if (dart.library.html) 'package:check_in_web_mobile_explore/presentation/core/core_helper_web.dart';
+
 
 class MainWebScreen extends StatefulWidget {
 
   final DashboardModel model;
+  final bool? isCreatingNewActivity;
   final DashboardMarker initialDashboardMarker;
   final UniqueId? initialReservationId;
 
-  const MainWebScreen({super.key, required this.model, required this.initialDashboardMarker, this.initialReservationId});
+  const MainWebScreen({super.key, required this.model, required this.initialDashboardMarker, this.initialReservationId, this.isCreatingNewActivity});
 
   @override
   State<MainWebScreen> createState() => _MainWebScreenState();
@@ -44,8 +47,12 @@ class MainWebScreen extends StatefulWidget {
 
 class _MainWebScreenState extends State<MainWebScreen> {
 
+  late bool? isCreatingNewActivity = false;
+
+
   @override
   void initState() {
+    isCreatingNewActivity = widget.isCreatingNewActivity;
     context.read<ListingsSearchRequirementsBloc>().add(ListingsSearchRequirementsEvent.currentDashboardMarker(widget.initialDashboardMarker));
     super.initState();
   }
@@ -57,7 +64,7 @@ class _MainWebScreenState extends State<MainWebScreen> {
         builder: (context, authState) {
           return authState.maybeMap(
               loadInProgress: (_) => JumpingDots(color: widget.model.paletteColor, numberOfDots: 3),
-              loadProfileFailure: (_) => retrieveAuthenticationState(null, [], [], []),
+              loadProfileFailure: (_) => retrieveAuthenticationState(null, [], [], [], null, null, null, null, []),
               loadUserProfileSuccess: (item) => retrieveCurrentReservations(item.profile),
               orElse: () {
                 return JumpingDots(color: widget.model.paletteColor, numberOfDots: 3);
@@ -70,15 +77,26 @@ class _MainWebScreenState extends State<MainWebScreen> {
 
 
   Widget retrieveCurrentReservations(UserProfileModel currentUser) {
-    return BlocProvider(create: (_) => getIt<ReservationManagerWatcherBloc>()..add(ReservationManagerWatcherEvent.watchCurrentUsersReservations([ReservationSlotState.current], currentUser, false)),
+    return BlocProvider(create: (_) => getIt<ReservationManagerWatcherBloc>()..add(ReservationManagerWatcherEvent.watchCurrentUsersReservations([ReservationSlotState.current], currentUser, false, 2, null)),
       child: BlocBuilder<ReservationManagerWatcherBloc, ReservationManagerWatcherState>(
         builder: (context, state) {
           return state.maybeMap(
               loadCurrentUserReservationsSuccess: (e) {
-                return retrieveActivityManagerForms(currentUser, e.item);
+                return BlocProvider(create: (_) => getIt<ActivityManagerWatcherBloc>()..add(ActivityManagerWatcherEvent.watchActivityManagerFromReservations(e.item.map((e) => e.reservationId).toList())),
+                  child: BlocBuilder<ActivityManagerWatcherBloc, ActivityManagerWatcherState>(
+                    builder: (context, state) {
+                      return state.maybeMap(
+                          loadActivityManagerFromResSuccess: (items) {
+                            return retrieveSelectedReservation(currentUser, e.item, items.items);
+                          },
+                          orElse: () => retrieveSelectedReservation(currentUser, e.item, [])
+                      );
+                    },
+                  ),
+                );
               },
             orElse: () {
-                return retrieveActivityManagerForms(currentUser, []);
+                return retrieveSelectedReservation(currentUser, [], []);
             }
           );
         },
@@ -86,32 +104,117 @@ class _MainWebScreenState extends State<MainWebScreen> {
     );
   }
 
-  Widget retrieveActivityManagerForms(UserProfileModel currentUser, List<ReservationItem> currentResList) {
-    return BlocProvider(create: (_) => getIt<ActivityManagerWatcherBloc>()..add(ActivityManagerWatcherEvent.watchActivityManagerFromReservations(currentResList.map((e) => e.reservationId.getOrCrash()).toList())),
-      child: BlocBuilder<ActivityManagerWatcherBloc, ActivityManagerWatcherState>(
-        builder: (context, state) {
-          return state.maybeMap(
-              loadActivityManagerFromResSuccess: (items) {
-                return retrieveNotifications(currentUser, currentResList, items.items);
+  // Widget retrieveActivityManagerForms(UserProfileModel currentUser, List<ReservationItem> currentResList) {
+  //   if (ReservationHelperCore.selectedReservationItem != null) {
+  //
+  //   } else if (widget.initialReservationId != null) {
+  //     return BlocProvider(create: (_) => getIt<ActivityManagerWatcherBloc>()..add(ActivityManagerWatcherEvent.watchActivityManagerFromReservations(currentResList.map((e) => e.reservationId.getOrCrash()).toList())),
+  //       child: BlocBuilder<ActivityManagerWatcherBloc, ActivityManagerWatcherState>(
+  //         builder: (context, state) {
+  //           return state.maybeMap(
+  //               loadActivityManagerFromResSuccess: (items) {
+  //                 return retrieveNotifications(currentUser, currentResList, items.items, null, null, null, null, []);
+  //               },
+  //               orElse: () => retrieveNotifications(currentUser, currentResList, [], null, null, null, null, [])
+  //           );
+  //         },
+  //       ),
+  //     );
+  //   }
+  //   return retrieveNotifications(currentUser, [], [], null, null, null, null, []);
+  // }
+
+  //
+  Widget retrieveSelectedReservation(UserProfileModel? currentUser, List<ReservationItem> reservations, List<ActivityManagerForm> activities,) {
+    if (ReservationHelperCore.selectedReservationItem != null) {
+      return retrieveNotifications(currentUser, reservations, activities, ReservationHelperCore.selectedReservationItem!, null, null, null, []);
+    } else if (widget.initialReservationId != null) {
+      print('not null');
+      return BlocProvider(create: (_) => getIt<ReservationManagerWatcherBloc>()..add(ReservationManagerWatcherEvent.watchReservationItem(widget.initialReservationId!.getOrCrash())),
+        child: BlocBuilder<ReservationManagerWatcherBloc, ReservationManagerWatcherState>(
+          builder: (context, state) {
+            return state.maybeMap(
+              // resLoadInProgress: (_) => JumpingDots(color: widget.model.paletteColor, numberOfDots: 3),
+              loadReservationItemSuccess: (e) {
+                return retrieveNotifications(currentUser, reservations, activities, e.item, null, null, null, []);
+                // ReservationHelperCore.selectedReservationItem ??= e.item;
+                // // return retrieveSelectedReservationListing(currentUser, reservations, activities, e.item);
+                //   return BlocProvider(create: (_) => getIt<ListingManagerWatcherBloc>()..add(ListingManagerWatcherEvent.watchListingManagerItemStarted(e.item.instanceId.getOrCrash())),
+                //     child: BlocBuilder<ListingManagerWatcherBloc, ListingManagerWatcherState>(
+                //       builder: (context, state) {
+                //         return state.maybeMap(
+                //             loadListingManagerItemSuccess: (item) {
+                //               ReservationHelperCore.currentListingManagerForm ??= item.failure;
+                //               return retrieveSelectedReservationActivity(currentUser, reservations, activities, e.item, item.failure);
+                //             },
+                //         orElse: () => retrieveSelectedReservationActivity(currentUser, reservations, activities, e.item, null)
+                //       );
+                //     },
+                //   ),
+                // );
               },
-              orElse: () => retrieveNotifications(currentUser, currentResList, [])
-          );
-        },
-      ),
-    );
+              orElse: () => retrieveNotifications(currentUser, reservations, activities, null, null, null, null, []),
+            );
+          },
+        )
+      );
+    } else {
+      return retrieveNotifications(currentUser, reservations, activities, null, null, null, null, []);
+    }
   }
 
 
-  Widget retrieveNotifications(UserProfileModel? currentUser, List<ReservationItem> reservations, List<ActivityManagerForm> activities) {
-    return BlocProvider(create: (_) => getIt<NotificationWatcherBloc>()..add(NotificationWatcherEvent.watchAllAccountNotificationAmountByType([AccountNotificationType.invite, AccountNotificationType.request, AccountNotificationType.activityPost, AccountNotificationType.joined, AccountNotificationType.message, AccountNotificationType.resSlot], null)),
+  // Widget retrieveSelectedReservationActivity(UserProfileModel? currentUser, List<ReservationItem> reservations, List<ActivityManagerForm> activities, ReservationItem? selectedReservation, ListingManagerForm? selectedListingForm,) {
+  //   if (selectedReservation != null) {
+  //     return BlocProvider(create: (_) => getIt<ActivityManagerWatcherBloc>()..add(ActivityManagerWatcherEvent.watchActivityManagerFormStarted(selectedReservation.reservationId.getOrCrash())),
+  //       child: BlocBuilder<ActivityManagerWatcherBloc, ActivityManagerWatcherState>(
+  //         builder: (context, state) {
+  //           return state.maybeMap(
+  //             loadActivityManagerFormSuccess: (item) {
+  //                 return selectedReservationAttendeeItem(currentUser, reservations, activities, selectedReservation, selectedListingForm, item.item);
+  //               },
+  //             orElse: () => selectedReservationAttendeeItem(currentUser, reservations, activities, selectedReservation, selectedListingForm, null),
+  //           );
+  //         },
+  //       ),
+  //     );
+  //   } else {
+  //     return retrieveNotifications(currentUser, reservations, activities, null, null, null, null, []);
+  //   }
+  // }
+
+
+  // Widget selectedReservationAttendeeItem(UserProfileModel? currentUser, List<ReservationItem> reservations, List<ActivityManagerForm> activities, ReservationItem? selectedReservation, ListingManagerForm? selectedListingForm, ActivityManagerForm? selectedActivityForm, ) {
+  //   if (selectedReservation != null && currentUser != null) {
+  //     return BlocProvider(create: (context) => getIt<AttendeeManagerWatcherBloc>()..add(AttendeeManagerWatcherEvent.watchAttendeeItem(selectedReservation.reservationId.getOrCrash(), currentUser.userId.getOrCrash())),
+  //         child: BlocBuilder<AttendeeManagerWatcherBloc, AttendeeManagerWatcherState>(
+  //             builder: (context, state) {
+  //               return state.maybeMap(
+  //                   loadAttendeeItemSuccess: (attendee) {
+  //                     return retrieveNotifications(currentUser, reservations, activities, selectedReservation, selectedListingForm, selectedActivityForm, attendee.item, []);
+  //                   },
+  //                   orElse: () {
+  //               return retrieveNotifications(currentUser, reservations, activities, selectedReservation, selectedListingForm, selectedActivityForm, null, []);
+  //             }
+  //           );
+  //         }
+  //       )
+  //     );
+  //   } else {
+  //     return retrieveNotifications(currentUser, reservations, activities, null, null, null, null, []);
+  //   }
+  // }
+
+  Widget retrieveNotifications(UserProfileModel? currentUser, List<ReservationItem> reservations, List<ActivityManagerForm> activities, ReservationItem? selectedReservation, ListingManagerForm? selectedListingForm, ActivityManagerForm? selectedActivityForm, AttendeeItem? selectedReservationAttendance, List<TicketItem> selectedReservationAllAttendees) {
+    return BlocProvider(create: (_) => getIt<NotificationWatcherBloc>()..add(const NotificationWatcherEvent.watchAllAccountNotificationAmountByType([AccountNotificationType.invite, AccountNotificationType.request, AccountNotificationType.activityPost, AccountNotificationType.joined, AccountNotificationType.message, AccountNotificationType.resSlot], null)),
         child: BlocBuilder<NotificationWatcherBloc, NotificationWatcherState>(
             builder: (context, authState) {
               return authState.maybeMap(
                   loadAllAccountNotificationByTypeSuccess: (item) {
-                    return retrieveAuthenticationState(currentUser, reservations, activities, item.notifications);
+                    return retrieveAuthenticationState(currentUser, reservations, activities, item.notifications, selectedReservation, selectedListingForm, selectedActivityForm, selectedReservationAttendance, selectedReservationAllAttendees);
                   },
             orElse: () {
-              return retrieveAuthenticationState(currentUser, reservations, activities, []);
+              return retrieveAuthenticationState(currentUser, reservations, activities, [], selectedReservation, selectedListingForm, selectedActivityForm, selectedReservationAttendance, selectedReservationAllAttendees);
             }
           );
         }
@@ -120,7 +223,7 @@ class _MainWebScreenState extends State<MainWebScreen> {
   }
 
 
-  Widget retrieveAuthenticationState(UserProfileModel? currentUser, List<ReservationItem> reservations, List<ActivityManagerForm> activities, List<AccountNotificationItem> notifications) {
+  Widget retrieveAuthenticationState(UserProfileModel? currentUser, List<ReservationItem> reservations, List<ActivityManagerForm> activities, List<AccountNotificationItem> notifications, ReservationItem? selectedReservation, ListingManagerForm? selectedListingForm, ActivityManagerForm? selectedActivityForm, AttendeeItem? selectedReservationAttendance, List<TicketItem> selectedReservationAllAttendees) {
     final searchExploreContainer = SearchExploreMainContainerWidget(
         model: widget.model,
         didUpdate: () {setState(() {
@@ -161,15 +264,16 @@ class _MainWebScreenState extends State<MainWebScreen> {
         selectedProfile: ActivityAttendeeHelperCore.selectedUserProfileItem,
         rebuild: () {
           setState(() {});
-        },
+      },
     );
     final activityAttendeesSubContainer = ActivityAttendeesListScreen(
       model: widget.model,
+      // initialReservationId: widget.initialReservationId,
       reservationItem: ReservationHelperCore.selectedReservationItem,
       activityManagerForm: ReservationHelperCore.currentActivityForm,
-      currentUser: ReservationHelperCore.currentUserProfile?.userId.getOrCrash(),
-      selectedAttendee: ActivityAttendeeHelperCore.selectedAttendeeItem,
-      selectedUserProfile: ActivityAttendeeHelperCore.selectedUserProfileItem,
+      selectedAttendee: ReservationHelperCore.selectedReservationAttendeeItem,
+      currentUser: currentUser?.userId.value.fold((l) => null, (r) => r),
+      selectedUserProfile: currentUser,
       didSelectAttendee: (attendee, user) {
         setState(() {
           ActivityAttendeeHelperCore.isLoading = true;
@@ -191,9 +295,11 @@ class _MainWebScreenState extends State<MainWebScreen> {
 
     final activitySettingsContainer = ActivitySettingsMainContainerWidget(
       model: widget.model,
-      reservationItem: ReservationHelperCore.selectedReservationItem,
-      currentUser: ReservationHelperCore.currentUserProfile,
-      activityManagerForm: ReservationHelperCore.currentActivityForm,
+      initialReservation: selectedReservation,
+      // listingForm: ReservationHelperCore.currentListingManagerForm,
+      // reservationItem: ReservationHelperCore.selectedReservationItem,
+      currentUser: currentUser,
+      // activityManagerForm: ReservationHelperCore.currentActivityForm,
       currentNavItem: ReservationHelperCore.currentSettingsItemModel,
       rebuild: () {
         setState(() {});
@@ -204,24 +310,36 @@ class _MainWebScreenState extends State<MainWebScreen> {
         });
       }
     );
+
+
     final activitySettingsSubContainer = ActivitySubSettingsContainer(
         model: widget.model,
-        currentUser: ReservationHelperCore.currentUserProfile,
+        currentUser: currentUser,
         currentSelectedSettingItem: ReservationHelperCore.currentSettingsItemModel,
-        currentAttendee: ActivityAttendeeHelperCore.selectedAttendeeItem,
+        initialReservationId: selectedReservation,
+        // currentAttendee: ActivityAttendeeHelperCore.selectedAttendeeItem,
+        // currentReservationItem: ReservationHelperCore.selectedReservationItem,
         didSelectNavItem: (selectedNav) {
           setState(() {
             ReservationHelperCore.currentSettingsItemModel = selectedNav;
-          });
-        },
-        currentReservationItem: ReservationHelperCore.selectedReservationItem,
-        currentActivityManagerForm: ReservationHelperCore.currentActivityForm
+
+            if (selectedReservation != null) {
+                Beamer.of(context).update(
+                  configuration: RouteInformation(
+                      location: reservationSettingsRoute(selectedReservation.reservationId.getOrCrash(), selectedNav.navItem.name)
+                ),
+                rebuild: false
+            );
+          }
+        });
+      },
     );
 
     final activityVendorFormMainContainer = ActivityVendorFormManageMainContainerWidget(
       model: widget.model,
-      reservationItem: ReservationHelperCore.selectedReservationItem,
-      activityManagerForm: ReservationHelperCore.currentActivityForm,
+      initialReservation: selectedReservation,
+      // activityManagerForm: ReservationHelperCore.currentActivityForm,
+      // initialReservationId: widget.initialReservationId,
       selectedForm: ActivityVendorHelperCore.selectedForm,
       rebuild: () {
         setState(() {
@@ -231,15 +349,17 @@ class _MainWebScreenState extends State<MainWebScreen> {
 
     final activityVendorFormSubContainer = ActivityVendorManagerSubContainer(
         model: widget.model,
-        currentReservationItem: ReservationHelperCore.selectedReservationItem,
-        currentActivityManagerForm: ReservationHelperCore.currentActivityForm,
+        initialReservation: selectedReservation,
+        // currentReservationItem: ReservationHelperCore.selectedReservationItem,
         currentVendorManagerForm: ActivityVendorHelperCore.selectedForm,
+        currentUser: currentUser,
+        // listing: ReservationHelperCore.currentListingManagerForm,
         didSelectFormItem: (form) {
           setState(() {
             ActivityVendorHelperCore.isLoading = true;
             ActivityVendorHelperCore.selectedForm = form;
           });
-          Future.delayed(const Duration(seconds: 1, milliseconds: 250), () {
+          Future.delayed(const Duration(seconds: 3, milliseconds: 250), () {
             setState(() {
               ActivityVendorHelperCore.isLoading = false;
             });
@@ -295,8 +415,12 @@ class _MainWebScreenState extends State<MainWebScreen> {
 
     final getLoginSignUpMainContainer = Padding(
       padding: const EdgeInsets.all(8.0),
-      child: GetLoginSignUpWidget(showFullScreen: true, model: widget.model, didLoginSuccess: () {
+      child: GetLoginSignUpWidget(
+        showFullScreen: true,
+        model: widget.model,
+        didLoginSuccess: () {
         setState(() {
+
           });
         },
       ),
@@ -324,21 +448,25 @@ class _MainWebScreenState extends State<MainWebScreen> {
       didSelectItem: (ProfileSettingMarker navItem) {
         setState(() {
           ReservationHelperCore.currentProfileSettingsMarker = navItem;
+
         });
       },
       rebuild: () {
-        setState(() {
-          Beamer.of(context).update(
-              configuration: RouteInformation(
-                  location: '/home'
-              ),
-              rebuild: true
-          );
-        });
+        // Navigator.of(context).pop();
+        didSelectRefresh();
+        // SystemNavigator.pop();
+        // setState(() {
+        //   Beamer.of(context).update(
+        //       configuration: RouteInformation(
+        //           location: '/home'
+        //       ),
+        //       rebuild: true
+        //   );
+        // });
       },
     );
 
-    List<DashboardContainerModel> dashboardContent(UserProfileModel? currentUser, List<ReservationItem> currentRes, List<ActivityManagerForm> currentAct) => [
+    List<DashboardContainerModel> dashboardContent(UserProfileModel? currentUser, List<ReservationItem> currentRes, List<ActivityManagerForm> currentAct, ReservationItem? selectedReservation, ListingManagerForm? selectedListingForm, ActivityManagerForm? selectedActivityForm, AttendeeItem? selectedReservationAttendance, List<TicketItem> selectedReservationAllAttendees) => [
       DashboardContainerModel(
           mainContainer: DashboardMainContainerModel(
               mainContainer: searchExploreContainer,
@@ -413,14 +541,19 @@ class _MainWebScreenState extends State<MainWebScreen> {
         isLive: true,
       ),
       DashboardContainerModel(
-          mainContainer: DashboardMainContainerModel(mainContainer: reservationContainer, sidePanelMainContainer: Container(), isSubContainerAllowed: false, presentSidePanel: false),
+          mainContainer: DashboardMainContainerModel(
+              mainContainer: reservationContainer,
+              sidePanelMainContainer: Container(),
+              isSubContainerAllowed: false,
+              presentSidePanel: false
+          ),
           subContainer: reservationSubContainer,
           dashboardMarker: DashboardMarker.resProfile,
           iconTab: Icons.home_outlined,
           tabTitle: 'Reservation',
           isPrivate: ReservationHelperCore.currentActivityForm?.rulesService.accessVisibilitySetting.isPrivateOnly == true || ReservationHelperCore.currentActivityForm?.rulesService.accessVisibilitySetting.isInviteOnly == true,
           imageUrl: [getImageFromSelectedReservationActivity(ReservationHelperCore.currentActivityForm, ReservationHelperCore.selectedReservationItem, ReservationHelperCore.currentListingManagerForm) ?? ''],
-          isVisible: (ReservationHelperCore.selectedReservationItem != null && !Responsive.isMobile(context))
+          isVisible: (selectedReservation != null && !Responsive.isMobile(context))
       ),
       DashboardContainerModel(
           mainContainer: DashboardMainContainerModel(
@@ -437,9 +570,9 @@ class _MainWebScreenState extends State<MainWebScreen> {
             e.notificationType == AccountNotificationType.request && ReservationHelperCore.selectedReservationItem?.reservationId == e.reservationId ||
             e.notificationType == AccountNotificationType.joined && ReservationHelperCore.selectedReservationItem?.reservationId == e.reservationId
           ).length,
-          isVisible: (ReservationHelperCore.selectedReservationItem != null && !Responsive.isMobile(context))
+          isVisible: (selectedReservation != null && !Responsive.isMobile(context))
       ),
-      if (currentUser != null && currentUser.userId == ReservationHelperCore.selectedReservationItem?.reservationOwnerId) DashboardContainerModel(
+      if (currentUser != null && currentUser.userId == selectedReservation?.reservationOwnerId) DashboardContainerModel(
           mainContainer: DashboardMainContainerModel(
               mainContainer: activityTicketMainContainer,
               sidePanelMainContainer: Container(),
@@ -450,9 +583,9 @@ class _MainWebScreenState extends State<MainWebScreen> {
           dashboardMarker: DashboardMarker.resTicket,
           iconTab: Icons.airplane_ticket_outlined,
           tabTitle: 'Tickets',
-          isVisible: (ReservationHelperCore.selectedReservationItem != null && ReservationHelperCore.currentActivityForm?.activityAttendance.isTicketBased == true && !Responsive.isMobile(context))
+          isVisible: (selectedReservation != null && ReservationHelperCore.currentActivityForm?.activityAttendance.isTicketBased == true && !Responsive.isMobile(context))
       ),
-      if (currentUser != null && currentUser.userId == ReservationHelperCore.selectedReservationItem?.reservationOwnerId) DashboardContainerModel(
+      if (currentUser != null && currentUser.userId == selectedReservation?.reservationOwnerId) DashboardContainerModel(
           mainContainer: DashboardMainContainerModel(
             mainContainer: activityVendorFormMainContainer,
             sidePanelMainContainer: Container(),
@@ -463,7 +596,7 @@ class _MainWebScreenState extends State<MainWebScreen> {
           dashboardMarker: DashboardMarker.resVendorForms,
           iconTab: Icons.note_alt_outlined,
           tabTitle: 'Vendor Forms',
-          isVisible: (ReservationHelperCore.selectedReservationItem != null && ReservationHelperCore.currentActivityForm?.rulesService.vendorMerchantForms?.isNotEmpty == true && !Responsive.isMobile(context))
+          isVisible: (selectedReservation != null || (ReservationHelperCore.selectedReservationItem != null && ReservationHelperCore.currentActivityForm?.rulesService.vendorMerchantForms?.isNotEmpty == true) && !Responsive.isMobile(context))
       ),
       if (currentUser != null && (ReservationHelperCore.currentAttendeeTicketItems ?? []).isNotEmpty) DashboardContainerModel(
           mainContainer: DashboardMainContainerModel(
@@ -478,7 +611,7 @@ class _MainWebScreenState extends State<MainWebScreen> {
           dashboardMarker: DashboardMarker.resAttendeeTicket,
           iconTab: Icons.airplane_ticket_rounded,
           tabTitle: 'Attendee Tickets',
-          isVisible: (ReservationHelperCore.selectedReservationItem != null && !Responsive.isMobile(context))
+          isVisible: (selectedReservation != null || (ReservationHelperCore.selectedReservationItem != null) && !Responsive.isMobile(context))
       ),
       DashboardContainerModel(
           mainContainer: DashboardMainContainerModel(
@@ -499,7 +632,7 @@ class _MainWebScreenState extends State<MainWebScreen> {
           iconTab: Icons.settings_outlined,
           tabTitle: 'Settings',
           /// show if is reservation owner or if is joined reservation attendee
-          isVisible: ((ReservationHelperCore.selectedReservationItem != null && ReservationHelperCore.selectedReservationItem?.reservationOwnerId == currentUser?.userId) || (ReservationHelperCore.selectedReservationAttendeeItem?.contactStatus == ContactStatus.joined)) && !Responsive.isMobile(context)
+          isVisible: (selectedReservation != null || ((ReservationHelperCore.selectedReservationItem != null && ReservationHelperCore.selectedReservationItem?.reservationOwnerId == currentUser?.userId) || (ReservationHelperCore.selectedReservationAttendeeItem?.contactStatus == ContactStatus.joined) || (ReservationHelperCore.selectedReservationAttendeeItem?.contactStatus == ContactStatus.requested))) && !Responsive.isMobile(context)
       ),
     ];
 
@@ -516,68 +649,149 @@ class _MainWebScreenState extends State<MainWebScreen> {
       tabTitle: 'Settings',
       isVisible: !Responsive.isMobile(context)
     );
-    return retrieveMainDashboardContainer(context, dashboardContent(currentUser, reservations, activities), reservations, activities, notifications, optionsDashboardItem);
+    return retrieveMainDashboardContainer(context, currentUser, dashboardContent(currentUser, reservations, activities, selectedReservation, selectedListingForm, selectedActivityForm, selectedReservationAttendance, selectedReservationAllAttendees), reservations, activities, notifications, optionsDashboardItem);
   }
 
 
-  Widget retrieveMainDashboardContainer(BuildContext context, List<DashboardContainerModel> dashboardContainerModel, List<ReservationItem> currentRes, List<ActivityManagerForm> currentAct, List<AccountNotificationItem> notifications, DashboardContainerModel optionsDashboardItem) {
-    return WebDashboardMain(
-    model: widget.model,
-      dashboardMarker: context.read<ListingsSearchRequirementsBloc>().state.currentDashboardMarker,
-      dashboardContainerItems: dashboardContainerModel,
-      didSelectDashboardMarkerItem: (marker) {
-        setState(() {
-          switch (marker) {
-            case DashboardMarker.resProfile:
+  Widget retrieveMainDashboardContainer(BuildContext context, UserProfileModel? currentUser, List<DashboardContainerModel> dashboardContainerModel, List<ReservationItem> currentRes, List<ActivityManagerForm> currentAct, List<AccountNotificationItem> notifications, DashboardContainerModel optionsDashboardItem) {
+    return Stack(
+      children: [
+        WebDashboardMain(
+        model: widget.model,
+          dashboardMarker: context.read<ListingsSearchRequirementsBloc>().state.currentDashboardMarker,
+          dashboardContainerItems: dashboardContainerModel,
+          didSelectDashboardMarkerItem: (marker) {
+            setState(() {
               Beamer.of(context).update(
                   configuration: RouteInformation(
-                      location: '/${marker.name.toString()}/'
+                      location: '/${marker.name.toString()}'
                   ),
-                rebuild: false
+                  rebuild: false
               );
-              break;
-            case DashboardMarker.resCurrent:
-              break;
-            case DashboardMarker.resAttendees:
-              // update notification count for attendees joined or requests
-              LocalNotificationCore.updateNotificationToRead(context, notifications.where((e) =>
-                e.notificationType == AccountNotificationType.request && ReservationHelperCore.selectedReservationItem?.reservationId == e.reservationId ||
-                e.notificationType == AccountNotificationType.joined && ReservationHelperCore.selectedReservationItem?.reservationId == e.reservationId).map((e) => e.notificationId).toList(),
-                widget.model.paletteColor,
-                widget.model.accentColor
-              );
-              break;
-            case DashboardMarker.resVendorForms:
-              ActivityVendorHelperCore.isLoading = true;
-              Future.delayed(const Duration(seconds: 1, milliseconds: 250), () {
-              setState(() {
-                ActivityVendorHelperCore.isLoading = false;
-                });
+
+              switch (marker) {
+                case DashboardMarker.home:
+                  if (ExploreWebHelperCore.selectedListing && ExploreWebHelperCore.currentFacilityItemId != null && ExploreWebHelperCore.currentReservationItemId != null) {
+                    Beamer.of(context).update(
+                        configuration: RouteInformation(
+                            location: searchedReservationRoute(ExploreWebHelperCore.currentFacilityItemId!.getOrCrash(), ExploreWebHelperCore.currentReservationItemId!.getOrCrash())
+                        ),
+                      rebuild: false
+                    );
+                  }
+                  break;
+                case DashboardMarker.resProfile:
+                  Beamer.of(context).update(
+                      configuration: RouteInformation(
+                          location: (ReservationHelperCore.selectedReservationItem != null) ? reservationProfileRoute(ReservationHelperCore.selectedReservationItem!.reservationId.getOrCrash()) : '/${marker.name.toString()}',
+                      ),
+                    rebuild: false
+                  );
+                  break;
+                case DashboardMarker.resCurrent:
+                  break;
+                case DashboardMarker.resAttendees:
+                  // update notification count for attendees joined or requests
+                  LocalNotificationCore.updateNotificationToRead(context, notifications.where((e) =>
+                    e.notificationType == AccountNotificationType.request && ReservationHelperCore.selectedReservationItem?.reservationId == e.reservationId ||
+                    e.notificationType == AccountNotificationType.joined && ReservationHelperCore.selectedReservationItem?.reservationId == e.reservationId).map((e) => e.notificationId).toList(),
+                    widget.model.paletteColor,
+                    widget.model.accentColor
+                  );
+                  break;
+                case DashboardMarker.resVendorForms:
+                  ActivityVendorHelperCore.isLoading = true;
+                  ActivityVendorHelperCore.isLoadingSubContainer = true;
+
+                  if (ReservationHelperCore.selectedReservationItem != null) {
+                    Beamer.of(context).update(
+                        configuration: RouteInformation(
+                            location: reservationVendorFormRoute(ReservationHelperCore.selectedReservationItem!.reservationId.getOrCrash())
+                        ),
+                        rebuild: false
+                    );
+                  } else if (widget.initialReservationId != null) {
+                    Beamer.of(context).update(
+                        configuration: RouteInformation(
+                            location: reservationVendorFormRoute(widget.initialReservationId!.getOrCrash())
+                        ),
+                        rebuild: false
+                    );
+                  } else {
+                    Beamer.of(context).update(
+                        configuration: RouteInformation(
+                            location: '/${marker.name.toString()}'
+                        ),
+                        rebuild: false
+                    );
+                  }
+
+                  Future.delayed(const Duration(seconds: 1, milliseconds: 250), () {
+                  setState(() {
+                    ActivityVendorHelperCore.isLoading = false;
+                    ActivityVendorHelperCore.isLoadingSubContainer = false;
+                    });
+                  });
+                case DashboardMarker.resTicket:
+                  // TODO: Handle this case.
+                  break;
+                case DashboardMarker.resAttendeeTicket:
+                  // TODO: Handle this case.
+                  break;
+                case DashboardMarker.resSettings:
+                  if (ReservationHelperCore.selectedReservationItem != null) {
+                    Beamer.of(context).update(
+                        configuration: RouteInformation(
+                            location: reservationSettingsRoute(ReservationHelperCore.selectedReservationItem!.reservationId.getOrCrash(), SettingNavMarker.reports.name)
+                        ),
+                        rebuild: false
+                    );
+                  } else if (widget.initialReservationId != null) {
+                    Beamer.of(context).update(
+                        configuration: RouteInformation(
+                            location: reservationSettingsRoute(widget.initialReservationId!.getOrCrash(), SettingNavMarker.reports.name)
+                        ),
+                        rebuild: false
+                    );
+                  } else {
+                    Beamer.of(context).update(
+                        configuration: RouteInformation(
+                            location: reservationSettingsRoute('/${marker.name.toString()}', SettingNavMarker.reports.name)
+                        ),
+                        rebuild: false
+                    );
+                  }
+                  // TODO: Handle this case.
+                  break;
+                default:
+                  break;
+              }
+
+
+              context.read<ListingsSearchRequirementsBloc>().add(ListingsSearchRequirementsEvent.currentDashboardMarker(marker));
               });
-            case DashboardMarker.resTicket:
-              // TODO: Handle this case.
-              break;
-            case DashboardMarker.resAttendeeTicket:
-              // TODO: Handle this case.
-              break;
-            case DashboardMarker.resSettings:
-              // TODO: Handle this case.
-              break;
-            default:
-              break;
-          }
+            },
+          optionsMarkerItem: optionsDashboardItem,
+        ),
 
-          Beamer.of(context).update(
-            configuration: RouteInformation(
-              location: '/${marker.name.toString()}'
+        if (isCreatingNewActivity == true) OnBoardingPopOverWidget(
+            height: 1050,
+            width: 750,
+            popOverWidget: CreateNewActivityScreen(
+                currentListingManForm: null,
+                initPage: null,
+                model: widget.model,
+                isPopOver: false,
+                didSelectClose: () {
+                  setState(() {
+                    isCreatingNewActivity = false;
+                  });
+                },
             ),
-            rebuild: false
-          );
+            model: widget.model
+        ),
 
-          context.read<ListingsSearchRequirementsBloc>().add(ListingsSearchRequirementsEvent.currentDashboardMarker(marker));
-          });
-        },
-      optionsMarkerItem: optionsDashboardItem,
+      ],
     );
   }
 

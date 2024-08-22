@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_domain/domain/misc/attendee_services/form/merchant_vendor/custom_availability/mv_custom_availability.dart';
+import 'package:check_in_domain/domain/misc/stripe/receipt_services/receipt/receipt_pdf_generator.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -29,11 +30,12 @@ class ActivityVendorApplicationsResultMain extends StatefulWidget {
 
   final DashboardModel model;
   final VendorMerchantForm selectedForm;
+  final ListingManagerForm listingForm;
   final ReservationItem reservationItem;
   final UserProfileModel activityOwnerProfile;
   final ActivityManagerForm activityManagerForm;
 
-  const ActivityVendorApplicationsResultMain({super.key, required this.model, required this.selectedForm, required this.reservationItem, required this.activityOwnerProfile, required this.activityManagerForm});
+  const ActivityVendorApplicationsResultMain({super.key, required this.model, required this.selectedForm, required this.reservationItem, required this.activityOwnerProfile, required this.activityManagerForm, required this.listingForm});
 
   @override
   State<ActivityVendorApplicationsResultMain> createState() => _ActivityVendorApplicationsResultMainState();
@@ -63,11 +65,80 @@ class _ActivityVendorApplicationsResultMainState extends State<ActivityVendorApp
     super.dispose();
   }
 
+  void _handleApplicantMoreOptionsDropdownSelection(BuildContext context, VendorApplicationBoothOptions? selectedAction, UserProfileModel? userProfile, EventMerchantVendorProfile? profile, AttendeeItem currentAttendee, List<VendorContactDetail> booths) async {
+    if (selectedAction == null) return;
 
+    switch (selectedAction) {
+      case VendorApplicationBoothOptions.selectAll:
+        setState(() {
+          for (VendorContactDetail vendor in booths.where((e) => e.boothItem.status?.name == currentEditingMode)) {
+            if (selectedVendors.map((e) => e.uid).contains(vendor.uid) == false) {
+              selectedVendors.add(vendor);
+            } else {
+              selectedVendors.removeWhere((element) => element.uid == vendor.uid);
+            }
+          }
+        });
+        break;
+      case VendorApplicationBoothOptions.previewPdf:
+        if (currentAttendee.vendorForm == null) {
+          return;
+        }
+
+        showSelectedDocumentButton(
+            context,
+            widget.model,
+            getDocumentsList(currentAttendee.vendorForm!)?.toList() ?? []
+        );
+        break;
+      case VendorApplicationBoothOptions.previewReceipt:
+        if (userProfile == null || profile == null || currentAttendee.vendorForm == null) {
+          return;
+        }
+        final invoiceNumber = await AttendeeFacade.instance.getNumberOfAttending(attendeeOwnerId: currentAttendee.attendeeOwnerId.getOrCrash(), status: ContactStatus.joined, attendingType: AttendeeType.vendor, isInterested: null) ?? 1;
+        final receiptPdf = await generateReceiptPdf(widget.activityManagerForm, widget.activityOwnerProfile, userProfile, profile, currentAttendee, invoiceNumber);
+        final receiptDoc = [
+          DocumentFormOption(
+              documentForm: ImageUpload(
+                  key: '',
+                  imageToUpload: receiptPdf
+              )
+          )
+        ];
+
+        showSelectedDocumentButton(
+            context,
+            widget.model,
+            receiptDoc
+        );
+
+        break;
+      case VendorApplicationBoothOptions.previewRefund:
+        if (userProfile == null || profile == null || currentAttendee.vendorForm == null) {
+          return;
+        }
+        final receiptPdf = await generateRefundPdf(widget.activityManagerForm, userProfile, profile, currentAttendee.vendorForm!);
+        final receiptDoc = [
+          DocumentFormOption(
+              documentForm: ImageUpload(
+                  key: '',
+                  imageToUpload: receiptPdf
+              )
+          )
+        ];
+        showSelectedDocumentButton(
+            context,
+            widget.model,
+            receiptDoc
+        );
+        break;
+      case VendorApplicationBoothOptions.previewStatus:
+        break;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Container(
@@ -137,6 +208,8 @@ class _ActivityVendorApplicationsResultMainState extends State<ActivityVendorApp
 
                               setState(() {
                                 ActivityVendorHelperCore.isLoading = true;
+                              });setState(() {
+                                ActivityVendorHelperCore.isLoading = true;
                               });
 
                               Future.delayed(const Duration(seconds: 2), () {
@@ -198,7 +271,26 @@ class _ActivityVendorApplicationsResultMainState extends State<ActivityVendorApp
     );
   }
 
+  Widget noVendorsYet() {
+    return Container(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Icon(Icons.people_outline, color: widget.model.disabledTextColor, size: 85),
+          const SizedBox(height: 10),
+          Text('Sorry, No Vendor Requests Yet', style: TextStyle(color: widget.model.disabledTextColor, fontSize: widget.model.secondaryQuestionTitleFontSize)),
+          const SizedBox(height: 10),
+          Text('post your activity on your socials to get vendors to join - or change the status of your activity to looking for vendors!', style: TextStyle(color: widget.model.disabledTextColor)),
+        ],
+      ),
+    );
+  }
+
   Widget getAttendeeUserProfiles(BuildContext context, List<AttendeeItem> attendees) {
+    if (attendees.isEmpty) {
+      return noVendorsYet();
+    }
     return BlocProvider(create: (context) => getIt<UserProfileWatcherBloc>()..add(UserProfileWatcherEvent.watchAllProfileFromUserIdsStarted(attendees.map((e) => e.attendeeOwnerId.getOrCrash()).toList())),
       child: BlocBuilder<UserProfileWatcherBloc, UserProfileWatcherState>(
           builder: (context, authState) {
@@ -281,7 +373,7 @@ class _ActivityVendorApplicationsResultMainState extends State<ActivityVendorApp
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
 
-                                  const SizedBox(height: 180),
+                                  const SizedBox(height: 205),
 
 
                                          // for (var entry in getAllVendorApplicationDetails(placeholder).entries.toList(growable: false))
@@ -296,6 +388,7 @@ class _ActivityVendorApplicationsResultMainState extends State<ActivityVendorApp
                                           /// ordered by latest to submit?
 
                                           /// confirmed
+
                                          Column(
                                            children: attendees.entries.toList(growable: true).map((entry) {
 
@@ -306,123 +399,80 @@ class _ActivityVendorApplicationsResultMainState extends State<ActivityVendorApp
                                                   mainAxisAlignment: MainAxisAlignment.start,
                                                   crossAxisAlignment: CrossAxisAlignment.start,
                                                   children: [
-                                                    if (MediaQuery.of(context).size.width >= widthResponsive) Container(
-                                                        height: 80,
-                                                        decoration: BoxDecoration(
-                                                          color: widget.model.accentColor,
-                                                          borderRadius: BorderRadius.circular(18),
-                                                        ),
-                                                        child: Row(
-                                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                          children: [
 
-                                                             Padding(
-                                                              padding: const EdgeInsets.only(left: 8.0),
-                                                              child: Row(
-                                                                children: [
-                                                                  if (MediaQuery.of(context).size.width <= widthResponsive && profile != null) Row(
-                                                                    children: [
-                                                                      Row(
-                                                                        children: [
-                                                                          CircleAvatar(
-                                                                            backgroundImage: Image.network(profile.uriImage?.uriPath ?? '').image,
-                                                                          ),
-                                                                        ],
-                                                                      ),
-                                                                      const SizedBox(width: 8),
-                                                                      Text(profile.brandName.getOrCrash(), style: TextStyle(color: widget.model.paletteColor, fontWeight: FontWeight.bold, fontSize: widget.model.secondaryQuestionTitleFontSize))
-                                                                    ],
-                                                                  ),
-                                                                  if (userProfile != null) SizedBox(
-                                                                    height: 67,
-                                                                    width: 340,
-                                                                    child: ListTile(
-                                                                      onTap: () {
-                                                                        // selectedItem(user);
-                                                                      },
-                                                                      leading: Container(
-                                                                          decoration: BoxDecoration(
-                                                                            color: Colors.transparent,
-                                                                            borderRadius: BorderRadius.circular(30),
-                                                                          ),
-                                                                          child: Padding(
-                                                                              padding: const EdgeInsets.all(1.75),
-                                                                              child: CircleAvatar(backgroundImage: userProfile.profileImage?.image ?? Image.asset('assets/profile-avatar.png').image))),
-                                                                      title: Text('${userProfile.legalName.getOrCrash()} ${userProfile.legalSurname.value.fold((l) => '', (r) => r)}', style: TextStyle(color: widget.model.paletteColor, overflow: TextOverflow.ellipsis), maxLines: 1),
-                                                                      subtitle: (entry.key.vendorForm?.lastOpenedAt != null) ? Text('Submitted: ${DateFormat.MMMd().add_jm().format(DateTime.fromMillisecondsSinceEpoch(entry.key.vendorForm!.lastOpenedAt))}', style: TextStyle(color: widget.model.disabledTextColor)) : null,
-                                                                    )
-                                                                  ),
-                                                                  const SizedBox(width: 8),
-                                                                  if (entry.key.vendorForm != null && isDocumentsOptionValid(entry.key.vendorForm!)) Column(
-                                                                    mainAxisAlignment: MainAxisAlignment.center,
-                                                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                                                    children: [
-                                                                      Container(
-                                                                          decoration: BoxDecoration(
-                                                                            color: widget.model.disabledTextColor.withOpacity(0.38),
-                                                                            borderRadius: BorderRadius.circular(30),
-                                                                          ),
-                                                                          child: InkWell(
-                                                                            onTap: () {
-                                                                              showSelectedDocumentButton(context, widget.model, getDocumentsList(entry.key.vendorForm!)?.toList() ?? []);
-                                                                            },
-                                                                            child: Padding(
-                                                                              padding: const EdgeInsets.all(8.0),
-                                                                              child: Text('Uploaded Documents', style: TextStyle(color: widget.model.paletteColor)),
-                                                                          ),
-                                                                        )
-                                                                      ),
-                                                                    ],
-                                                                  )
-                                                                ],
-                                                              ),
-                                                            ),
-                                                            selectAllStatusHeader(entry.value, entry.key)
-                                                        ],
-                                                      )
+                                                    vendorAttendeeApplicationHeaderBar(
+                                                        context,
+                                                        widget.model,
+                                                        currentEditingMode,
+                                                        widthResponsive,
+                                                        widget.activityManagerForm,
+                                                        widget.activityOwnerProfile,
+                                                        entry.key,
+                                                        entry.value,
+                                                        entry.key.vendorForm,
+                                                        profile,
+                                                        userProfile,
+                                                        didSelectOption: (e) {
+                                                          _handleApplicantMoreOptionsDropdownSelection(context, e, userProfile, profile, entry.key, entry.value);
+                                                        },
+                                                        didSelectSelectAll: () {
+                                                          setState(() {
+                                                            for (VendorContactDetail vendor in entry.value.where((e) => e.boothItem.status?.name == currentEditingMode)) {
+                                                              if (selectedVendors.map((e) => e.uid).contains(vendor.uid) == false) {
+                                                                selectedVendors.add(vendor);
+                                                              } else {
+                                                                selectedVendors.removeWhere((element) => element.uid == vendor.uid);
+                                                              }
+                                                            }
+                                                          });
+                                                        }
                                                     ),
-                                                    if (MediaQuery.of(context).size.width <= widthResponsive) Container(
-                                                      height: 80,
-                                                      decoration: BoxDecoration(
-                                                        color: widget.model.accentColor,
-                                                        borderRadius: BorderRadius.circular(18),
-                                                      ),
-                                                      child: Padding(
-                                                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                                                        child: Row(
-                                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                          children: [
-                                                            if (userProfile != null && profile != null) Row(
-                                                              children: [
-                                                                CircleAvatar(
-                                                                  backgroundImage: Image.network(profile.uriImage?.uriPath ?? '').image,
-                                                                ),
-                                                                SizedBox(
-                                                                    height: 67,
-                                                                    width: 200,
-                                                                    child: ListTile(
-                                                                      onTap: () {
-                                                                        // selectedItem(user);
-                                                                      },
-                                                                      leading: Container(
-                                                                          decoration: BoxDecoration(
-                                                                            color: Colors.transparent,
-                                                                            borderRadius: BorderRadius.circular(30),
-                                                                          ),
-                                                                          child: Padding(
-                                                                              padding: const EdgeInsets.all(1.75),
-                                                                              child: CircleAvatar(backgroundImage: userProfile.profileImage?.image ?? Image.asset('assets/profile-avatar.png').image))),
-                                                                      title: Text('${userProfile.legalName.getOrCrash()} ${userProfile.legalSurname.value.fold((l) => '', (r) => r)}', style: TextStyle(color: widget.model.paletteColor, overflow: TextOverflow.ellipsis), maxLines: 1),
-                                                                      subtitle: Text(profile.brandName.getOrCrash(), style: TextStyle(color: widget.model.paletteColor, fontWeight: FontWeight.bold, overflow: TextOverflow.ellipsis), maxLines: 1,)
-                                                                    )
-                                                                ),
-                                                              ],
-                                                            ),
-                                                            selectAllStatusHeader(entry.value, entry.key)
-                                                          ],
-                                                        ),
-                                                      ),
-                                                    ),
+                                                    // if (MediaQuery.of(context).size.width <= widthResponsive) Container(
+                                                    //   height: 80,
+                                                    //   decoration: BoxDecoration(
+                                                    //     color: widget.model.accentColor,
+                                                    //     borderRadius: BorderRadius.circular(18),
+                                                    //   ),
+                                                    //   child: Padding(
+                                                    //     padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                                    //     child: Row(
+                                                    //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                    //       children: [
+                                                    //         if (userProfile != null && profile != null) Row(
+                                                    //           children: [
+                                                    //             CircleAvatar(
+                                                    //               backgroundImage: Image.network(profile.uriImage?.uriPath ?? '').image,
+                                                    //             ),
+                                                    //             SizedBox(
+                                                    //                 height: 67,
+                                                    //                 width: 200,
+                                                    //                 child: ListTile(
+                                                    //                   onTap: () {
+                                                    //                     // selectedItem(user);
+                                                    //                   },
+                                                    //                   leading: Container(
+                                                    //                       decoration: BoxDecoration(
+                                                    //                         color: Colors.transparent,
+                                                    //                         borderRadius: BorderRadius.circular(30),
+                                                    //                       ),
+                                                    //                       child: Padding(
+                                                    //                           padding: const EdgeInsets.all(1.75),
+                                                    //                           child: CircleAvatar(backgroundImage: userProfile.profileImage?.image ?? Image.asset('assets/profile-avatar.png').image))),
+                                                    //                   title: Text('${userProfile.legalName.getOrCrash()} ${userProfile.legalSurname.value.fold((l) => '', (r) => r)}', style: TextStyle(color: widget.model.paletteColor, overflow: TextOverflow.ellipsis), maxLines: 1),
+                                                    //                   subtitle: Text(profile.brandName.getOrCrash(), style: TextStyle(color: widget.model.paletteColor, fontWeight: FontWeight.bold, overflow: TextOverflow.ellipsis), maxLines: 1,)
+                                                    //                 )
+                                                    //             ),
+                                                    //           ],
+                                                    //         ),
+                                                    //         selectAllStatusHeader(
+                                                    //             entry.value,
+                                                    //             entry.key,
+                                                    //             didSelectOption: (options) => _handleApplicantMoreOptionsDropdownSelection(context, options, userProfile, profile, entry.key, entry.value)
+                                                    //         ),
+                                                    //       ],
+                                                    //     ),
+                                                    //   ),
+                                                    // );
                                                     const SizedBox(height: 8),
                                                     Row(
                                                       mainAxisAlignment: MainAxisAlignment.start,
@@ -478,6 +528,7 @@ class _ActivityVendorApplicationsResultMainState extends State<ActivityVendorApp
                                                                         child: getRowForBoothOption(
                                                                           context,
                                                                           widget.model,
+                                                                          widget.activityOwnerProfile.userId.getOrCrash() == FirebaseChatCore.instance.firebaseUser?.uid,
                                                                           widget.activityManagerForm.rulesService.currency,
                                                                           vendorDetail,
                                                                           j,
@@ -536,7 +587,7 @@ class _ActivityVendorApplicationsResultMainState extends State<ActivityVendorApp
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Container(
-                      height: 185,
+                      height: 200,
                       constraints: const BoxConstraints(maxWidth: 900),
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
@@ -553,6 +604,7 @@ class _ActivityVendorApplicationsResultMainState extends State<ActivityVendorApp
                                     exportButton(attendees.values.toList()),
                                     const SizedBox(height: 8),
                                     filterButton(),
+                                    // const SizedBox(height: 8),
                                     dropDownOptionsButton(context, attendees.values.toList()),
                                   ],
                                 ),
@@ -703,20 +755,19 @@ class _ActivityVendorApplicationsResultMainState extends State<ActivityVendorApp
                           padding: const EdgeInsets.symmetric(horizontal: 3.0),
                           child: VerticalDivider(color: widget.model.paletteColor),
                         ),
-                        Text('${completeTotalPriceWithCurrency(getTotalPotentialEarnings(attendees.values.toList().map((e) => e.map((e) => e.boothItem).toList()).toList()).toDouble(), widget.activityManagerForm.rulesService.currency)} Earnings'),
+                        Text('${completeTotalPriceWithCurrency(getTotalPotentialEarnings(attendees.values.toList().map((e) => e.map((e) => e.boothItem).toList()).toList()).toDouble() - (getTotalPotentialEarnings(attendees.values.toList().map((e) => e.map((e) => e.boothItem).toList()).toList()).toDouble() * CICOSellerPercentageFee), widget.activityManagerForm.rulesService.currency)} Earnings'),
                         if (selectedVendors.isNotEmpty) Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 3.0),
                           child: VerticalDivider(color: widget.model.paletteColor),
                         ),
-                        if (selectedVendors.isNotEmpty) Text('${completeTotalPriceWithCurrency(attendeeVendorFee(selectedVendors.map((e) => e.boothItem).toList()).toDouble(), widget.activityManagerForm.rulesService.currency)} Potential Earnings', style: TextStyle(color: widget.model.paletteColor)),
-                    ],
-                  ),
-                ),
+                        if (selectedVendors.isNotEmpty) Text('${completeTotalPriceWithCurrency(attendeeVendorFee(selectedVendors.map((e) => e.boothItem).toList()).toDouble() - (attendeeVendorFee(selectedVendors.map((e) => e.boothItem).toList()).toDouble() * CICOSellerPercentageFee), widget.activityManagerForm.rulesService.currency)} Potential Earnings', style: TextStyle(color: widget.model.paletteColor)),
+                ],
               ),
-            )
-          ],
-        );
-
+            ),
+          ),
+        )
+      ],
+    );
   }
   //
   // Widget boothStatusButton(AvailabilityStatus? status) {
@@ -876,6 +927,7 @@ class _ActivityVendorApplicationsResultMainState extends State<ActivityVendorApp
           ),
           child: InkWell(
             onTap: () {
+              if (selectedVendors.isNotEmpty) {
               final List<VendorContactDetail> selectedInView = [];
 
               for (List<VendorContactDetail> vendors in vendors) {
@@ -896,6 +948,7 @@ class _ActivityVendorApplicationsResultMainState extends State<ActivityVendorApp
                     context.read<AttendeeFormBloc>().add(AttendeeFormEvent.didRefundAttendeesGroup(selectedInView));
                     selectedVendors.clear();
                   });
+              }
             },
             child: Padding(
               padding: const EdgeInsets.all(8.0),
@@ -984,7 +1037,6 @@ class _ActivityVendorApplicationsResultMainState extends State<ActivityVendorApp
       default:
         return Container();
     }
-
   }
 
   Widget selectAllButton(List<List<VendorContactDetail>> vendors) {
@@ -1013,146 +1065,168 @@ class _ActivityVendorApplicationsResultMainState extends State<ActivityVendorApp
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Text("Select All", style: TextStyle(color: widget.model.paletteColor, fontWeight: FontWeight.bold, fontSize: (Responsive.isDesktop(context)) ? widget.model.secondaryQuestionTitleFontSize : null)),
-            ),
           ),
-        );
-
+        ),
+      );
   }
 
-
-  Widget selectAllStatusHeader(List<VendorContactDetail> booths, AttendeeItem currentAttendee) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Visibility(
-            visible: booths.map((e) => e.boothItem.status?.name).contains(currentEditingMode),
-            child: InkWell(
-                onTap: () {
-                  setState(() {
-                    for (VendorContactDetail vendor in booths) {
-                      if (selectedVendors.map((e) => e.uid).contains(vendor.uid) == false) {
-                        selectedVendors.add(vendor);
-                      } else {
-                        selectedVendors.removeWhere((element) => element.uid == vendor.uid);
-                      }
-                    }
-                  });
-                },
-                child: Container(
-                  decoration: BoxDecoration(
-                      color: widget.model.disabledTextColor.withOpacity(0.25),
-                      borderRadius: BorderRadius.circular(30)
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(4.0),
-                    child: Text(' select All '),
-                ),
-              )
-            ),
-          ),
-          // Text('Applied At: ${DateFormat.MMMd().add_jm().format(e.dateCreated)}', style: TextStyle(color: widget.model.disabledTextColor)),
-          Text('Status: ${currentAttendee.contactStatus?.name ?? 'Requested'}', style: TextStyle(color: widget.model.disabledTextColor)),
-        ],
-      ),
-    );
-  }
 
   Widget dropDownOptionsButton(BuildContext context, List<List<VendorContactDetail>> booths) {
 
-    final List<String> allDropDrownOptions = [];
+    final List<String> allDropDownOptions = [];
 
-    if (Responsive.isDesktop(context) == false) {
-      allDropDrownOptions.add('Export');
+    if (!Responsive.isDesktop(context)) {
+      allDropDownOptions.add('Export');
     }
 
     for (List<VendorContactDetail> vendors in booths) {
-      if (allDropDrownOptions.contains(AvailabilityStatus.confirmed.name) == false && vendors.where((element) => element.boothItem.status == AvailabilityStatus.confirmed).isNotEmpty == true) {
-        allDropDrownOptions.add(AvailabilityStatus.confirmed.name);
+      if (!allDropDownOptions.contains(AvailabilityStatus.confirmed.name) &&
+          vendors.any((element) => element.boothItem.status == AvailabilityStatus.confirmed)) {
+        allDropDownOptions.add(AvailabilityStatus.confirmed.name);
       }
 
-      if (allDropDrownOptions.contains(AvailabilityStatus.requested.name) == false && vendors.where((element) => element.boothItem.status == AvailabilityStatus.requested).isNotEmpty == true) {
-        allDropDrownOptions.add(AvailabilityStatus.requested.name);
+      if (!allDropDownOptions.contains(AvailabilityStatus.requested.name) &&
+          vendors.any((element) => element.boothItem.status == AvailabilityStatus.requested)) {
+        allDropDownOptions.add(AvailabilityStatus.requested.name);
       }
     }
 
+    // If only one option exists, make the button behave like a regular button
+    if (allDropDownOptions.length == 1) {
+      return Container(
+        height: 45,
+        constraints: !Responsive.isDesktop(context) ? const BoxConstraints(maxWidth: 90) : null,
+        child: InkWell(
+          onTap: () {
+            _handleDropDownSelection(allDropDownOptions.first, booths);
+          },
+          child: Container(
+            decoration: BoxDecoration(
+              color: currentEditingMode == null ? widget.model.accentColor : widget.model.paletteColor,
+              borderRadius: BorderRadius.circular(35),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      CupertinoIcons.pencil_circle,
+                      color: currentEditingMode != null ? widget.model.accentColor : widget.model.paletteColor,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      currentEditingMode ?? 'Edit',
+                      style: TextStyle(
+                        color: currentEditingMode == null ? widget.model.paletteColor : widget.model.accentColor,
+                        fontSize: widget.model.secondaryQuestionTitleFontSize,
+                        fontWeight: FontWeight.bold,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      maxLines: 1,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
 
+    // If multiple options exist, use a dropdown
     return Container(
-      height: 55,
-      constraints: (Responsive.isDesktop(context) == false) ? const BoxConstraints(
-        maxWidth: 90,
-      ) : null,
+      height: 60,
+      constraints: !Responsive.isDesktop(context) ? const BoxConstraints(maxWidth: 90) : null,
       child: DropdownButtonHideUnderline(
-          child: DropdownButton2(
-            isDense: true,
-            customButton: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: (currentEditingMode == null) ? widget.model.accentColor : widget.model.paletteColor,
-                  borderRadius: BorderRadius.circular(35),
-                ),
-                child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(CupertinoIcons.pencil_circle, color: (currentEditingMode != null) ? widget.model.accentColor : widget.model.paletteColor),
-                            const SizedBox(width: 8),
-                            if (Responsive.isDesktop(context)) Text((currentEditingMode != null) ? currentEditingMode! : 'Edit', style: TextStyle(color: (currentEditingMode == null) ? widget.model.paletteColor : widget.model.accentColor, fontSize: widget.model.secondaryQuestionTitleFontSize, fontWeight: FontWeight.bold, overflow: TextOverflow.ellipsis), maxLines: 1),
-                            if (Responsive.isDesktop(context) == false) Expanded(child: Text(currentEditingMode ?? 'Options', style: TextStyle(color: (currentEditingMode == null) ? widget.model.paletteColor : widget.model.accentColor, fontSize: null, fontWeight: FontWeight.bold, overflow: TextOverflow.ellipsis), maxLines: 1,)),
-                      ],
-                    )
-                  )
-                ),
-              ),
-            ),
-            onChanged: (Object? navItem) {
-            },
-            items: allDropDrownOptions.map(
-                    (e) {
-                  return DropdownMenuItem<String>(
-                    onTap: () {
-                      setState(() {
-                        if (e == 'Export') {
-                          final List<VendorContactDetail> vendorAppList = [];
-                          for (List<VendorContactDetail> vendorList in booths.toList()) {
-                            for (VendorContactDetail vendor in vendorList) {
-                              vendorAppList.add(vendor);
-                            }
-                          }
-                          /// based on sorted
-                          exportToExcel(vendorAppList, widget.selectedForm.availableTimeSlots, widget.selectedForm.formTitle ?? 'My Form');
-                        }
-
-                        if (e == AvailabilityStatus.confirmed.name || e == AvailabilityStatus.requested.name) {
-                          selectedVendors.clear();
-                          if (currentEditingMode == e) {
-                            currentEditingMode = null;
-                          } else {
-                            currentEditingMode = e;
-                          }
-                        }
-                      });
-                    },
-                    value: e,
-                    child: Text(e.capitalize(), style: TextStyle(color: widget.model.paletteColor, fontWeight: (currentEditingMode == e) ? FontWeight.bold : null)),
-                  );
-                }
-            ).toList(),
-            dropdownStyleData: DropdownStyleData(
-              width: 200,
+        child: DropdownButton2(
+          isDense: true,
+          customButton: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: Container(
+              height: 60,
               decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(25),
-                  color: widget.model.webBackgroundColor,
+                color: currentEditingMode == null ? widget.model.accentColor : widget.model.paletteColor,
+                borderRadius: BorderRadius.circular(35),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(CupertinoIcons.pencil_circle,
+                          color: currentEditingMode != null ? widget.model.accentColor : widget.model.paletteColor),
+                      const SizedBox(width: 8),
+                      if (Responsive.isDesktop(context))
+                        Text(
+                          currentEditingMode ?? 'Edit',
+                          style: TextStyle(
+                            color: currentEditingMode == null ? widget.model.paletteColor : widget.model.accentColor,
+                            fontSize: widget.model.secondaryQuestionTitleFontSize,
+                            fontWeight: FontWeight.bold,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          maxLines: 1,
+                        ),
+                      if (!Responsive.isDesktop(context))
+                        Expanded(
+                          child: Text(
+                            currentEditingMode ?? 'Options',
+                            style: TextStyle(
+                              color: currentEditingMode == null ? widget.model.paletteColor : widget.model.accentColor,
+                              fontWeight: FontWeight.bold,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            maxLines: 1,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
               ),
             ),
-          )
+          ),
+          onChanged: (Object? navItem) {},
+          items: allDropDownOptions.map(
+                (e) {
+              return DropdownMenuItem<String>(
+                onTap: () => _handleDropDownSelection(e, booths),
+                value: e,
+                child: Text(
+                  e.capitalize(),
+                  style: TextStyle(
+                    color: widget.model.paletteColor,
+                    fontWeight: currentEditingMode == e ? FontWeight.bold : null,
+                  ),
+                ),
+              );
+            },
+          ).toList(),
+          dropdownStyleData: DropdownStyleData(
+            width: 200,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(25),
+              color: widget.model.webBackgroundColor,
+            ),
+          ),
+        ),
       ),
     );
+  }
+
+  void _handleDropDownSelection(String selection, List<List<VendorContactDetail>> booths) {
+    setState(() {
+      if (selection == 'Export') {
+        final List<VendorContactDetail> vendorAppList = booths.expand((e) => e).toList();
+        exportToExcel(vendorAppList, widget.selectedForm.availableTimeSlots, widget.selectedForm.formTitle ?? 'My Form');
+      } else if (selection == AvailabilityStatus.confirmed.name || selection == AvailabilityStatus.requested.name) {
+        selectedVendors.clear();
+        currentEditingMode = (currentEditingMode == selection) ? null : selection;
+      }
+    });
   }
 }

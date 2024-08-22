@@ -11,8 +11,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
-import '../components/helper.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../components/helper.dart';
 
 class SearchWhereWhenPopOver extends StatefulWidget {
 
@@ -161,16 +161,16 @@ class _SearchWhereWhenPopOverState extends State<SearchWhereWhenPopOver> with Ti
                               context.read<ListingsSearchRequirementsBloc>().add(const ListingsSearchRequirementsEvent.locationIsSomewhereNearChanged(null));
                               context.read<ListingsSearchRequirementsBloc>().add(const ListingsSearchRequirementsEvent.locationCotyFromMapChanged(null));
 
-                              if (selectedItem.locationItemId == context.read<ListingsSearchRequirementsBloc>().state.locationItemId) {
+                              if (selectedItem?.locationItemId == context.read<ListingsSearchRequirementsBloc>().state.locationItemId) {
                                 context.read<ListingsSearchRequirementsBloc>().add(ListingsSearchRequirementsEvent.locationItemIdRequiredChanged(null));
                               } else {
                                 searchTab = SearchWhereWhenMarker.when;
-                                context.read<ListingsSearchRequirementsBloc>().add(ListingsSearchRequirementsEvent.locationItemIdRequiredChanged(selectedItem.locationItemId));
+                                context.read<ListingsSearchRequirementsBloc>().add(ListingsSearchRequirementsEvent.locationItemIdRequiredChanged(selectedItem?.locationItemId));
                                 MapHelper.mapController.animateCamera(
                                     CameraUpdate.newCameraPosition(
                                         CameraPosition(
-                                            zoom: getMapOptions.firstWhere((element) => element.locationItemId == selectedItem.locationItemId).zoom,
-                                            target: getMapOptions.firstWhere((element) => element.locationItemId == selectedItem.locationItemId).locationPosition
+                                            zoom: getMapOptions.firstWhere((element) => element.locationItemId == selectedItem?.locationItemId).zoom,
+                                            target: getMapOptions.firstWhere((element) => element.locationItemId == selectedItem?.locationItemId).locationPosition
                                         )
                                     )
                                 );

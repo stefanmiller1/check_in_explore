@@ -16,7 +16,8 @@ class WebDashboardMain extends StatefulWidget {
   final List<DashboardContainerModel> dashboardContainerItems;
   final DashboardContainerModel optionsMarkerItem;
 
-  const WebDashboardMain({super.key,
+  const WebDashboardMain({
+    super.key,
     required this.model,
     required this.dashboardMarker,
     required this.didSelectDashboardMarkerItem,
@@ -27,6 +28,7 @@ class WebDashboardMain extends StatefulWidget {
   @override
   State<WebDashboardMain> createState() => _WebDashboardMainState();
 }
+
 
 class _WebDashboardMainState extends State<WebDashboardMain> {
 
@@ -92,6 +94,10 @@ class _WebDashboardMainState extends State<WebDashboardMain> {
     late int index = 0;
     index = widget.dashboardContainerItems.indexWhere((element) => element.dashboardMarker == currentMarker);
 
+    if (index == -1) {
+      return 0;
+    }
+    
     return index;
   }
 
@@ -138,10 +144,10 @@ class _WebDashboardMainState extends State<WebDashboardMain> {
         actions: [
           IconButton(
               onPressed: () {
-                // setState(() {
-                //   currentMarker = widget.optionsMarkerItem.dashboardMarker;
-                // });
-                // widget.didSelectDashboardMarkerItem(widget.optionsMarkerItem.dashboardMarker);
+                setState(() {
+                  currentMarker = widget.optionsMarkerItem.dashboardMarker;
+                });
+                widget.didSelectDashboardMarkerItem(widget.optionsMarkerItem.dashboardMarker);
               },
             icon: Icon(widget.optionsMarkerItem.iconTab, color: widget.model.accentColor),
           ),
@@ -164,7 +170,10 @@ class _WebDashboardMainState extends State<WebDashboardMain> {
         items: widget.dashboardContainerItems.where((element) => element.isVisible == true).map(
                 (e) => BottomNavigationBarItem(
           label: e.tabTitle,
-          icon: (e.imageUrl != null && e.imageUrl?.isNotEmpty == true) ? CircleAvatar(backgroundImage: Image.network(e.imageUrl?.first ?? '').image) : Icon(e.iconTab)
+          icon: (e.imageUrl != null && e.imageUrl?.isNotEmpty == true) ? CircleAvatar(
+              backgroundImage: Image.asset('assets/profile-avatar.png').image,
+              foregroundImage: (e.imageUrl?[0] != '') ? Image.network(e.imageUrl?[0] ?? '').image : null
+            ) : Icon(e.iconTab)
           )
         ).toList(),
       ) : null,

@@ -2,17 +2,9 @@ import 'package:check_in_application/auth/update_services/listing_update_create_
 import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_access_visibility_widgets/access_visibility_info_settings_widget.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_rules_widget/activity_general_rules_widget.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_background_mobile_widget/background_info_settings_widget.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_check_in_widget/check_ins_info_widget.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_attendee_widget/create_ticket_attendee_type.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_custom_rules_widgets/custom_rule_info_widget.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_requirements_widget/requirements_settings_widget.dart';
+import 'package:check_in_presentation/core/router_helper.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/pop_over_screen/activity_onboarding_widget.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings_web/reservations_settings_widget.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_attendee_widget/select_attendee_type_widget.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings/components/activity_cancellation_widget/select_cancellation_settings_widget.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/activity_settings_web/settings_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:jumping_dot/jumping_dot.dart';
@@ -21,20 +13,22 @@ import 'package:provider/provider.dart';
 import 'package:dartz/dartz.dart' as bloc;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:beamer/beamer.dart';
 
-import '../activity_settings/components/activity_vendor_form_widget/activity_vendor_forms_widget.dart';
+import '../../web_screens/focused_main_container_widgets/activity_vendor_form_manage_widget/actvity_vendor_form_manager_helper.dart';
 
 class SettingsMainContainerWidget extends StatefulWidget {
 
   final DashboardModel model;
   final UserProfileModel userProfileModel;
+  final ListingManagerForm listingForm;
   final ReservationItem reservationItem;
   final ActivityManagerForm activityForm;
   final SettingsItemModel? currentNavItem;
   final Function() rebuild;
   final Function() didPresentSidePanel;
 
-  const SettingsMainContainerWidget({Key? key, required this.model, required this.userProfileModel, required this.reservationItem, required this.activityForm, required this.currentNavItem, required this.rebuild, required this.didPresentSidePanel}) : super(key: key);
+  const SettingsMainContainerWidget({Key? key, required this.model, required this.userProfileModel, required this.reservationItem, required this.activityForm, required this.currentNavItem, required this.rebuild, required this.didPresentSidePanel, required this.listingForm}) : super(key: key);
 
   @override
   State<SettingsMainContainerWidget> createState() => _SettingsMainContainerWidgetState();
@@ -43,17 +37,27 @@ class SettingsMainContainerWidget extends StatefulWidget {
 class _SettingsMainContainerWidgetState extends State<SettingsMainContainerWidget> {
 
 
-  late ActivityManagerForm? initActivityManagerForm = null;
+  late bool reloadMain = false;
   late bool needsOnBoarding = false;
   late bool didCreateNewActivity = false;
 
   @override
   void initState() {
     super.initState();
-
-    initActivityManagerForm = widget.activityForm;
     needsOnBoarding = activitySetupComplete(widget.activityForm) == false;
+    initReload();
+  }
 
+  void initReload() {
+    reloadMain = true;
+
+    if (mounted) {
+      Future.delayed(const Duration(seconds: 1, milliseconds: 500), () {
+        setState(() {
+          reloadMain = false;
+        });
+      });
+    }
   }
 
   Widget getMainSettingsContainer(BuildContext context, SettingsItemModel? navItem, UserProfileModel activityOwner) {
@@ -62,17 +66,15 @@ class _SettingsMainContainerWidgetState extends State<SettingsMainContainerWidge
       case SettingNavMarker.backgroundInfo:
         return BackgroundInfoSettingsWidget(
             model: widget.model,
-            activityManagerForm: widget.activityForm,
+            activityManagerForm: context.read<UpdateActivityFormBloc>().state.activitySettingsForm,
             currentUser: widget.userProfileModel,
             reservationItem: widget.reservationItem,
         );
       case SettingNavMarker.requirementsInfo:
         return RequirementSettingsWidget(
           model: widget.model,
-          activityOwner: activityOwner,
-          currentUser: widget.userProfileModel,
           reservationItem: widget.reservationItem,
-          activityManagerForm: widget.activityForm,
+          activityManagerForm: context.read<UpdateActivityFormBloc>().state.activitySettingsForm,
         );
       case SettingNavMarker.reservations:
         return ReservationSettingsWidget(
@@ -87,6 +89,7 @@ class _SettingsMainContainerWidgetState extends State<SettingsMainContainerWidge
       case SettingNavMarker.accessAndVisibility:
         return AccessVisibilitySettingWidget(
           model: widget.model,
+          reservation: widget.reservationItem,
         );
       case SettingNavMarker.cancellations:
         return CancellationSettingsWidget(
@@ -108,8 +111,20 @@ class _SettingsMainContainerWidgetState extends State<SettingsMainContainerWidge
         return VendorFormsWidget(
           reservation: widget.reservationItem,
           model: widget.model,
-          activityForm: widget.activityForm,
+          activityForm: context.read<UpdateActivityFormBloc>().state.activitySettingsForm,
           resOwner: activityOwner,
+          listing: widget.listingForm,
+          didSelectedManageForm: (form) {
+            ActivityVendorHelperCore.selectedForm = form;
+            Beamer.of(context).update(
+                configuration: RouteInformation(
+                    location: reservationVendorFormRoute(widget.reservationItem.reservationId.getOrCrash())
+                ),
+                rebuild: false
+            );
+            context.read<ListingsSearchRequirementsBloc>().add(const ListingsSearchRequirementsEvent.currentDashboardMarker(DashboardMarker.resVendorForms));
+            widget.rebuild();
+          },
         );
       case SettingNavMarker.payments:
         return PaymentsSettingWidget(
@@ -163,7 +178,7 @@ class _SettingsMainContainerWidgetState extends State<SettingsMainContainerWidge
                           widget.model,
                           true,
                           true,
-                          widget.activityForm,
+                          context.read<UpdateActivityFormBloc>().state.activitySettingsForm,
                           widget.reservationItem,
                           [],
                           reservationOwner
@@ -191,7 +206,7 @@ class _SettingsMainContainerWidgetState extends State<SettingsMainContainerWidge
                     true,
                     false,
                     reservationOwner,
-                    widget.activityForm,
+                    context.read<UpdateActivityFormBloc>().state.activitySettingsForm,
                     widget.reservationItem,
                     [],
                     widget.userProfileModel.userId.getOrCrash(),
@@ -289,6 +304,7 @@ class _SettingsMainContainerWidgetState extends State<SettingsMainContainerWidge
             child: getActivityVendorOptionColumn(
               context,
               widget.model,
+              widget.listingForm,
               context.read<UpdateActivityFormBloc>().state.reservationItem,
               context.read<UpdateActivityFormBloc>().state.activitySettingsForm,
               reservationOwner,
@@ -301,6 +317,12 @@ class _SettingsMainContainerWidgetState extends State<SettingsMainContainerWidge
             ),
           ),
         );
+      case SettingNavMarker.reports:
+        // TODO: Handle this case.
+      case SettingNavMarker.guides:
+        // TODO: Handle this case.
+      case SettingNavMarker.uploads:
+        // TODO: Handle this case.
     }
     return Container();
   }
@@ -354,7 +376,7 @@ class _SettingsMainContainerWidgetState extends State<SettingsMainContainerWidge
                             ScaffoldMessenger.of(context).showSnackBar(snackBar);
                           }, (_) {
 
-                        if ((initActivityManagerForm != null) && activitySetupComplete(initActivityManagerForm!) == false && activitySetupComplete(state.activitySettingsForm)) {
+                        if (activitySetupComplete(widget.activityForm) == false && activitySetupComplete(state.activitySettingsForm)) {
                           didCreateNewActivity = true;
                           Future.delayed(const Duration(seconds: 3), () {
                             if (mounted) {
@@ -385,6 +407,10 @@ class _SettingsMainContainerWidgetState extends State<SettingsMainContainerWidge
                 builder: (context, state) {
 
                   bool showPreviewer = widget.currentNavItem?.navItem == SettingNavMarker.backgroundInfo || widget.currentNavItem?.navItem == SettingNavMarker.requirementsInfo || widget.currentNavItem?.navItem == SettingNavMarker.ticketBased || widget.currentNavItem?.navItem == SettingNavMarker.vendorForm;
+
+                  if (reloadMain) {
+                    return JumpingDots(color: widget.model.paletteColor, numberOfDots: 3);
+                  }
 
                   return Stack(
                     children: [
@@ -443,7 +469,7 @@ class _SettingsMainContainerWidgetState extends State<SettingsMainContainerWidge
                             ),
 
 
-                            if ((state.activitySettingsForm != initActivityManagerForm) && activitySetupComplete(state.activitySettingsForm) == false && ((initActivityManagerForm != null) && activitySetupComplete(initActivityManagerForm!) == false) && state.isSaving == false) InkWell(
+                            if ((state.activitySettingsForm != widget.activityForm) && activitySetupComplete(state.activitySettingsForm) == false && (activitySetupComplete(widget.activityForm) == false) && state.isSaving == false) InkWell(
                               onTap: () {
                                 // widget.didFinishEditing();
                                 context.read<UpdateActivityFormBloc>().add(const UpdateActivityFormEvent.isSavingChanged(true));
@@ -470,10 +496,7 @@ class _SettingsMainContainerWidgetState extends State<SettingsMainContainerWidge
                             const SizedBox(height: 8),
 
                             /// will un-publish if saving (from init published) but incomplete.
-                            if (state.activitySettingsForm != initActivityManagerForm &&
-                                activitySetupComplete(state.activitySettingsForm) == false &&
-                                (initActivityManagerForm != null) &&
-                                activitySetupComplete(initActivityManagerForm!)) InkWell(
+                            if (state.activitySettingsForm != widget.activityForm && activitySetupComplete(state.activitySettingsForm) == false) InkWell(
                               onTap: () {
                                 context.read<UpdateActivityFormBloc>().add(const UpdateActivityFormEvent.isSavingChanged(true));
                                 context.read<UpdateActivityFormBloc>().add(const UpdateActivityFormEvent.createActivityFinished());
@@ -506,8 +529,8 @@ class _SettingsMainContainerWidgetState extends State<SettingsMainContainerWidge
 
                             /// Publish is not published on load
                             AnimatedBorderButton(
-                                buttonText: ((initActivityManagerForm != null) && activitySetupComplete(initActivityManagerForm!) == false) ? 'Publish Activity' : 'Update Activity',
-                                isActivated: (state.isEditingForm && state.activitySettingsForm != initActivityManagerForm && activitySetupComplete(state.activitySettingsForm) && (initActivityManagerForm != null)),
+                                buttonText: (activitySetupComplete(widget.activityForm) == false) ? 'Publish Activity' : 'Update Activity',
+                                isActivated: (state.isEditingForm && state.activitySettingsForm != widget.activityForm && activitySetupComplete(state.activitySettingsForm)),
                                 model: widget.model,
                                 didSelectButton: () {
                                     context.read<UpdateActivityFormBloc>().add(const UpdateActivityFormEvent.isSavingChanged(true));
@@ -550,6 +573,8 @@ class _SettingsMainContainerWidgetState extends State<SettingsMainContainerWidge
 
 
                       if (needsOnBoarding) OnBoardingPopOverWidget(
+                          height: 750,
+                          width: 600,
                           popOverWidget: ActivityOnBoardingWidget(
                             model: widget.model,
                             didSelectClose: () {
@@ -578,5 +603,4 @@ class _SettingsMainContainerWidgetState extends State<SettingsMainContainerWidge
         )
     );
   }
-
 }

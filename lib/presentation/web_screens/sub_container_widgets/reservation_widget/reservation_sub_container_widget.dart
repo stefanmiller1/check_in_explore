@@ -1,10 +1,9 @@
 import 'package:beamer/beamer.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/reservations/reservation_helper.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/reservations/reservations_screen.dart';
+import 'package:check_in_presentation/core/router_helper.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:check_in_facade/auth/notification_facade/notification_core_config.dart';
+import 'package:check_in_facade/check_in_facade.dart';
 
 class ReservationSubContainerWidget extends StatelessWidget {
 
@@ -33,7 +32,7 @@ class ReservationSubContainerWidget extends StatelessWidget {
 
                 ReservationHelperCore.isLoading = true;
                 ReservationHelperCore.currentListingManagerForm = listing;
-                ReservationHelperCore.currentUserProfile = profile;
+                // ReservationHelperCore.currentUserProfile = profile;
                 ReservationHelperCore.selectedReservationItem = reservation;
                 ReservationHelperCore.currentActivityForm = activity;
                 ReservationHelperCore.selectedReservationAttendeeItem = attendeeItem;
@@ -43,10 +42,9 @@ class ReservationSubContainerWidget extends StatelessWidget {
                 didSelectReservation();
                 Beamer.of(context).update(
                     configuration: RouteInformation(
-                        location: '/${DashboardMarker.reservations.name.toString()}/reservation/${ReservationHelperCore.selectedReservationItem?.reservationId.getOrCrash().toString()}'
+                        location: reservationRoute(reservation.reservationId.getOrCrash()),
                     ),
-
-                    rebuild: false
+                  rebuild: false
                 );
 
                 Future.delayed(const Duration(seconds: 1), () {
@@ -54,7 +52,6 @@ class ReservationSubContainerWidget extends StatelessWidget {
                   ReservationCoreHelper.pageController = PageController(initialPage: tabIndex);
 
                   ReservationHelperCore.isLoading = false;
-
                   didSelectReservation();
                 });
 
@@ -63,12 +60,11 @@ class ReservationSubContainerWidget extends StatelessWidget {
                       ReservationHelperCore.selectedReservationItem?.reservationId == e.reservationId).map((e) => e.notificationId).toList(),
                       model.paletteColor,
                       model.accentColor
-                );
+              );
             },
           ),
         ),
       ],
     );
   }
-
 }

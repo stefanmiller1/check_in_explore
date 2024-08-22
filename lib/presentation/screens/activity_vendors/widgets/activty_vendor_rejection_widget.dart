@@ -73,6 +73,7 @@ class _ActivityVendorRejectionPopOverState extends State<ActivityVendorRejection
 
   Widget getMainContainer(BuildContext context) {
 
+
     List<Widget> rejectionContainerModel(BuildContext context) => [
       Container(
         child: getCancelReason(
@@ -103,12 +104,19 @@ class _ActivityVendorRejectionPopOverState extends State<ActivityVendorRejection
         child: getCancelReviewRefund(
           widget.model,
           attendeeVendorFee(widget.rejectionList.map((e) => e.boothItem).toList()).toDouble(),
+          null,
           widget.currency,
           'Cancelling from ${widget.rejectionList.map((e) => e.attendee.attendeeOwnerId).toSet().length} Applicants',
           'Refunding ${widget.rejectionList.length} Booths'
         ),
       )
     ];
+
+    final totalFee = (attendeeVendorFee(widget.rejectionList.map((e) => e.boothItem).toList())).toDouble();
+    final taxPercentage = null;
+    final totalTaxAmount = totalFee * (taxPercentage ?? CICOTaxesFee);
+    final sellerFee = totalFee * CICOSellerPercentageFee;
+    final totalBuyerTaxAmount = sellerFee * (taxPercentage ?? CICOTaxesFee);
 
     return Stack(
       alignment: Alignment.bottomCenter,
@@ -175,10 +183,7 @@ class _ActivityVendorRejectionPopOverState extends State<ActivityVendorRejection
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               Text('Missed Earnings', style: TextStyle(color: widget.model.disabledTextColor, fontSize: widget.model.secondaryQuestionTitleFontSize,), maxLines: 1,),
-                              Text(completeTotalPriceWithCurrency(
-                                      (attendeeVendorFee(widget.rejectionList.map((e) => e.boothItem).toList())).toDouble() +
-                                      (attendeeVendorFee(widget.rejectionList.map((e) => e.boothItem).toList())).toDouble()*CICOReservationPercentageFee +
-                                      (attendeeVendorFee(widget.rejectionList.map((e) => e.boothItem).toList())).toDouble()*CICOTaxesFee, widget.currency), style: TextStyle(color: widget.model.paletteColor, fontSize: widget.model.secondaryQuestionTitleFontSize, fontWeight: FontWeight.bold)),
+                              Text(completeTotalPriceWithCurrency(totalFee - (sellerFee + totalBuyerTaxAmount) + totalTaxAmount, widget.currency), style: TextStyle(color: widget.model.paletteColor, fontSize: widget.model.secondaryQuestionTitleFontSize, fontWeight: FontWeight.bold)),
                             ],
                           ),
                         ),

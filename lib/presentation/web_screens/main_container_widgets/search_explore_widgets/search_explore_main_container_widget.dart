@@ -4,18 +4,14 @@ import 'package:beamer/beamer.dart';
 import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/create_activity/create_activity_screen_helper.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/facility_preview/facility_preview_screen.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/discovery_search_component.dart';
+import 'package:check_in_presentation/core/router_helper.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/list_search_component.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/listing_components/listing_result_main_card.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/map_search_component.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/search_components/search_explore_filter.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/search_components/search_helper.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/pop_over_screen/web/search_when_web.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/pop_over_screen/web/search_where_web.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/pop_over_screen/web/search_who_web.dart';
-import 'package:check_in_web_mobile_explore/presentation/web_screens/main_container_widgets/search_explore_widgets/search_explore_helper_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -23,8 +19,6 @@ import 'package:jumping_dot/jumping_dot.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
-
-import '../../../screens/create_activity/create_activity_screen.dart';
 
 class SearchExploreMainContainerWidget extends StatefulWidget {
 
@@ -87,6 +81,11 @@ class _SearchExploreMainContainerWidgetState extends State<SearchExploreMainCont
                   ),
 
                  getSearchHeaderToggleTopBar(),
+                 if (Responsive.isDesktop(context)) Positioned(
+                     bottom: 10,
+                     left: 10,
+                     child: SingleLineWebFooter(model: widget.model)
+                   ),
                  // getFooterFilterBar(),
 
                   ],
@@ -132,17 +131,32 @@ class _SearchExploreMainContainerWidgetState extends State<SearchExploreMainCont
                                       });
                                     },
                                     didSelectMainImage: (listing) {
-                                      MapHelper.mapController.animateCamera(
-                                          CameraUpdate.newCameraPosition(
-                                              CameraPosition(
-                                                  zoom: 15,
-                                                  target: LatLng(
-                                                      listing.listingProfileService.listingLocationSetting.locationPosition!.latitude,
-                                                      listing.listingProfileService.listingLocationSetting.locationPosition!.longitude
-                                                  )
+
+                                      // Future.delayed(const Duration(seconds: 2), () async {
+                                      //   //   setState(() {
+                                      //   MapHelper.showMapReload = true;
+                                      //   //     context.read<ListingsSearchRequirementsBloc>().add(const ListingsSearchRequirementsEvent.isMarkersLoading(false));
+                                      //   //     widget.selectedListing(null);
+                                      // });
+                                      setState(() {
+                                        MapHelper.mapController.animateCamera(
+                                            CameraUpdate.newCameraPosition(
+                                                CameraPosition(
+                                                    zoom: 15,
+                                                    target: LatLng(
+                                                        listing.listingProfileService.listingLocationSetting.locationPosition!.latitude,
+                                                        listing.listingProfileService.listingLocationSetting.locationPosition!.longitude
+                                            )
+                                          )
                                         )
-                                      )
-                                    );
+                                      );
+
+                                        if (MapHelper.currentZoom != 15) {
+                                          MapHelper.initMarkers(context, mounted, widget.model, context.read<ListingsSearchRequirementsBloc>().state.listings.toList());
+                                          MapHelper.currentZoom = 15;
+                                        }
+
+                                    });
                                   },
                                   didSelectFooter: (ListingManagerForm listing) {
                                     didSelectCreateNewActivity(
@@ -245,6 +259,10 @@ class _SearchExploreMainContainerWidgetState extends State<SearchExploreMainCont
             // getFooterFilterBar(),
          ],
       );
+      case SearchExploreHelperMarker.profile:
+        return Container();
+        // TODO: Handle this case.
+        break;
     }
   }
 
@@ -276,13 +294,12 @@ class _SearchExploreMainContainerWidgetState extends State<SearchExploreMainCont
                         transitionWidget: PointerInterceptor(
                           child: DiscoverySearchComponent(
                             model: widget.model,
-                            didSelectListing: (listing) {
-                              didSelectCreateNewActivity(
-                                  context,
-                                  widget.model,
-                                  listing,
-                                  2
-                              );
+                              // didSelectCreateNewActivity(
+                              //     context,
+                              //     widget.model,
+                              //     listing,
+                              //     2
+                              // );
                             //   setState(() {
                             //     ExploreWebHelperCore.didSelectFacilityItem(context, listing);
                             //   });
@@ -291,7 +308,6 @@ class _SearchExploreMainContainerWidgetState extends State<SearchExploreMainCont
                             //     ExploreWebHelperCore.isLoading = false;
                             //   });
                             // });
-                        },
                       ),
                     ),
                   )
@@ -363,8 +379,8 @@ class _SearchExploreMainContainerWidgetState extends State<SearchExploreMainCont
                             listing: ExploreWebHelperCore.selectedFacilityItem,
                             reservation: ExploreWebHelperCore.selectedReservationItem,
                             didSelectBack: () {  },
-                    ),
                       ),
+                    ),
                   ],
                 )
               ),
@@ -420,8 +436,8 @@ class _SearchExploreMainContainerWidgetState extends State<SearchExploreMainCont
                   width: double.infinity,
                   height: double.infinity,
                   color: widget.model.mobileBackgroundColor,
-                  child: JumpingDots(color: widget.model.paletteColor, numberOfDots: 3)),
-
+                  child: JumpingDots(color: widget.model.paletteColor, numberOfDots: 3)
+              ),
             ],
           ),
         )
@@ -443,7 +459,7 @@ class _SearchExploreMainContainerWidgetState extends State<SearchExploreMainCont
                     setState(() {
                       Beamer.of(context).update(
                           configuration: RouteInformation(
-                              location: '/${DashboardMarker.home.name.toString()}/${SearchExploreHelperMarker.map.toString()}/search'
+                              location: searchExploreRoute()
                           ),
 
                           rebuild: false
@@ -481,12 +497,14 @@ class _SearchExploreMainContainerWidgetState extends State<SearchExploreMainCont
                         ),
                         const SizedBox(width: 6),
                         Expanded(
-                          child: Text('Search & Find New Communities', style: TextStyle(color: widget.model.paletteColor), maxLines: 1,),
+                          child: Text('Search & Find New Circles', style: TextStyle(color: widget.model.paletteColor), maxLines: 1,),
                         )
                       ],
                     ),
                   ),
                 ),
+
+
                 // Positioned(
                 //   right: 10,
                 //   child: InkWell(

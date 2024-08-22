@@ -159,8 +159,8 @@ class _SearchProfileCommunityState extends State<SearchProfileCommunity> {
                                             mainAxisAlignment: MainAxisAlignment.start,
                                             crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
-                                              Text('Search Community', style: TextStyle(color: widget.model.paletteColor)),
-                                              Text('Find your community and their reservation', style: TextStyle(color: widget.model.disabledTextColor))
+                                              Text('Search Circles', style: TextStyle(color: widget.model.paletteColor)),
+                                              Text('Find your Circles and their reservation', style: TextStyle(color: widget.model.disabledTextColor))
                                             ],
                                           ),
                                         ],

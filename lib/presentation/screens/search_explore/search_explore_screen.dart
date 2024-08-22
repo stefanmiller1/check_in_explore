@@ -1,6 +1,5 @@
 import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/helper.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/map_search_component.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/search_components/search_helper.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/listing_search_result.dart';
@@ -8,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 
-import '../create_activity/create_activity_screen_helper.dart';
 
 
 
@@ -43,6 +41,7 @@ class _SearchExploreScreenState extends State<SearchExploreScreen> {
 
   @override
   void dispose() {
+    _scrollController.dispose();
     // SearchHelper.controller?.dispose();
     super.dispose();
   }

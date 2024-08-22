@@ -26,13 +26,10 @@ class _ProfileMainContainerWidgetState extends State<ProfileMainContainerWidget>
             color: widget.model.accentColor,
             borderRadius: BorderRadius.all(Radius.circular(20))
         ),
-        child: ReviewCurrentProfile(
-          currentUser: widget.currentUser,
-          model: widget.model,
-          didSelectEditProfile: (profile) {
-
-          },
-          showBack: true,
+        child: ProfileMainContainer(
+            model: widget.model,
+            currentUserId: widget.currentUser.userId.getOrCrash(),
+            currentUserProfile: widget.currentUser,
         )
       )
     );

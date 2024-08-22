@@ -7,11 +7,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
+import 'package:url_strategy/url_strategy.dart';
 import 'firebase_options.dart';
 import 'package:check_in_facade/check_in_facade.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:check_in_facade/auth/notification_facade/notification_core_config.dart';
-
 import 'presentation/router/location_builder.dart';
 
 @pragma('vm:entry-point')
@@ -32,6 +31,7 @@ Future<void> main() async {
   setup();
   setupFacade();
   setupApp();
+  setPathUrlStrategy();
   await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform
   );

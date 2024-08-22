@@ -7,9 +7,6 @@ import 'package:flutter_svg/svg.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../helper.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-
 
 class SearchExploreWebHelperCore {
 

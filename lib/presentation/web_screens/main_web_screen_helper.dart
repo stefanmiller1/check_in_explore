@@ -29,11 +29,11 @@ List<String>? getImageFromCurrentReservations(BuildContext context, List<Reserva
 
 
   for (ReservationItem reservationItem in reservations) {
-
       /// add activity
         if (activities.where((element) => element.activityFormId == reservationItem.reservationId).isNotEmpty) {
           final ActivityManagerForm activity = activities.where((element) => element.activityFormId == reservationItem.reservationId).first;
           if (activity.profileService.activityBackground.activityProfileImages?.isNotEmpty == true) {
+
             imageList.add(activity.profileService.activityBackground.activityProfileImages?[0].uriPath ?? '');
           } else {
             imageList.add('');

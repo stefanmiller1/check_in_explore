@@ -1,7 +1,6 @@
 import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/listing_components/listing_result_main_card.dart';
 import 'package:dismissible_page/dismissible_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -9,8 +8,6 @@ import 'package:flutter/rendering.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
-
-import '../create_activity/create_activity_screen_helper.dart';
 
 class ListingSearchResult extends StatefulWidget {
 
@@ -177,9 +174,9 @@ class _ListingSearchResultState extends State<ListingSearchResult> {
                           currentReservationId: res.reservationId,
                           currentListingId: listing.listingServiceId,
                           didSelectBack: () {  },
-                        ),
-                      );
-                    }
+                      ),
+                    );
+                  }
                 ));
               },
             ),

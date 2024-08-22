@@ -1,7 +1,5 @@
 import 'package:check_in_presentation/check_in_presentation.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/chat_inbox/direct_chat_rooms_screen.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/chat_inbox/direct_chat_screen.dart';
-import 'package:check_in_web_mobile_explore/presentation/web_screens/main_container_widgets/chat_widget/chat_helper_core.dart';
 import 'package:flutter/material.dart';
 
 class ChatSubContainerWidget extends StatefulWidget {
@@ -67,9 +65,7 @@ class _ChatSubContainerWidgetState extends State<ChatSubContainerWidget> with Si
             ],
           ),
         ),
-        const SizedBox(height: 10),
-        Divider(color: widget.model.disabledTextColor),
-        
+
         Expanded(
           child: PageView.builder(
             physics: const NeverScrollableScrollPhysics(),
