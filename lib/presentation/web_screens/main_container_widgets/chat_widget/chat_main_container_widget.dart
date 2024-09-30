@@ -17,35 +17,32 @@ class ChatMainContainerWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 30.0, left: 30.0, bottom: 30.0, top: 40.0),
-      child: Container(
-        width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height,
-        decoration: BoxDecoration(
-            color: model.accentColor,
-            borderRadius: BorderRadius.all(Radius.circular(20))
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      height: MediaQuery.of(context).size.height,
+      decoration: BoxDecoration(
+          color: model.accentColor,
+          borderRadius: BorderRadius.all(Radius.circular(20))
+      ),
+      child:  (room != null) ? DirectChatScreen(
+          room: room,
+          model: model,
+          currentUser: currentUser,
+          reservationItem: null,
+          isFromReservation: false
+      ) : Container(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Icon(Icons.message_outlined, color: model.disabledTextColor, size: 85),
+            const SizedBox(height: 10),
+            Text('Your Chats', style: TextStyle(color: model.disabledTextColor, fontSize: model.secondaryQuestionTitleFontSize)),
+            const SizedBox(height: 10),
+            Text('Select any chat from the list to get the conversation started', style: TextStyle(color: model.disabledTextColor)),
+          ],
         ),
-        child:  (room != null) ? DirectChatScreen(
-            room: room,
-            model: model,
-            currentUser: currentUser,
-            reservationItem: null,
-            isFromReservation: false
-        ) : Container(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Icon(Icons.message_outlined, color: model.disabledTextColor, size: 85),
-              const SizedBox(height: 10),
-              Text('Your Chats', style: TextStyle(color: model.disabledTextColor, fontSize: model.secondaryQuestionTitleFontSize)),
-              const SizedBox(height: 10),
-              Text('Select any chat from the list to get the conversation started', style: TextStyle(color: model.disabledTextColor)),
-            ],
-          ),
-        ),
-      )
+      ),
     );
   }
 }

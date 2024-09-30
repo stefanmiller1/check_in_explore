@@ -267,181 +267,172 @@ class _SearchExploreMainContainerWidgetState extends State<SearchExploreMainCont
   }
 
 
+
+
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 30.0, left: 30.0, bottom: 30.0, top: 40.0),
-      child: Container(
-        width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height,
-        child: ClipRRect(
-          borderRadius: const BorderRadius.all(Radius.circular(20)),
-          child:  Stack(
-            alignment: Alignment.center,
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+
+       if (!(kIsWeb && Responsive.isMobile(context))) getMainContainer(context, ExploreWebHelperCore.searchExploreMarker),
+
+        AnimatedOpacity(
+          duration: Duration(milliseconds: 800),
+          opacity: (ExploreWebHelperCore.selectedSearch || (kIsWeb) && Responsive.isMobile(context)) ? 1 : 0,
+            child: Visibility(
+                visible: ExploreWebHelperCore.selectedSearch || (kIsWeb) && Responsive.isMobile(context),
+                child: SlideInTransitionWidget(
+                  durationTime: 400,
+                  offset: const Offset(0.0, 1.0),
+                  transitionWidget: PointerInterceptor(
+                    child: DiscoverySearchComponent(
+                      model: widget.model,
+                        // didSelectCreateNewActivity(
+                        //     context,
+                        //     widget.model,
+                        //     listing,
+                        //     2
+                        // );
+                      //   setState(() {
+                      //     ExploreWebHelperCore.didSelectFacilityItem(context, listing);
+                      //   });
+                      // Future.delayed(const Duration(seconds: 2), () {
+                      //   setState(() {
+                      //     ExploreWebHelperCore.isLoading = false;
+                      //   });
+                      // });
+                ),
+              ),
+            )
+          ),
+        ),
+
+        Visibility(
+          visible: ExploreWebHelperCore.selectedSearch,
+          child: Positioned(
+              top: 15,
+              right: 15,
+              child: IconButton(
+                icon: Icon(Icons.cancel, color: widget.model.paletteColor, size: 35),
+                onPressed: () {
+                  setState(() {
+                    Beamer.of(context).update(
+                        configuration: RouteInformation(
+                            location: homeTabRoute(DashboardMarker.search),
+                        ),
+                        rebuild: false
+                    );
+                    ExploreWebHelperCore.selectedSearch = false;
+                });
+              },
+            )
+          ),
+        ),
+
+        Visibility(
+          visible: ExploreWebHelperCore.selectedListing,
+          child: Stack(
+            alignment: Alignment.bottomCenter,
             children: [
-
-              getMainContainer(context, ExploreWebHelperCore.searchExploreMarker),
-
-
-              AnimatedOpacity(
-                duration: Duration(milliseconds: 800),
-                opacity: ExploreWebHelperCore.selectedSearch ? 1 : 0,
-                  child: Visibility(
-                      visible: ExploreWebHelperCore.selectedSearch,
-                      child: SlideInTransitionWidget(
-                        durationTime: 400,
-                        offset: const Offset(0.0, 1.0),
-                        transitionWidget: PointerInterceptor(
-                          child: DiscoverySearchComponent(
-                            model: widget.model,
-                              // didSelectCreateNewActivity(
-                              //     context,
-                              //     widget.model,
-                              //     listing,
-                              //     2
-                              // );
-                            //   setState(() {
-                            //     ExploreWebHelperCore.didSelectFacilityItem(context, listing);
-                            //   });
-                            // Future.delayed(const Duration(seconds: 2), () {
-                            //   setState(() {
-                            //     ExploreWebHelperCore.isLoading = false;
-                            //   });
-                            // });
-                      ),
-                    ),
-                  )
-                ),
-              ),
-
-              Visibility(
-                visible: ExploreWebHelperCore.selectedSearch,
-                child: Positioned(
-                    top: 15,
-                    right: 15,
-                    child: IconButton(
-                      icon: Icon(Icons.cancel, color: widget.model.paletteColor, size: 35),
-                      onPressed: () {
-                        setState(() {
-                          Beamer.of(context).update(
-                              configuration: RouteInformation(
-                                  location: '/${DashboardMarker.home.name.toString()}'
-                              ),
-                              rebuild: false
-                          );
-                          ExploreWebHelperCore.selectedSearch = false;
-                      });
-                    },
-                  )
-                ),
-              ),
-
-              Visibility(
-                visible: ExploreWebHelperCore.selectedListing,
-                child: Stack(
-                  alignment: Alignment.bottomCenter,
-                  children: [
-                    if (ExploreWebHelperCore.currentReservationItemId == null && ExploreWebHelperCore.currentFacilityItemId != null) PointerInterceptor(
-                      child: FacilityPreviewScreen(
-                        model: widget.model,
-                        listingId: ExploreWebHelperCore.currentFacilityItemId!,
-                        listing: ExploreWebHelperCore.selectedFacilityItem,
-                        isAutoImplyLeading: true,
-                        selectedReservationsSlots: context.read<ListingsSearchRequirementsBloc>().state.selectedReservationsSlots?.toList() ?? [],
-                        didSelectBack: () {},
-                        didSelectReservation: (listing, res) {
-                            setState(() {
-                              ExploreWebHelperCore.didSelectReservationItem(context, listing, res);
-                            });
-                            Future.delayed(const Duration(seconds: 2), () {
-                              setState(() {
-                                ExploreWebHelperCore.isLoading = false;
-                              });
-
-                          });
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              Visibility(
-                  visible: ExploreWebHelperCore.selectedListing,
-                  child: Stack(
-                    alignment: Alignment.bottomCenter,
-                    children: [
-                      if (ExploreWebHelperCore.currentReservationItemId != null && ExploreWebHelperCore.currentFacilityItemId != null) PointerInterceptor(
-                        child: ActivityPreviewScreen(
-                            model: widget.model,
-                            currentListingId: ExploreWebHelperCore.currentFacilityItemId!,
-                            currentReservationId: ExploreWebHelperCore.currentReservationItemId!,
-                            listing: ExploreWebHelperCore.selectedFacilityItem,
-                            reservation: ExploreWebHelperCore.selectedReservationItem,
-                            didSelectBack: () {  },
-                      ),
-                    ),
-                  ],
-                )
-              ),
-
-              if (ExploreWebHelperCore.selectedListing) Positioned(
-                bottom: 130,
-                child: Visibility(
-                  visible: ExploreWebHelperCore.isLoading == false,
-                  child: InkWell(
-                    onTap: () {
+              if (ExploreWebHelperCore.currentReservationItemId == null && ExploreWebHelperCore.currentFacilityItemId != null) PointerInterceptor(
+                child: FacilityPreviewScreen(
+                  model: widget.model,
+                  listingId: ExploreWebHelperCore.currentFacilityItemId!,
+                  listing: ExploreWebHelperCore.selectedFacilityItem,
+                  isAutoImplyLeading: true,
+                  selectedReservationsSlots: context.read<ListingsSearchRequirementsBloc>().state.selectedReservationsSlots?.toList() ?? [],
+                  didSelectBack: () {},
+                  didSelectReservation: (listing, res) {
                       setState(() {
-                        ExploreWebHelperCore.selectedListing = false;
-                        ExploreWebHelperCore.isLoading = true;
+                        ExploreWebHelperCore.didSelectReservationItem(context, listing, res);
+                      });
+                      Future.delayed(const Duration(seconds: 2), () {
+                        setState(() {
+                          ExploreWebHelperCore.isLoading = false;
+                        });
+
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        Visibility(
+            visible: ExploreWebHelperCore.selectedListing,
+            child: Stack(
+              alignment: Alignment.bottomCenter,
+              children: [
+                if (ExploreWebHelperCore.currentReservationItemId != null && ExploreWebHelperCore.currentFacilityItemId != null) PointerInterceptor(
+                  child: ActivityPreviewScreen(
+                      model: widget.model,
+                      currentListingId: ExploreWebHelperCore.currentFacilityItemId!,
+                      currentReservationId: ExploreWebHelperCore.currentReservationItemId!,
+                      listing: ExploreWebHelperCore.selectedFacilityItem,
+                      reservation: ExploreWebHelperCore.selectedReservationItem,
+                      didSelectBack: () {  },
+                ),
+              ),
+            ],
+          )
+        ),
+
+        if (ExploreWebHelperCore.selectedListing) Positioned(
+          bottom: 130,
+          child: Visibility(
+            visible: ExploreWebHelperCore.isLoading == false,
+            child: InkWell(
+              onTap: () {
+                setState(() {
+                  ExploreWebHelperCore.selectedListing = false;
+                  ExploreWebHelperCore.isLoading = true;
 
                         Beamer.of(context).update(
                             configuration: RouteInformation(
-                                location: '/${DashboardMarker.home.name.toString()}'
+                                location: homeTabRoute(DashboardMarker.search),
                             ),
                             rebuild: false
                         );
 
-                        Future.delayed(const Duration(milliseconds: 600), () {
-                          setState(() {
-                            ExploreWebHelperCore.isLoading = false;
-                          });
-                        });
-                      });
-                    },
-                    child: Container(
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: widget.model.paletteColor,
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 3.0),
-                        child: Center(
-                          child: Chip(
-                              side: BorderSide.none,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                              backgroundColor: widget.model.paletteColor,
-                              label: Text('Back',
-                                  style: TextStyle(color: widget.model.accentColor, fontWeight: FontWeight.bold)),
-                              avatar: Icon(Icons.u_turn_left_rounded, color: widget.model.accentColor)
-                          ),
-                        ),
-                      ),
+                  Future.delayed(const Duration(milliseconds: 600), () {
+                    setState(() {
+                      ExploreWebHelperCore.isLoading = false;
+                    });
+                  });
+                });
+              },
+              child: Container(
+                height: 40,
+                decoration: BoxDecoration(
+                  color: widget.model.paletteColor,
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 3.0),
+                  child: Center(
+                    child: Chip(
+                        side: BorderSide.none,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                        backgroundColor: widget.model.paletteColor,
+                        label: Text('Back',
+                            style: TextStyle(color: widget.model.accentColor, fontWeight: FontWeight.bold)),
+                        avatar: Icon(Icons.u_turn_left_rounded, color: widget.model.accentColor)
                     ),
                   ),
                 ),
               ),
-              if (ExploreWebHelperCore.isLoading) Container(
-                  width: double.infinity,
-                  height: double.infinity,
-                  color: widget.model.mobileBackgroundColor,
-                  child: JumpingDots(color: widget.model.paletteColor, numberOfDots: 3)
-              ),
-            ],
+            ),
           ),
-        )
-      ),
+        ),
+        if (ExploreWebHelperCore.isLoading) Container(
+            width: double.infinity,
+            height: double.infinity,
+            color: widget.model.mobileBackgroundColor,
+            child: JumpingDots(color: widget.model.paletteColor, numberOfDots: 3)
+        ),
+      ],
     );
   }
 

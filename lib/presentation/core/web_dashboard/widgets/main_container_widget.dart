@@ -1,5 +1,6 @@
 import 'package:check_in_presentation/check_in_presentation.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class MainDashboardContainer extends StatefulWidget {
@@ -28,10 +29,27 @@ class _MainDashboardContainerState extends State<MainDashboardContainer> {
 
   @override
   Widget build(BuildContext context) {
+
+
     return Stack(
       alignment: Alignment.centerRight,
       children: [
-        widget.mainContainer,
+        if (Responsive.isMobile(context)) widget.mainContainer,
+        if (!Responsive.isMobile(context)) Padding(
+          padding: const EdgeInsets.only(right: 30.0, left: 30.0, bottom: 30.0, top: 40.0),
+          child: Container(
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height,
+            decoration: BoxDecoration(
+                color: widget.model.accentColor,
+                borderRadius: BorderRadius.all(Radius.circular(20))
+            ),
+            child: ClipRRect(
+              borderRadius: const BorderRadius.all(Radius.circular(20)),
+              child: widget.mainContainer,
+            ),
+          ),
+        ),
         // Positioned(
         //   top: 120,
         //   child: AnimatedContainer(

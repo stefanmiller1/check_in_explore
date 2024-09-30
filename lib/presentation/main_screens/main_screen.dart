@@ -111,15 +111,14 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Widget retrieveMainResponsiveScreen({required DashboardModel model}) {
-    final isWebMobile = kIsWeb &&
-        (defaultTargetPlatform == TargetPlatform.iOS ||
-            defaultTargetPlatform == TargetPlatform.android);
 
-    if (isWebMobile) {
-      return MainScreenWebMobile(
-        model: model
-      );
-    } else if (kIsWeb) {
+    // if (isWebMobile) {
+    //   return MainScreenWebMobile(
+    //     model: model
+    //   );
+    // } else
+
+      if (kIsWeb) {
       return MainWebScreen(
         model: model,
         initialDashboardMarker: widget.initialDashboardMarker,

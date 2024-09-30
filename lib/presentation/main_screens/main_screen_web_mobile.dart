@@ -1,4 +1,5 @@
 import 'package:check_in_presentation/check_in_presentation.dart';
+import 'package:check_in_credentials/check_in_credentials.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
@@ -136,7 +137,7 @@ class _MainScreenWebMobileState extends State<MainScreenWebMobile> {
                     ),
                     const SizedBox(height: 8),
                     InkWell(
-                      onTap: () => _launchURL('https://apps.apple.com/ca/app/circle-activities/id6479968457'),
+                      onTap: () => _launchURL(iosActivitiesAppLink),
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: SvgPicture.asset(

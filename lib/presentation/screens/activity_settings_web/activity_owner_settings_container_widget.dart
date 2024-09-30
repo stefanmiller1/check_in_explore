@@ -203,11 +203,13 @@ class _SettingsMainContainerWidgetState extends State<SettingsMainContainerWidge
                   getActivityRequirementsColumn(
                     context,
                     widget.model,
+                    false,
                     true,
                     false,
                     reservationOwner,
                     context.read<UpdateActivityFormBloc>().state.activitySettingsForm,
                     widget.reservationItem,
+                    [],
                     [],
                     widget.userProfileModel.userId.getOrCrash(),
                     didSelectAttendees: () {

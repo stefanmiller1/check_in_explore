@@ -45,30 +45,40 @@
 <body>
   <script src="main.dart.js" type="application/javascript"></script>
   <script src="path_to_pdf.js/pdf.js"></script>
-<script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
-                navigator.serviceWorker.register('/firebase-messaging-sw.js?v= + serviceWorkerVersion')
-                    .then(function(registration) {
-                        console.log('Service worker registered successfully:', registration);
+  <script>
+    document.addEventListener(
+      'touchstart',
+      (startEvent) => {
+        if (startEvent.touches.length > 1) return;
+        startEvent.preventDefault();
+      },
+      { passive: false }
+    );
+  </script>
+  <script>
+          if ('serviceWorker' in navigator) {
+              window.addEventListener('load', function() {
+                  navigator.serviceWorker.register('/firebase-messaging-sw.js?v= + serviceWorkerVersion')
+                      .then(function(registration) {
+                          console.log('Service worker registered successfully:', registration);
 
-                        // Attempt subscription to push notifications here
-                        return registration.pushManager.subscribe({
-                            userVisibleOnly: true,
-                            applicationServerKey: 'BCc_cyT2apphC8NxosVIQTC42C6IfaF4mh0xkJ2ZJgUC0YXJMS3FuxMQfVWomEmN4wqtSy6g4AhuI7m8fG52fVI'
-                        });
-                    })
-                    .then(function(subscription) {
-                        console.log('Push subscription successful:', subscription);
-                    })
-                    .catch(function(error) {
-                        console.error('Service worker registration or push subscription failed:', error);
-                    });
-            });
-        } else {
-            console.log('Service workers are not supported.');
-        }
-        window.flutterWebRenderer = 'canvaskit';
-    </script>
+                          // Attempt subscription to push notifications here
+                          return registration.pushManager.subscribe({
+                              userVisibleOnly: true,
+                              applicationServerKey: 'BCc_cyT2apphC8NxosVIQTC42C6IfaF4mh0xkJ2ZJgUC0YXJMS3FuxMQfVWomEmN4wqtSy6g4AhuI7m8fG52fVI'
+                          });
+                      })
+                      .then(function(subscription) {
+                          console.log('Push subscription successful:', subscription);
+                      })
+                      .catch(function(error) {
+                          console.error('Service worker registration or push subscription failed:', error);
+                      });
+              });
+          } else {
+              console.log('Service workers are not supported.');
+          }
+          window.flutterWebRenderer = 'canvaskit';
+      </script>
 </body>
 </html>

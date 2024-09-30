@@ -1,5 +1,5 @@
 name: check_in_web_mobile_explore
-description: A new Flutter project.
+description: A platform for making use out of useless space.
 
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -38,7 +38,7 @@ dependencies:
   share_plus: ^9.0.0
   timeago: ^3.2.2
   file_picker: ^8.0.0+1
-  excel: ^4.0.3
+  excel: ^4.0.6
   video_player: ^2.8.6
   url_strategy: ^0.3.0
   auth_buttons:
@@ -140,6 +140,8 @@ flutter:
     - assets/icons_svg/ios/Download_on_the_App_Store_Badge_US-UK_RGB_blk_092917.svg
     - assets/icons_svg/ios/Download_on_the_App_Store_Badge_US-UK_RGB_wht_092917.svg
     - assets/images/activity_creator/onboarding/IMG_7389.png
+    - assets/images/activity_creator/onboarding/IMG_6792.png
+    - assets/images/activity_creator/onboarding/IMG_6794.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
@@ -171,3 +173,4 @@ dependency_overrides:
   test_api: 0.5.2
   matcher: 0.12.16
   intl: ^0.18.1
+  win32: ^5.5.4

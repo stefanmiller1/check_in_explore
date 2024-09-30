@@ -3,6 +3,7 @@ import 'package:check_in_presentation/check_in_presentation.dart';
 import 'package:check_in_web_mobile_explore/presentation/main_screens/main_screen.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 
 final simpleLocationBuilder = RoutesLocationBuilder(
     routes: {
@@ -12,14 +13,15 @@ final simpleLocationBuilder = RoutesLocationBuilder(
           name: 'home',
           title: 'home',
           child: const MainScreen(
-              initialDashboardMarker: DashboardMarker.home
+              initialDashboardMarker: DashboardMarker.search
           ),
         );
       },
       '/:mainId': (context, state, data) {
+        final isWebMobile = kIsWeb && (defaultTargetPlatform == TargetPlatform.iOS || defaultTargetPlatform == TargetPlatform.android);
         final initialMarker = state.pathParameters['mainId'];
         ExploreWebHelperCore.selectedListing = false;
-        ExploreWebHelperCore.selectedSearch = false;
+        ExploreWebHelperCore.selectedSearch = isWebMobile;
         ExploreWebHelperCore.searchExploreMarker = SearchExploreHelperMarker.map;
 
         return BeamPage(
@@ -28,6 +30,22 @@ final simpleLocationBuilder = RoutesLocationBuilder(
           title: getDashboardMarkerTitle(getDashboardMarker(initialMarker)),
           child: MainScreen(
                 initialDashboardMarker: getDashboardMarker(initialMarker),
+          ),
+        );
+      },
+      '/home/mainId:/': (context, state, data) {
+        final isWebMobile = kIsWeb && (defaultTargetPlatform == TargetPlatform.iOS || defaultTargetPlatform == TargetPlatform.android);
+        final initialMarker = state.pathParameters['mainId'];
+        ExploreWebHelperCore.selectedListing = false;
+        ExploreWebHelperCore.selectedSearch = isWebMobile;
+        ExploreWebHelperCore.searchExploreMarker = SearchExploreHelperMarker.map;
+
+        return BeamPage(
+          key: ValueKey(initialMarker),
+          name: getDashboardMarkerTitle(getDashboardMarker(initialMarker)),
+          title: getDashboardMarkerTitle(getDashboardMarker(initialMarker)),
+          child: MainScreen(
+            initialDashboardMarker: getDashboardMarker(initialMarker),
           ),
         );
       },
@@ -120,7 +138,7 @@ final simpleLocationBuilder = RoutesLocationBuilder(
           ),
         );
       },
-      '/:mainId/:searchType/search': (context, state, data) {
+      '/:mainId/:searchType/browse': (context, state, data) {
         final mainId = state.pathParameters['mainId'];
         final searchType = state.pathParameters['search`Type'];
 

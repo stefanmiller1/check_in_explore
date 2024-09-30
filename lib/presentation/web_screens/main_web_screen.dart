@@ -2,6 +2,7 @@ import 'package:beamer/beamer.dart';
 import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
+import 'package:check_in_credentials/check_in_credentials.dart';
 import 'package:check_in_presentation/core/router_helper.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/web_dashboard/dashboard_helper.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/web_dashboard/dashboard_main.dart';
@@ -15,7 +16,9 @@ import 'package:check_in_web_mobile_explore/presentation/web_screens/main_web_sc
 import 'package:check_in_web_mobile_explore/presentation/web_screens/sub_container_widgets/chat_widget/chat_sub_container_widget.dart';
 import 'package:check_in_web_mobile_explore/presentation/web_screens/sub_container_widgets/reservation_widget/reservation_sub_container_widget.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/services.dart';
 import 'package:jumping_dot/jumping_dot.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -48,6 +51,7 @@ class MainWebScreen extends StatefulWidget {
 class _MainWebScreenState extends State<MainWebScreen> {
 
   late bool? isCreatingNewActivity = false;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
 
   @override
@@ -129,7 +133,6 @@ class _MainWebScreenState extends State<MainWebScreen> {
     if (ReservationHelperCore.selectedReservationItem != null) {
       return retrieveNotifications(currentUser, reservations, activities, ReservationHelperCore.selectedReservationItem!, null, null, null, []);
     } else if (widget.initialReservationId != null) {
-      print('not null');
       return BlocProvider(create: (_) => getIt<ReservationManagerWatcherBloc>()..add(ReservationManagerWatcherEvent.watchReservationItem(widget.initialReservationId!.getOrCrash())),
         child: BlocBuilder<ReservationManagerWatcherBloc, ReservationManagerWatcherState>(
           builder: (context, state) {
@@ -240,6 +243,7 @@ class _MainWebScreenState extends State<MainWebScreen> {
       initialReservationId: widget.initialReservationId,
       didSelectReservation: () {
         setState(() {
+          _scaffoldKey.currentState?.closeDrawer();
         });
       },
     );
@@ -310,7 +314,6 @@ class _MainWebScreenState extends State<MainWebScreen> {
         });
       }
     );
-
 
     final activitySettingsSubContainer = ActivitySubSettingsContainer(
         model: widget.model,
@@ -448,7 +451,7 @@ class _MainWebScreenState extends State<MainWebScreen> {
       didSelectItem: (ProfileSettingMarker navItem) {
         setState(() {
           ReservationHelperCore.currentProfileSettingsMarker = navItem;
-
+          _scaffoldKey.currentState?.closeDrawer();
         });
       },
       rebuild: () {
@@ -476,7 +479,7 @@ class _MainWebScreenState extends State<MainWebScreen> {
           subContainer: Container(
             color: Colors.blue,
           ),
-          dashboardMarker: DashboardMarker.home,
+          dashboardMarker: DashboardMarker.search,
           iconTab: Icons.public,
           tabTitle: 'Discovery',
           isVisible: true,
@@ -655,22 +658,25 @@ class _MainWebScreenState extends State<MainWebScreen> {
 
   Widget retrieveMainDashboardContainer(BuildContext context, UserProfileModel? currentUser, List<DashboardContainerModel> dashboardContainerModel, List<ReservationItem> currentRes, List<ActivityManagerForm> currentAct, List<AccountNotificationItem> notifications, DashboardContainerModel optionsDashboardItem) {
     return Stack(
+      alignment: Alignment.center,
       children: [
         WebDashboardMain(
+        isLoggedIn: currentUser != null,
+        scaffoldKey: _scaffoldKey,
         model: widget.model,
-          dashboardMarker: context.read<ListingsSearchRequirementsBloc>().state.currentDashboardMarker,
-          dashboardContainerItems: dashboardContainerModel,
-          didSelectDashboardMarkerItem: (marker) {
+        dashboardMarker: context.read<ListingsSearchRequirementsBloc>().state.currentDashboardMarker,
+        dashboardContainerItems: dashboardContainerModel,
+        didSelectDashboardMarkerItem: (marker) {
             setState(() {
               Beamer.of(context).update(
                   configuration: RouteInformation(
-                      location: '/${marker.name.toString()}'
+                      location: homeTabRoute(marker),
                   ),
                   rebuild: false
               );
 
               switch (marker) {
-                case DashboardMarker.home:
+                case DashboardMarker.search:
                   if (ExploreWebHelperCore.selectedListing && ExploreWebHelperCore.currentFacilityItemId != null && ExploreWebHelperCore.currentReservationItemId != null) {
                     Beamer.of(context).update(
                         configuration: RouteInformation(
@@ -720,7 +726,7 @@ class _MainWebScreenState extends State<MainWebScreen> {
                   } else {
                     Beamer.of(context).update(
                         configuration: RouteInformation(
-                            location: '/${marker.name.toString()}'
+                            location: homeTabRoute(marker),
                         ),
                         rebuild: false
                     );
@@ -766,12 +772,36 @@ class _MainWebScreenState extends State<MainWebScreen> {
                 default:
                   break;
               }
-
-
               context.read<ListingsSearchRequirementsBloc>().add(ListingsSearchRequirementsEvent.currentDashboardMarker(marker));
               });
             },
           optionsMarkerItem: optionsDashboardItem,
+        ),
+
+        if (kIsWeb && Responsive.isMobile(context)) Positioned(
+          top: (showTopNavBar(context.read<ListingsSearchRequirementsBloc>().state.currentDashboardMarker) && currentUser != null) ? 130 : 75,
+            child: SizedBox(
+              height: 60,
+              child: FilterChip(
+                side: BorderSide.none,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                elevation: 8,
+                shadowColor: widget.model.disabledTextColor.withOpacity(0.3),
+                onSelected: (e) async {
+                  if (await canLaunch(iosActivitiesAppLink)) {
+                    await launch(iosActivitiesAppLink);
+                  } else {
+                    throw 'Could not launch $iosActivitiesAppLink';
+                  }
+                },
+                avatar: Icon(Icons.link_rounded, size: 26, color: widget.model.paletteColor),
+                label:  Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 6.0),
+                  child: Text('Download on iOS', style: TextStyle(color: widget.model.paletteColor)),
+                ),
+              backgroundColor:widget.model.accentColor,
+            ),
+          ),
         ),
 
         if (isCreatingNewActivity == true) OnBoardingPopOverWidget(

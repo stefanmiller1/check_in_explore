@@ -8,13 +8,17 @@ import 'package:check_in_web_mobile_explore/presentation/core/web_dashboard/widg
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../../web_screens/main_web_screen_helper.dart';
+
 class WebDashboardMain extends StatefulWidget {
 
   final DashboardModel model;
+  final bool isLoggedIn;
   final DashboardMarker dashboardMarker;
   final Function(DashboardMarker tab) didSelectDashboardMarkerItem;
   final List<DashboardContainerModel> dashboardContainerItems;
   final DashboardContainerModel optionsMarkerItem;
+  final GlobalKey<ScaffoldState> scaffoldKey;
 
   const WebDashboardMain({
     super.key,
@@ -23,6 +27,8 @@ class WebDashboardMain extends StatefulWidget {
     required this.didSelectDashboardMarkerItem,
     required this.dashboardContainerItems,
     required this.optionsMarkerItem,
+    required this.scaffoldKey,
+    required this.isLoggedIn,
   });
 
   @override
@@ -32,7 +38,7 @@ class WebDashboardMain extends StatefulWidget {
 
 class _WebDashboardMainState extends State<WebDashboardMain> {
 
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  // final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   DashboardContainerModel? currentDashboardContainer;
   DashboardMarker? currentMarker;
 
@@ -114,11 +120,11 @@ class _WebDashboardMainState extends State<WebDashboardMain> {
     if (currentMarker != widget.dashboardMarker) {
       currentMarker = widget.dashboardMarker;
     }
-    if (!(subContainerIsHidden(currentMarker!))) _scaffoldKey.currentState?.closeDrawer();
+    if (!(subContainerIsHidden(currentMarker!))) widget.scaffoldKey.currentState?.closeDrawer();
 
     Size _size = MediaQuery.of(context).size;
     return Scaffold(
-      key: _scaffoldKey,
+      key: widget.scaffoldKey,
       drawer: SizedBox(
        width: (subContainerIsHidden(currentMarker!)) ? 350 : 0,
         child: Drawer(
@@ -127,16 +133,16 @@ class _WebDashboardMainState extends State<WebDashboardMain> {
           child: updateSubContainer(currentMarker!),
         ),
       ),
-      appBar: (Responsive.isMobile(context)) ? AppBar(
+      appBar: (Responsive.isMobile(context) && showTopNavBar(currentMarker ?? widget.dashboardMarker) && widget.isLoggedIn) ? AppBar(
         backgroundColor: widget.model.paletteColor,
         elevation: 0,
-        title: Text(widget.dashboardContainerItems[retrieveSelectedIndex(currentMarker ?? DashboardMarker.home)].tabTitle ?? '',),
+        title: Text(widget.dashboardContainerItems[retrieveSelectedIndex(currentMarker ?? DashboardMarker.search)].tabTitle ?? '',),
         titleTextStyle: TextStyle(color: widget.model.accentColor, fontSize: widget.model.secondaryQuestionTitleFontSize),
         automaticallyImplyLeading: false,
         leading: (subContainerIsHidden(currentMarker!)) ? IconButton(
           onPressed: () {
             setState(() {
-              _scaffoldKey.currentState?.openDrawer();
+              widget.scaffoldKey.currentState?.openDrawer();
             });
           },
           icon: Icon(Icons.menu, color: widget.model.accentColor),
@@ -153,7 +159,7 @@ class _WebDashboardMainState extends State<WebDashboardMain> {
           ),
         ],
       ) : null,
-      bottomNavigationBar: (Responsive.isMobile(context)) ? BottomNavigationBar(
+      bottomNavigationBar: (Responsive.isMobile(context) && widget.isLoggedIn) ? BottomNavigationBar(
         onTap: (i) {
           setState(() {
             currentMarker = widget.dashboardContainerItems[i].dashboardMarker;

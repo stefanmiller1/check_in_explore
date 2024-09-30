@@ -27,18 +27,15 @@ class ActivityVendorFormManageMainContainerWidget extends StatelessWidget {
         title: const Text('Manage Vendor Applications'),
         centerTitle: true,
       ) : null,
-      body: Padding(
-          padding: (kIsWeb) ? const EdgeInsets.only(right: 30.0, left: 30.0, bottom: 30.0, top: 40.0) : EdgeInsets.zero,
-          child: Container(
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height,
-              decoration: BoxDecoration(
-                  color: model.accentColor,
-                  borderRadius: BorderRadius.all(Radius.circular(20))
+      body: Container(
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
+          decoration: BoxDecoration(
+              color: model.accentColor,
+              borderRadius: BorderRadius.all(Radius.circular(20))
+          ),
+          child: (selectedForm != null) ? retrieveReservationSource(selectedForm!) : defaultPagePreview()
               ),
-              child: (selectedForm != null) ? retrieveReservationSource(selectedForm!) : defaultPagePreview()
-        )
-      ),
     );
   }
 
