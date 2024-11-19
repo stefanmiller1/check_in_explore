@@ -16,36 +16,40 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 /// create feed posts in-between (posts can be: polls, images (bereal, snapchat, story), chat/thread, leaderboard
 
 
-Widget flexibleReservationProfileHeader(BuildContext context, DashboardModel model, Widget mainTitleWidget, ReservationItem reservationItem, ListingManagerForm listing) {
-
-
-  return FlexibleSpaceBar(
-    collapseMode: CollapseMode.parallax,
-    centerTitle: true,
-    stretchModes: const [StretchMode.blurBackground, StretchMode.zoomBackground],
-    title: mainTitleWidget,
-    background: Container(
-      foregroundDecoration: BoxDecoration(
-        color: model.paletteColor.withOpacity(0.25),
-      ),
-      child: PageView.builder(
-          itemCount: retrieveReservationSpacesFromListing(reservationItem, listing).length,
-          itemBuilder: (_, index) {
-            final SpaceOptionSizeDetail reservationSpace = retrieveReservationSpacesFromListing(reservationItem, listing)[index];
-
-            if (reservationSpace.spacePhoto != null) {
-              return Image(image: reservationSpace.spacePhoto!.image, fit: BoxFit.cover);
-            }
-           return  getActivityTypeTabOption(
-                context,
-                model,
-                200,
-                false,
-                getActivityOptions().firstWhere((element) => element.activityId == reservationItem.reservationSlotItem.first.selectedActivityType)
-            );
-        }
-      ),
-    ),
-    expandedTitleScale: 1,
-  );
-}
+// Widget flexibleReservationProfileHeader(BuildContext context, DashboardModel model, Widget mainTitleWidget, ReservationItem reservationItem, ListingManagerForm listing) {
+//
+//
+//   return FlexibleSpaceBar(
+//     collapseMode: CollapseMode.parallax,
+//     centerTitle: true,
+//     stretchModes: const [StretchMode.blurBackground, StretchMode.zoomBackground],
+//     title: mainTitleWidget,
+//     background: Container(
+//       foregroundDecoration: BoxDecoration(
+//         color: model.paletteColor.withOpacity(0.25),
+//       ),
+//       child: PageView.builder(
+//           itemCount: retrieveReservationSpacesFromListing(reservationItem, listing).length,
+//           itemBuilder: (_, index) {
+//             final SpaceOptionSizeDetail reservationSpace = retrieveReservationSpacesFromListing(reservationItem, listing)[index];
+//
+//             if (reservationSpace.photoUri != null) {
+//               return CachedNetworkImage(
+//                 imageUrl: reservationSpace.photoUri ?? '',
+//
+//               );
+//               return Image(image: reservationSpace.spacePhoto!.image, fit: BoxFit.cover);
+//             }
+//            return  getActivityTypeTabOption(
+//                 context,
+//                 model,
+//                 200,
+//                 false,
+//                 getActivityOptions().firstWhere((element) => element.activityId == reservationItem.reservationSlotItem.first.selectedActivityType)
+//             );
+//         }
+//       ),
+//     ),
+//     expandedTitleScale: 1,
+//   );
+// }

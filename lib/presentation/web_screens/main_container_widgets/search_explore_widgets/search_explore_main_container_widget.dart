@@ -263,10 +263,64 @@ class _SearchExploreMainContainerWidgetState extends State<SearchExploreMainCont
         return Container();
         // TODO: Handle this case.
         break;
+      case SearchExploreHelperMarker.listing:
+        if (ExploreWebHelperCore.currentReservationItemId == null && ExploreWebHelperCore.currentFacilityItemId != null) {
+          return Stack(
+            alignment: Alignment.bottomCenter,
+            children: [
+              PointerInterceptor(
+                    child: FacilityPreviewScreen(
+                      model: widget.model,
+                      listingId: ExploreWebHelperCore.currentFacilityItemId!,
+                      listing: ExploreWebHelperCore.selectedFacilityItem,
+                      isAutoImplyLeading: true,
+                      selectedReservationsSlots: context.read<ListingsSearchRequirementsBloc>().state.selectedReservationsSlots?.toList() ?? [],
+                      didSelectBack: () {},
+                      didSelectReservation: (listing, res) {
+                          setState(() {
+                            ExploreWebHelperCore.didSelectReservationItem(context, listing, res);
+                          });
+                          Future.delayed(const Duration(seconds: 2), () {
+                            setState(() {
+                              ExploreWebHelperCore.isLoading = false;
+                            });
+
+                        });
+                      },
+                    ),
+                  ),
+            ],
+          );
+            } else {
+          return Container();
+        }
+      case SearchExploreHelperMarker.activity:
+       if (ExploreWebHelperCore.currentReservationItemId != null && ExploreWebHelperCore.currentFacilityItemId != null) {
+         return Stack(
+           alignment: Alignment.bottomCenter,
+           children: [
+             PointerInterceptor(
+               child: ActivityPreviewScreen(
+                 model: widget.model,
+                 currentListingId: ExploreWebHelperCore.currentFacilityItemId!,
+                 currentReservationId: ExploreWebHelperCore
+                     .currentReservationItemId!,
+                 listing: ExploreWebHelperCore.selectedFacilityItem,
+                 reservation: ExploreWebHelperCore.selectedReservationItem,
+                 didSelectBack: () {
+
+                 },
+               ),
+             ),
+           ],
+         );
+       } else {
+         return Container();
+       }
+      case SearchExploreHelperMarker.search:
+        return Container();
     }
   }
-
-
 
 
   @override
@@ -275,13 +329,13 @@ class _SearchExploreMainContainerWidgetState extends State<SearchExploreMainCont
       alignment: Alignment.center,
       children: [
 
-       if (!(kIsWeb && Responsive.isMobile(context))) getMainContainer(context, ExploreWebHelperCore.searchExploreMarker),
+       getMainContainer(context, ExploreWebHelperCore.searchExploreMarker),
 
         AnimatedOpacity(
           duration: Duration(milliseconds: 800),
-          opacity: (ExploreWebHelperCore.selectedSearch || (kIsWeb) && Responsive.isMobile(context)) ? 1 : 0,
+          opacity: (ExploreWebHelperCore.searchExploreMarker == SearchExploreHelperMarker.search || (ExploreWebHelperCore.searchExploreMarker != SearchExploreHelperMarker.activity && (kIsWeb) && Responsive.isMobile(context))) ? 1 : 0,
             child: Visibility(
-                visible: ExploreWebHelperCore.selectedSearch || (kIsWeb) && Responsive.isMobile(context),
+                visible: ExploreWebHelperCore.searchExploreMarker == SearchExploreHelperMarker.search || (ExploreWebHelperCore.searchExploreMarker != SearchExploreHelperMarker.activity && (kIsWeb) && Responsive.isMobile(context)),
                 child: SlideInTransitionWidget(
                   durationTime: 400,
                   offset: const Offset(0.0, 1.0),
@@ -309,7 +363,7 @@ class _SearchExploreMainContainerWidgetState extends State<SearchExploreMainCont
         ),
 
         Visibility(
-          visible: ExploreWebHelperCore.selectedSearch,
+          visible: ExploreWebHelperCore.searchExploreMarker == SearchExploreHelperMarker.search,
           child: Positioned(
               top: 15,
               right: 15,
@@ -323,70 +377,41 @@ class _SearchExploreMainContainerWidgetState extends State<SearchExploreMainCont
                         ),
                         rebuild: false
                     );
-                    ExploreWebHelperCore.selectedSearch = false;
+                    ExploreWebHelperCore.searchExploreMarker = SearchExploreHelperMarker.map;
                 });
               },
             )
           ),
         ),
 
-        Visibility(
-          visible: ExploreWebHelperCore.selectedListing,
-          child: Stack(
-            alignment: Alignment.bottomCenter,
-            children: [
-              if (ExploreWebHelperCore.currentReservationItemId == null && ExploreWebHelperCore.currentFacilityItemId != null) PointerInterceptor(
-                child: FacilityPreviewScreen(
-                  model: widget.model,
-                  listingId: ExploreWebHelperCore.currentFacilityItemId!,
-                  listing: ExploreWebHelperCore.selectedFacilityItem,
-                  isAutoImplyLeading: true,
-                  selectedReservationsSlots: context.read<ListingsSearchRequirementsBloc>().state.selectedReservationsSlots?.toList() ?? [],
-                  didSelectBack: () {},
-                  didSelectReservation: (listing, res) {
-                      setState(() {
-                        ExploreWebHelperCore.didSelectReservationItem(context, listing, res);
-                      });
-                      Future.delayed(const Duration(seconds: 2), () {
-                        setState(() {
-                          ExploreWebHelperCore.isLoading = false;
-                        });
 
-                    });
-                  },
-                ),
-              ),
-            ],
-          ),
-        ),
+        // Visibility(
+        //     visible: ExploreWebHelperCore.selectedListing,
+        //     child: Stack(
+        //       alignment: Alignment.bottomCenter,
+        //       children: [
+        //         if (ExploreWebHelperCore.currentReservationItemId != null && ExploreWebHelperCore.currentFacilityItemId != null) PointerInterceptor(
+        //           child: ActivityPreviewScreen(
+        //               model: widget.model,
+        //               currentListingId: ExploreWebHelperCore.currentFacilityItemId!,
+        //               currentReservationId: ExploreWebHelperCore.currentReservationItemId!,
+        //               listing: ExploreWebHelperCore.selectedFacilityItem,
+        //               reservation: ExploreWebHelperCore.selectedReservationItem,
+        //               didSelectBack: () {  },
+        //         ),
+        //       ),
+        //     ],
+        //   )
+        // ),
 
-        Visibility(
-            visible: ExploreWebHelperCore.selectedListing,
-            child: Stack(
-              alignment: Alignment.bottomCenter,
-              children: [
-                if (ExploreWebHelperCore.currentReservationItemId != null && ExploreWebHelperCore.currentFacilityItemId != null) PointerInterceptor(
-                  child: ActivityPreviewScreen(
-                      model: widget.model,
-                      currentListingId: ExploreWebHelperCore.currentFacilityItemId!,
-                      currentReservationId: ExploreWebHelperCore.currentReservationItemId!,
-                      listing: ExploreWebHelperCore.selectedFacilityItem,
-                      reservation: ExploreWebHelperCore.selectedReservationItem,
-                      didSelectBack: () {  },
-                ),
-              ),
-            ],
-          )
-        ),
-
-        if (ExploreWebHelperCore.selectedListing) Positioned(
+        if (ExploreWebHelperCore.searchExploreMarker == SearchExploreHelperMarker.activity || ExploreWebHelperCore.searchExploreMarker == SearchExploreHelperMarker.listing) Positioned(
           bottom: 130,
           child: Visibility(
             visible: ExploreWebHelperCore.isLoading == false,
             child: InkWell(
               onTap: () {
                 setState(() {
-                  ExploreWebHelperCore.selectedListing = false;
+                  ExploreWebHelperCore.searchExploreMarker = SearchExploreHelperMarker.search;
                   ExploreWebHelperCore.isLoading = true;
 
                         Beamer.of(context).update(
@@ -426,6 +451,7 @@ class _SearchExploreMainContainerWidgetState extends State<SearchExploreMainCont
             ),
           ),
         ),
+
         if (ExploreWebHelperCore.isLoading) Container(
             width: double.infinity,
             height: double.infinity,
@@ -455,7 +481,7 @@ class _SearchExploreMainContainerWidgetState extends State<SearchExploreMainCont
 
                           rebuild: false
                       );
-                      ExploreWebHelperCore.selectedSearch = true;
+                      ExploreWebHelperCore.searchExploreMarker = SearchExploreHelperMarker.search;
                     });
                   },
                   child: Container(

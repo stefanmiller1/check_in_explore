@@ -15,8 +15,8 @@ String? getImageFromSelectedReservationActivity(ActivityManagerForm? activityMan
   }
 
   if (listingForm != null && reservationItem != null) {
-    if (retrieveReservationSpacesFromListing(reservationItem, listingForm).where((element) => element.spacePhoto != null).isNotEmpty) {
-      return retrieveReservationSpacesFromListing(reservationItem, listingForm).firstWhere((element) => element.spacePhoto != null).photoUri;
+    if (retrieveReservationSpacesFromListing(reservationItem, listingForm).where((element) => element.photoUri != null).isNotEmpty) {
+      return retrieveReservationSpacesFromListing(reservationItem, listingForm).firstWhere((element) => element.photoUri != null).photoUri;
     }
   }
 

@@ -34,8 +34,8 @@ class ActivityVendorFormManageMainContainerWidget extends StatelessWidget {
               color: model.accentColor,
               borderRadius: BorderRadius.all(Radius.circular(20))
           ),
-          child: (selectedForm != null) ? retrieveReservationSource(selectedForm!) : defaultPagePreview()
-              ),
+        child: (selectedForm != null) ? retrieveReservationSource(selectedForm!) : defaultPagePreview()
+      ),
     );
   }
 
@@ -91,16 +91,16 @@ class ActivityVendorFormManageMainContainerWidget extends StatelessWidget {
                 child: GetLoginSignUpWidget(showFullScreen: true, model: model, didLoginSuccess: () {  },),
               ),
               loadUserProfileSuccess: (item) => ActivityVendorApplicationsResultMain(
-                model: model,
-                selectedForm: selectedForm,
-                reservationItem: reservation,
-                listingForm: listingForm,
-                activityOwnerProfile: item.profile,
-                activityManagerForm: activityForm,
-              ),
+                  model: model,
+                  selectedForm: selectedForm,
+                  reservationItem: reservation,
+                  listingForm: listingForm,
+                  activityOwnerProfile: item.profile,
+                  activityManagerForm: activityForm,
+                ),
               orElse: () {
-                return JumpingDots(color: model.paletteColor, numberOfDots: 3);
-              }
+              return JumpingDots(color: model.paletteColor, numberOfDots: 3);
+            }
           );
         },
       ),

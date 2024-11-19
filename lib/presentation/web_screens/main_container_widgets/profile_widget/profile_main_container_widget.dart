@@ -17,6 +17,7 @@ class _ProfileMainContainerWidgetState extends State<ProfileMainContainerWidget>
 
   @override
   Widget build(BuildContext context) {
+
     return ProfileMainContainer(
         model: widget.model,
         currentUserId: widget.currentUser.userId.getOrCrash(),

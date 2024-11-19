@@ -677,7 +677,7 @@ class _MainWebScreenState extends State<MainWebScreen> {
 
               switch (marker) {
                 case DashboardMarker.search:
-                  if (ExploreWebHelperCore.selectedListing && ExploreWebHelperCore.currentFacilityItemId != null && ExploreWebHelperCore.currentReservationItemId != null) {
+                  if (ExploreWebHelperCore.searchExploreMarker == SearchExploreHelperMarker.listing && ExploreWebHelperCore.currentFacilityItemId != null && ExploreWebHelperCore.currentReservationItemId != null) {
                     Beamer.of(context).update(
                         configuration: RouteInformation(
                             location: searchedReservationRoute(ExploreWebHelperCore.currentFacilityItemId!.getOrCrash(), ExploreWebHelperCore.currentReservationItemId!.getOrCrash())

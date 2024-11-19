@@ -245,6 +245,9 @@ class _ActivityVendorApplicationsResultMainState extends State<ActivityVendorApp
                                       return JumpingDots(color: widget.model.paletteColor, numberOfDots: 3);
                                     }
                                     // getAllVendorApplicationDetails(allAttendees.item);
+                                    print(allAttendees.item.map((e) => e.eventMerchantVendorProfile));
+
+                                    print(widget.selectedForm.formId);
                                     return getAttendeeUserProfiles(context, allAttendees.item.where((element) => element.vendorForm?.formId == widget.selectedForm.formId).toList());
                                   },
                                   /// no earnings yet.
@@ -346,13 +349,11 @@ class _ActivityVendorApplicationsResultMainState extends State<ActivityVendorApp
         }
       }
     }
-
     return getMainContainer(context, queriedAttendees);
   }
 
 
   Widget getMainContainer(BuildContext context, Map<AttendeeItem, List<VendorContactDetail>> attendees) {
-
           return Stack(
             alignment: Alignment.topCenter,
             children: [
@@ -1026,7 +1027,6 @@ class _ActivityVendorApplicationsResultMainState extends State<ActivityVendorApp
                     selectedVendors.clear();
                   }
               );
-
             },
             child: Padding(
               padding: const EdgeInsets.all(8.0),

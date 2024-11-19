@@ -20,9 +20,7 @@ final simpleLocationBuilder = RoutesLocationBuilder(
       '/:mainId': (context, state, data) {
         final isWebMobile = kIsWeb && (defaultTargetPlatform == TargetPlatform.iOS || defaultTargetPlatform == TargetPlatform.android);
         final initialMarker = state.pathParameters['mainId'];
-        ExploreWebHelperCore.selectedListing = false;
-        ExploreWebHelperCore.selectedSearch = isWebMobile;
-        ExploreWebHelperCore.searchExploreMarker = SearchExploreHelperMarker.map;
+        ExploreWebHelperCore.searchExploreMarker = isWebMobile ? SearchExploreHelperMarker.search : SearchExploreHelperMarker.map;
 
         return BeamPage(
           key: ValueKey(initialMarker),
@@ -36,9 +34,7 @@ final simpleLocationBuilder = RoutesLocationBuilder(
       '/home/mainId:/': (context, state, data) {
         final isWebMobile = kIsWeb && (defaultTargetPlatform == TargetPlatform.iOS || defaultTargetPlatform == TargetPlatform.android);
         final initialMarker = state.pathParameters['mainId'];
-        ExploreWebHelperCore.selectedListing = false;
-        ExploreWebHelperCore.selectedSearch = isWebMobile;
-        ExploreWebHelperCore.searchExploreMarker = SearchExploreHelperMarker.map;
+        ExploreWebHelperCore.searchExploreMarker = isWebMobile ? SearchExploreHelperMarker.search : SearchExploreHelperMarker.map;
 
         return BeamPage(
           key: ValueKey(initialMarker),
@@ -50,8 +46,6 @@ final simpleLocationBuilder = RoutesLocationBuilder(
         );
       },
       '/:mainId/create_my_activity': (context, state, data) {
-        ExploreWebHelperCore.selectedListing = false;
-        ExploreWebHelperCore.selectedSearch = false;
         ExploreWebHelperCore.searchExploreMarker = SearchExploreHelperMarker.map;
 
         return BeamPage(
@@ -82,8 +76,6 @@ final simpleLocationBuilder = RoutesLocationBuilder(
         final mainId = state.pathParameters['mainId'];
         final searchType = state.pathParameters['searchType'];
         ExploreWebHelperCore.searchExploreMarker = getSearchExploreMarker(searchType);
-        ExploreWebHelperCore.selectedListing = false;
-        ExploreWebHelperCore.selectedSearch = false;
 
           return BeamPage(
             key: ValueKey('search-${searchType}'),
@@ -100,8 +92,6 @@ final simpleLocationBuilder = RoutesLocationBuilder(
         final listingId = state.pathParameters['listingId'];
 
         ExploreWebHelperCore.currentFacilityItemId = listingId != null ? UniqueId.fromUniqueString(listingId) : UniqueId();
-        ExploreWebHelperCore.selectedListing = true;
-        ExploreWebHelperCore.selectedSearch = false;
         ExploreWebHelperCore.searchExploreMarker = getSearchExploreMarker(searchType);
         ExploreWebHelperCore.selectedReservationItem = null;
         ExploreWebHelperCore.currentReservationItemId = null;
@@ -125,13 +115,11 @@ final simpleLocationBuilder = RoutesLocationBuilder(
         ExploreWebHelperCore.currentReservationItemId = reservationId != null ? UniqueId.fromUniqueString(reservationId) : UniqueId();
         ExploreWebHelperCore.selectedReservationItem = null;
         ExploreWebHelperCore.selectedFacilityItem = null;
-        ExploreWebHelperCore.selectedListing = true;
-        ExploreWebHelperCore.selectedSearch = false;
-        ExploreWebHelperCore.searchExploreMarker = getSearchExploreMarker(searchType);
+        ExploreWebHelperCore.searchExploreMarker = SearchExploreHelperMarker.activity;
 
         return BeamPage(
           key: ValueKey('reservation_preview'),
-          name: 'reservation_preview',
+          name: 'activity_preview',
           title: 'a circle activity',
           child: MainScreen(
               initialDashboardMarker: getDashboardMarker(mainId)
@@ -142,8 +130,7 @@ final simpleLocationBuilder = RoutesLocationBuilder(
         final mainId = state.pathParameters['mainId'];
         final searchType = state.pathParameters['search`Type'];
 
-        ExploreWebHelperCore.selectedSearch = true;
-        ExploreWebHelperCore.searchExploreMarker = getSearchExploreMarker(searchType);
+        ExploreWebHelperCore.searchExploreMarker = SearchExploreHelperMarker.search;
         return BeamPage(
           key: ValueKey('search_discovery'),
           name: 'search_discovery',

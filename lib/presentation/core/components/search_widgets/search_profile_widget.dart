@@ -258,7 +258,7 @@ class _SearchProfileCommunityState extends State<SearchProfileCommunity> {
                           widget.didSelectUser(user);
                         });
                       },
-                      leading: CircleAvatar(backgroundImage: (users.firstWhere((profileUser) => profileUser.userId == user.contactId).profileImage != null) ? users.firstWhere((profileUser) => profileUser.userId == user.contactId).profileImage!.image : Image.asset('assets/profile-avatar.png').image),
+                      // leading: CircleAvatar(backgroundImage: (users.firstWhere((profileUser) => profileUser.userId == user.contactId).photoUri != null) ? users.firstWhere((profileUser) => profileUser.userId == user.contactId).profileImage!.image : Image.asset('assets/profile-avatar.png').image),
                       title: Text(user.name.getOrCrash(), style: TextStyle(color: widget.model.paletteColor)
                       )
                     );
