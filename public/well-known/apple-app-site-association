@@ -1,0 +1,28 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appIDs": [
+          "R27Y45WKCJ.com.cico.checkInActivities"
+        ],
+        "paths": [
+          "/*"
+        ],
+        "components": [
+            {
+                "/": "/*"
+            }
+        ]
+      }
+    ]
+  },
+  "webcredentials": {
+    "apps": [
+      "R27Y45WKCJ.com.cico.checkInActivities"
+    ]
+  },
+  "appclips": {
+    "apps": ["R27Y45WKCJ.com.cico.checkInActivities.MyApp.Clip"]
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "projects": {
+    "default": "cico-8298b"
+  },
+  "targets": {
+    "cico-8298b": {
+      "hosting": {
+        "dev-v1": [
+          "cico-8298b"
+        ]
+      }
+    }
+  },
+  "etags": {},
+  "dataconnectEmulatorConfig": {}
+}

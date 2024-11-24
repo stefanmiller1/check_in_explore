@@ -1,0 +1,48 @@
+{
+  "hosting": {
+    	  "public": "build/web_release",
+    	  "ignore": [
+      	  "firebase.json",
+      	  "**/.*",
+       	  "**/node_modules/**"
+    	],
+    	"rewrites":[        
+          {
+            "source": "/:id",
+            "function": "getMetadataPage"
+          },
+          {
+            "source": "**",
+            "destination": "/index.html"
+          }
+      ]
+    },
+  "headers": [
+      {
+      "source": "**",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type"
+        }
+      ]
+    },
+    {
+      "source": "/.well-known/apple-app-site-association",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/json"
+        }
+      ]
+    }
+  ]
+}
