@@ -224,7 +224,6 @@ class _ActivityVendorApplicationsResultMainState extends State<ActivityVendorApp
                               content: Text(AppLocalizations.of(context)!.saved, style: TextStyle(color: widget.model.webBackgroundColor))
                           );
                           ScaffoldMessenger.of(context).showSnackBar(snackBar);
-
                         }));
                   },
                   buildWhen: (p,c) => p.isSubmitting != c.isSubmitting || p.attendeeItem != c.attendeeItem,
@@ -244,10 +243,7 @@ class _ActivityVendorApplicationsResultMainState extends State<ActivityVendorApp
                                       selectedVendors.clear();
                                       return JumpingDots(color: widget.model.paletteColor, numberOfDots: 3);
                                     }
-                                    // getAllVendorApplicationDetails(allAttendees.item);
-                                    print(allAttendees.item.map((e) => e.eventMerchantVendorProfile));
 
-                                    print(widget.selectedForm.formId);
                                     return getAttendeeUserProfiles(context, allAttendees.item.where((element) => element.vendorForm?.formId == widget.selectedForm.formId).toList());
                                   },
                                   /// no earnings yet.
