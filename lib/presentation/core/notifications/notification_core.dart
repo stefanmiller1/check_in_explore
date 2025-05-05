@@ -1,6 +1,5 @@
 import 'package:check_in_facade/check_in_facade.dart' as facade;
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
-import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 
 class NotificationCore {
 
@@ -9,7 +8,7 @@ class NotificationCore {
 
     List<types.Message> chatReceivedNotification = [];
 
-    facade.FirebaseChatCore.instance.rooms(isArchived: true).listen((event) {
+    facade.FirebaseChatCore.instance.rooms(isArchived: true, roomType: null).listen((event) {
           for (types.Room room in event) {
               facade.FirebaseChatCore.instance.messages(room, limit: 1).listen((eventMessage) {
 

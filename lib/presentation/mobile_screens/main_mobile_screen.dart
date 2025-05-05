@@ -95,7 +95,6 @@ class _MainMobileScreenState extends State<MainMobileScreen> {
                 },
                 icon: Icon(Icons.favorite_border, color: widget.model.paletteColor)
               ),
-
             ],
           ),
         isSelected: false
@@ -103,32 +102,22 @@ class _MainMobileScreenState extends State<MainMobileScreen> {
       MainMobileScreenModel(
           iconItem: Icons.messenger_outline,
           mainTitle: 'chat',
-          mainWidgetItem: DirectChatRoomsScreen(
+          mainWidgetItem: RoomsScreen(
               model: widget.model,
-              isArchive: false,
-              didSelectChats: () {
-
-              },
-              didSelectArchive: () {
-                Navigator.push(context, MaterialPageRoute(
-                  builder: (_) {
-                    return DirectChatArchiveRoomsScreen(
-                      model: widget.model,
-                    );
-                  }));
-              },
               didSelectRoom: (room, profile) {
-                ChatHelperCore.isLoading = false;
+                RoomsHelperCore.isLoading = false;
+
                 Navigator.push(context, MaterialPageRoute(
                     builder: (_) {
                       return DirectChatScreen(
                         model: widget.model,
-                        room: room,
+                        roomId: room.id,
                         currentUser: profile,
+                        showOptions: null,
                         reservationItem: null,
                         isFromReservation: false,
                   );
-                }));
+              }));
             },
           ),
           appBarWidgetItem: AppBar(
@@ -141,17 +130,17 @@ class _MainMobileScreenState extends State<MainMobileScreen> {
               //       badgeContent: Text(NotificationCore.chatReceivedNotification.length.toString() ?? '', style: TextStyle(color: model.accentColor),),
               //       position: BadgePosition.topEnd(end: 4, top: 2),
               //       showBadge: (NotificationCore.chatReceivedNotification.isNotEmpty) ? true : false,
-                      IconButton(
-                        onPressed: () {
-                          Navigator.push(context, MaterialPageRoute(
-                              builder: (_) {
-                                return DirectChatArchiveRoomsScreen(
-                                  model: widget.model,
-                                );
-                              }));
-                        },
-                  icon: Icon(Icons.archive_outlined, color: widget.model.paletteColor)
-                ),
+                //       IconButton(
+                //         onPressed: () {
+                //           Navigator.push(context, MaterialPageRoute(
+                //               builder: (_) {
+                //                 return DirectChatArchiveRoomsScreen(
+                //                   model: widget.model,
+                //                 );
+                //               }));
+                //         },
+                //   icon: Icon(Icons.archive_outlined, color: widget.model.paletteColor)
+                // ),
               // ),
             ],
           ),

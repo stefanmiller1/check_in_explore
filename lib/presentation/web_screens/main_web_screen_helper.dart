@@ -1,6 +1,5 @@
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
-import 'package:check_in_web_mobile_explore/presentation/core/web_dashboard/dashboard_helper.dart';
 import 'package:flutter/material.dart';
 
 bool showTopNavBar(DashboardMarker marker) => marker == DashboardMarker.resSettings || marker == DashboardMarker.settings || marker == DashboardMarker.reservations || marker == DashboardMarker.profile;

@@ -85,8 +85,14 @@ class _SearchExploreScreenState extends State<SearchExploreScreen> {
               didSelectCreateNewActivity(
                   context,
                   widget.model,
+                  null,
                   listing,
-                  2
+                  didSaveActivity: (res) {
+
+                  },
+                  didPublishActivity: (res) {
+                    
+                  }
               );
             },
           ),

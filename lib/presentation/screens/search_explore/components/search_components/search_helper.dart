@@ -58,7 +58,7 @@ Widget getActivityTabForReservation(BuildContext context, DashboardModel model, 
             padding: const EdgeInsets.all(8.0),
             child: ClipRRect(
                 borderRadius: BorderRadius.circular(65),
-                child: Center(child: SvgPicture.asset(getIconPathForActivity(context, activityOption.activityId), fit: BoxFit.fill, color: model.paletteColor))),
+                child: Center(child: SvgPicture.asset(getIconPathForActivity(activityOption.activity), fit: BoxFit.fill, color: model.paletteColor))),
           )
         ),
         const SizedBox(height: 10),
@@ -69,7 +69,7 @@ Widget getActivityTabForReservation(BuildContext context, DashboardModel model, 
           ),
           child: Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Text(getTitleForActivityOption(context, activityOption.activityId) ?? 'Activity', style: TextStyle(color: model.paletteColor, fontSize: 14, fontWeight: FontWeight.bold, overflow: TextOverflow.ellipsis), maxLines: 1, softWrap: true),
+            child: Text(getTitleForActivityOption(context, activityOption.activity) ?? 'Activity', style: TextStyle(color: model.paletteColor, fontSize: 14, fontWeight: FontWeight.bold, overflow: TextOverflow.ellipsis), maxLines: 1, softWrap: true),
           ),
         ),
       ],
@@ -96,8 +96,8 @@ Widget getActivityOptionForSearch(BuildContext context, DashboardModel model, do
                 padding: const EdgeInsets.only(top: 8.0),
                 child: Row(
                   children: [
-                    Expanded(child: SvgPicture.asset(getIconPathForActivity(context, activityOption.activityId), fit: BoxFit.cover, color: (isSelected) ? model.accentColor : model.paletteColor, height: height)),
-                    if (isSelected || kIsWeb) Expanded(child: Text(getTitleForActivityOption(context, activityOption.activityId) ?? 'Activity', style: TextStyle(color: (isSelected) ? model.accentColor : model.paletteColor), overflow: TextOverflow.ellipsis, maxLines: 1, softWrap: true,)),
+                    Expanded(child: SvgPicture.asset(getIconPathForActivity(activityOption.activity), fit: BoxFit.cover, color: (isSelected) ? model.accentColor : model.paletteColor, height: height)),
+                    if (isSelected || kIsWeb) Expanded(child: Text(getTitleForActivityOption(context, activityOption.activity) ?? 'Activity', style: TextStyle(color: (isSelected) ? model.accentColor : model.paletteColor), overflow: TextOverflow.ellipsis, maxLines: 1, softWrap: true,)),
                 ],
               ),
             ),

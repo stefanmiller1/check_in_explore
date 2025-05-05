@@ -1,9 +1,10 @@
 import 'package:beamer/beamer.dart';
 import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_domain/check_in_domain.dart';
+import 'package:check_in_domain/domain/misc/explore_services/filter/explore_filter_item.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
 import 'package:check_in_credentials/check_in_credentials.dart';
-import 'package:check_in_presentation/core/router_helper.dart';
+import 'package:check_in_presentation/explore_core_widgets/components/template_components/explore_search_shell.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/web_dashboard/dashboard_helper.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/web_dashboard/dashboard_main.dart';
 import 'package:check_in_web_mobile_explore/presentation/web_screens/focused_main_container_widgets/activity_attendee_widget/activity_attendee_container_widget.dart';
@@ -19,10 +20,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter/services.dart';
 import 'package:jumping_dot/jumping_dot.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../screens/activity_settings/pop_over_screen/activity_onboarding_widget.dart';
 import 'focused_main_container_widgets/activity_vendor_form_manage_widget/activity_vendor_form_manage_container_widget.dart';
 import 'focused_main_container_widgets/activity_vendor_form_manage_widget/actvity_vendor_form_manager_helper.dart';
 import 'main_container_widgets/settings_widget/settings_main_container_widget.dart';
@@ -41,8 +40,9 @@ class MainWebScreen extends StatefulWidget {
   final bool? isCreatingNewActivity;
   final DashboardMarker initialDashboardMarker;
   final UniqueId? initialReservationId;
+  final ExploreFilterObject? initialExploreFilterObject;
 
-  const MainWebScreen({super.key, required this.model, required this.initialDashboardMarker, this.initialReservationId, this.isCreatingNewActivity});
+  const MainWebScreen({super.key, required this.model, required this.initialDashboardMarker, this.initialReservationId, this.isCreatingNewActivity, this.initialExploreFilterObject});
 
   @override
   State<MainWebScreen> createState() => _MainWebScreenState();
@@ -81,7 +81,7 @@ class _MainWebScreenState extends State<MainWebScreen> {
 
 
   Widget retrieveCurrentReservations(UserProfileModel currentUser) {
-    return BlocProvider(create: (_) => getIt<ReservationManagerWatcherBloc>()..add(ReservationManagerWatcherEvent.watchCurrentUsersReservations([ReservationSlotState.current], currentUser, false, 2, null)),
+    return BlocProvider(create: (_) => getIt<ReservationManagerWatcherBloc>()..add(ReservationManagerWatcherEvent.watchCurrentUsersReservations([ReservationSlotState.current], currentUser, false, 2, null, null, null, null, null, null)),
       child: BlocBuilder<ReservationManagerWatcherBloc, ReservationManagerWatcherState>(
         builder: (context, state) {
           return state.maybeMap(
@@ -228,10 +228,11 @@ class _MainWebScreenState extends State<MainWebScreen> {
 
   Widget retrieveAuthenticationState(UserProfileModel? currentUser, List<ReservationItem> reservations, List<ActivityManagerForm> activities, List<AccountNotificationItem> notifications, ReservationItem? selectedReservation, ListingManagerForm? selectedListingForm, ActivityManagerForm? selectedActivityForm, AttendeeItem? selectedReservationAttendance, List<TicketItem> selectedReservationAllAttendees) {
     final searchExploreContainer = SearchExploreMainContainerWidget(
-        model: widget.model,
+        model: widget.model, 
         didUpdate: () {setState(() {
         });},
-        currentUser: ChatHelperCore.currentUserProfile,
+        initialFilterObject: widget.initialExploreFilterObject,
+        currentUser: currentUser,
     );
     final reservationContainer = ReservationMainContainerWidget(
         initialReservationId: widget.initialReservationId,
@@ -249,11 +250,12 @@ class _MainWebScreenState extends State<MainWebScreen> {
     );
     final chatContainer = ChatMainContainerWidget(
       model: widget.model,
-      room: ChatHelperCore.selectedRoom,
-      currentUser: ChatHelperCore.currentUserProfile,
+      roomId: RoomsHelperCore.selectedRoomId,
+      currentUser: currentUser,
     );
     final chatSubContainer = ChatSubContainerWidget(
       model: widget.model,
+      initialRoomId: RoomsHelperCore.selectedRoomId,
       didSelectRoom: () {
         setState(() {});
       },
@@ -262,40 +264,40 @@ class _MainWebScreenState extends State<MainWebScreen> {
       model: widget.model,
       currentUser: currentUserProfile,
     );
-    final activityAttendeeMainContainer = ActivityAttendeeMainContainerWidget(
-      model: widget.model,
-        attendee: ActivityAttendeeHelperCore.selectedAttendeeItem,
-        selectedProfile: ActivityAttendeeHelperCore.selectedUserProfileItem,
-        rebuild: () {
-          setState(() {});
-      },
-    );
-    final activityAttendeesSubContainer = ActivityAttendeesListScreen(
-      model: widget.model,
-      // initialReservationId: widget.initialReservationId,
-      reservationItem: ReservationHelperCore.selectedReservationItem,
-      activityManagerForm: ReservationHelperCore.currentActivityForm,
-      selectedAttendee: ReservationHelperCore.selectedReservationAttendeeItem,
-      currentUser: currentUser?.userId.value.fold((l) => null, (r) => r),
-      selectedUserProfile: currentUser,
-      didSelectAttendee: (attendee, user) {
-        setState(() {
-          ActivityAttendeeHelperCore.isLoading = true;
-          if (ActivityAttendeeHelperCore.selectedAttendeeItem?.attendeeOwnerId == attendee.attendeeOwnerId) {
-            ActivityAttendeeHelperCore.selectedAttendeeItem = null;
-            ActivityAttendeeHelperCore.selectedUserProfileItem = null;
-          } else {
-            ActivityAttendeeHelperCore.selectedAttendeeItem = attendee;
-            ActivityAttendeeHelperCore.selectedUserProfileItem = user;
-          }
-        });
-        Future.delayed(Duration(seconds: 1), () {
-          setState(() {
-            ActivityAttendeeHelperCore.isLoading = false;
-          });
-        });
-      }
-    );
+    // final activityAttendeeMainContainer = ActivityAttendeeMainContainerWidget(
+    //   model: widget.model,
+    //     attendee: ActivityAttendeeHelperCore.selectedAttendeeItem,
+    //     selectedProfile: ActivityAttendeeHelperCore.selectedUserProfileItem,
+    //     rebuild: () {
+    //       setState(() {});
+    //   },
+    // );
+    // final activityAttendeesSubContainer = ActivityAttendeesListScreen(
+    //   model: widget.model,
+    //   // initialReservationId: widget.initialReservationId,
+    //   reservationItem: ReservationHelperCore.selectedReservationItem,
+    //   activityManagerForm: ReservationHelperCore.currentActivityForm,
+    //   selectedAttendee: ReservationHelperCore.selectedReservationAttendeeItem,
+    //   currentUser: currentUser?.userId.value.fold((l) => null, (r) => r),
+    //   selectedUserProfile: currentUser,
+    //   didSelectAttendee: (attendee, user) {
+    //     setState(() {
+    //       ActivityAttendeeHelperCore.isLoading = true;
+    //       if (ActivityAttendeeHelperCore.selectedAttendeeItem?.attendeeOwnerId == attendee.attendeeOwnerId) {
+    //         ActivityAttendeeHelperCore.selectedAttendeeItem = null;
+    //         ActivityAttendeeHelperCore.selectedUserProfileItem = null;
+    //       } else {
+    //         ActivityAttendeeHelperCore.selectedAttendeeItem = attendee;
+    //         ActivityAttendeeHelperCore.selectedUserProfileItem = user;
+    //       }
+    //     });
+    //     Future.delayed(Duration(seconds: 1), () {
+    //       setState(() {
+    //         ActivityAttendeeHelperCore.isLoading = false;
+    //       });
+    //     });
+    //   }
+    // );
 
     final activitySettingsContainer = ActivitySettingsMainContainerWidget(
       model: widget.model,
@@ -343,7 +345,7 @@ class _MainWebScreenState extends State<MainWebScreen> {
       initialReservation: selectedReservation,
       // activityManagerForm: ReservationHelperCore.currentActivityForm,
       // initialReservationId: widget.initialReservationId,
-      selectedForm: ActivityVendorHelperCore.selectedForm,
+      selectedFormId: ActivityVendorHelperCore.selectedFormId,
       rebuild: () {
         setState(() {
         });
@@ -354,13 +356,19 @@ class _MainWebScreenState extends State<MainWebScreen> {
         model: widget.model,
         initialReservation: selectedReservation,
         // currentReservationItem: ReservationHelperCore.selectedReservationItem,
-        currentVendorManagerForm: ActivityVendorHelperCore.selectedForm,
+        currentVendorManagerFormId: ActivityVendorHelperCore.selectedFormId,
         currentUser: currentUser,
         // listing: ReservationHelperCore.currentListingManagerForm,
         didSelectFormItem: (form) {
           setState(() {
             ActivityVendorHelperCore.isLoading = true;
-            ActivityVendorHelperCore.selectedForm = form;
+            ActivityVendorHelperCore.selectedFormId = form.formId.getOrCrash();
+            Beamer.of(context).update(
+              configuration: RouteInformation(
+                uri: Uri.parse(reservationVendorFormWithIdRoute(selectedReservation!.reservationId.getOrCrash(), form.formId.getOrCrash())),
+              ),
+              rebuild: false
+            );
           });
           Future.delayed(const Duration(seconds: 3, milliseconds: 250), () {
             setState(() {
@@ -475,7 +483,9 @@ class _MainWebScreenState extends State<MainWebScreen> {
               mainContainer: searchExploreContainer,
               sidePanelMainContainer: Container(),
               isSubContainerAllowed: false,
-              presentSidePanel: false),
+              presentSidePanel: false,
+              isFullBleed: true,
+          ),
           subContainer: Container(
             color: Colors.blue,
           ),
@@ -558,23 +568,23 @@ class _MainWebScreenState extends State<MainWebScreen> {
           imageUrl: [getImageFromSelectedReservationActivity(ReservationHelperCore.currentActivityForm, ReservationHelperCore.selectedReservationItem, ReservationHelperCore.currentListingManagerForm) ?? ''],
           isVisible: (selectedReservation != null && !Responsive.isMobile(context))
       ),
-      DashboardContainerModel(
-          mainContainer: DashboardMainContainerModel(
-              mainContainer: activityAttendeeMainContainer,
-              sidePanelMainContainer: Container(),
-              isSubContainerAllowed: true,
-              presentSidePanel: false
-          ),
-          subContainer: activityAttendeesSubContainer,
-          dashboardMarker: DashboardMarker.resAttendees,
-          iconTab: Icons.people_outline_rounded,
-          tabTitle: 'Attendees',
-          notificationCount: notifications.where((e) =>
-            e.notificationType == AccountNotificationType.request && ReservationHelperCore.selectedReservationItem?.reservationId == e.reservationId ||
-            e.notificationType == AccountNotificationType.joined && ReservationHelperCore.selectedReservationItem?.reservationId == e.reservationId
-          ).length,
-          isVisible: (selectedReservation != null && !Responsive.isMobile(context))
-      ),
+      // DashboardContainerModel(
+      //     mainContainer: DashboardMainContainerModel(
+      //         mainContainer: activityAttendeeMainContainer,
+      //         sidePanelMainContainer: Container(),
+      //         isSubContainerAllowed: true,
+      //         presentSidePanel: false
+      //     ),
+      //     subContainer: activityAttendeesSubContainer,
+      //     dashboardMarker: DashboardMarker.resAttendees,
+      //     iconTab: Icons.people_outline_rounded,
+      //     tabTitle: 'Attendees',
+      //     notificationCount: notifications.where((e) =>
+      //       e.notificationType == AccountNotificationType.request && ReservationHelperCore.selectedReservationItem?.reservationId.getOrCrash() == e.reservationId ||
+      //       e.notificationType == AccountNotificationType.joined && ReservationHelperCore.selectedReservationItem?.reservationId.getOrCrash() == e.reservationId
+      //     ).length,
+      //     isVisible: (selectedReservation != null && !Responsive.isMobile(context))
+      // ),
       if (currentUser != null && currentUser.userId == selectedReservation?.reservationOwnerId) DashboardContainerModel(
           mainContainer: DashboardMainContainerModel(
               mainContainer: activityTicketMainContainer,
@@ -699,8 +709,8 @@ class _MainWebScreenState extends State<MainWebScreen> {
                 case DashboardMarker.resAttendees:
                   // update notification count for attendees joined or requests
                   LocalNotificationCore.updateNotificationToRead(context, notifications.where((e) =>
-                    e.notificationType == AccountNotificationType.request && ReservationHelperCore.selectedReservationItem?.reservationId == e.reservationId ||
-                    e.notificationType == AccountNotificationType.joined && ReservationHelperCore.selectedReservationItem?.reservationId == e.reservationId).map((e) => e.notificationId).toList(),
+                    e.notificationType == AccountNotificationType.request && ReservationHelperCore.selectedReservationItem?.reservationId.getOrCrash() == e.reservationId ||
+                    e.notificationType == AccountNotificationType.joined && ReservationHelperCore.selectedReservationItem?.reservationId.getOrCrash() == e.reservationId).map((e) => e.notificationId).toList(),
                     widget.model.paletteColor,
                     widget.model.accentColor
                   );
@@ -803,6 +813,60 @@ class _MainWebScreenState extends State<MainWebScreen> {
             ),
           ),
         ),
+
+        // if (currentUser != null && !(currentUser.legalName.isValid()) || currentUser != null && !(currentUser.legalSurname.isValid())) OnBoardingPopOverWidget(
+        //     height: 600,
+        //     width: 500,
+        //     model: widget.model,
+        //     popOverWidget: Container(
+        //         height: 600,
+        //         width: 500,
+        //         decoration: BoxDecoration(
+        //             color: widget.model.webBackgroundColor,
+        //             borderRadius: BorderRadius.all(Radius.circular(25))
+        //         ),
+        //       child: Padding(
+        //         padding: const EdgeInsets.all(8.0),
+        //         child: GeneralProfileCreatorEditor(
+        //           model: widget.model,
+        //           currentUser: currentUser,
+        //           headerWidget: Column(
+        //             children: [
+        //               Text('Update Your Profile', style: TextStyle(color: widget.model.paletteColor, fontSize: widget.model.secondaryQuestionTitleFontSize),),
+        //               const SizedBox(height: 8),
+        //               Container(
+        //                 decoration: BoxDecoration(
+        //                   color: widget.model.paletteColor.withOpacity(0.1),
+        //                   borderRadius: BorderRadius.circular(15),
+        //                 ),
+        //                 padding: const EdgeInsets.all(16),
+        //                 child: Row(
+        //                   children: [
+        //                     Icon(Icons.info_outline, color: widget.model.paletteColor),
+        //                     const SizedBox(width: 10),
+        //                     Expanded(
+        //                       child: Text(
+        //                         'Tiny changes - please update your first and last name below, please try not to use any special characters.',
+        //                         style: TextStyle(color: widget.model.paletteColor),
+        //                       ),
+        //                     ),
+        //                   ],
+        //                 ),
+        //               ),
+        //             ]
+        //           ),
+        //           hideCancel: true,
+        //           didSaveSuccessfully: () {
+        //               // Navigator.of(context).pop();
+        //           },
+        //             didCancel: () {
+        //               // Navigator.of(context).pop();
+        //           }
+        
+        //         ),
+        //       ),
+        //     ),
+        //   ),
 
         if (isCreatingNewActivity == true) OnBoardingPopOverWidget(
             height: 1050,

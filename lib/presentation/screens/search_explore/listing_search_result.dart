@@ -149,9 +149,16 @@ class _ListingSearchResultState extends State<ListingSearchResult> {
                 didSelectCreateNewActivity(
                     context,
                     widget.model,
+                    null,
                     listing,
-                    2
+                    didSaveActivity: (res) {
+
+                    },
+                    didPublishActivity: (res) {
+                      
+                    }
                 );
+
               },
               didSelectFooter: (ListingManagerForm listing) {
 

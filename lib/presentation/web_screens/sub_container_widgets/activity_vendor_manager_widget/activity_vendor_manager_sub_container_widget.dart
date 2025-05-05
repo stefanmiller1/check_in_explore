@@ -1,3 +1,4 @@
+import 'dart:js_interop';
 import 'dart:ui';
 
 import 'package:check_in_domain/check_in_domain.dart';
@@ -21,14 +22,14 @@ class ActivityVendorManagerSubContainer extends StatefulWidget {
 
   final DashboardModel model;
   final ReservationItem? initialReservation;
-  final VendorMerchantForm? currentVendorManagerForm;
+  final String? currentVendorManagerFormId;
   // final ActivityManagerForm? currentActivityManagerForm;
   // final ListingManagerForm? listing;
   final UserProfileModel? currentUser;
   final Function(VendorMerchantForm form) didSelectFormItem;
   final Function() didSelectManageVendorForm;
 
-  const ActivityVendorManagerSubContainer({super.key, required this.model, required this.didSelectFormItem, required this.didSelectManageVendorForm, required this.currentUser, required this.initialReservation, this.currentVendorManagerForm});
+  const ActivityVendorManagerSubContainer({super.key, required this.model, required this.didSelectFormItem, required this.didSelectManageVendorForm, required this.currentUser, required this.initialReservation, this.currentVendorManagerFormId});
 
   @override
   State<ActivityVendorManagerSubContainer> createState() => _ActivityVendorManagerSubContainerState();
@@ -115,6 +116,7 @@ class _ActivityVendorManagerSubContainerState extends State<ActivityVendorManage
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: activityManagerForm.rulesService.vendorMerchantForms?.toList().asMap().map((i, form) {
+
                       return MapEntry(i, SlideInTransitionWidget(
                         durationTime: 300 * i,
                         offset: Offset(0, 0.25),
@@ -124,7 +126,7 @@ class _ActivityVendorManagerSubContainerState extends State<ActivityVendorManage
                             width: MediaQuery.of(context).size.width,
                             decoration: BoxDecoration(
                                 borderRadius: BorderRadius.all(Radius.circular(17.5)),
-                                border: widget.currentVendorManagerForm == form ? Border.all(color: widget.model.paletteColor, width: 1.5) : null
+                                border: widget.currentVendorManagerFormId == form.formId.getOrCrash() ? Border.all(color: widget.model.paletteColor, width: 1.5) : null
                             ),
                             child: Padding(
                               padding: const EdgeInsets.all(9.0),
@@ -144,7 +146,7 @@ class _ActivityVendorManagerSubContainerState extends State<ActivityVendorManage
                                           const SizedBox(height: 15),
                                           Container(
                                               decoration: BoxDecoration(
-                                                  color: (widget.currentVendorManagerForm == form) ? widget.model.paletteColor : widget.model.disabledTextColor.withOpacity(0.2),
+                                                  color: (widget.currentVendorManagerFormId == form.formId.getOrCrash()) ? widget.model.paletteColor : widget.model.disabledTextColor.withOpacity(0.2),
                                                   borderRadius: BorderRadius.all(Radius.circular(30))
                                               ),
                                               child: Padding(

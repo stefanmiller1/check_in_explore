@@ -20,20 +20,20 @@ importScripts('https://www.gstatic.com/firebasejs/8.4.1/firebase-messaging.js');
   messaging.onBackgroundMessage(function(payload) {
     console.log('Received background message', payload);
 
-    const notificationTitle = payload.notification.title;
-    const notificationOptions = {
-      body: payload.notification.body,
-      data: payload.notification.data
-    };
+    // Ensure only background messages are handled here
+  if (!payload.notification) return;
 
-    self.registration.showNotification(notificationTitle,
-      notificationOptions);
+    // const notificationTitle = payload.notification.title;
+    // const notificationOptions = {
+    //   body: payload.notification.body,
+    //   icon: "favicon.png",
+    //   data: payload.notification.data
+    // };
+
+    // self.registration.showNotification(notificationTitle,
+    //   notificationOptions);
 
   });
-
-self.addEventListener('activate', function(event) {
-    console.log('Service worker activated.');
-});
 
   // Handling push notification subscription inside the 'activate' event listener
   self.addEventListener('activate', function(event) {

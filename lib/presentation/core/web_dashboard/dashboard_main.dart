@@ -4,7 +4,6 @@ import 'package:check_in_web_mobile_explore/presentation/core/web_dashboard/dash
 import 'package:check_in_web_mobile_explore/presentation/core/web_dashboard/dashboard_components/side_panel_container.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/web_dashboard/dashboard_components/sub_container.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/web_dashboard/dashboard_helper.dart';
-import 'package:check_in_web_mobile_explore/presentation/core/web_dashboard/widgets/menu_marker_item.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -95,6 +94,13 @@ class _WebDashboardMainState extends State<WebDashboardMain> {
     }
   }
 
+  bool isMainContainerFullBleeed(DashboardMarker dashboardMarker) {
+    if (widget.dashboardContainerItems.where((element) => element.dashboardMarker == dashboardMarker).isNotEmpty) {
+      return widget.dashboardContainerItems.firstWhere((element) => element.dashboardMarker == dashboardMarker).mainContainer.isFullBleed ?? false;
+    } else {
+      return false;
+    }
+  }
 
   int retrieveSelectedIndex(DashboardMarker currentMarker) {
     late int index = 0;
@@ -136,7 +142,7 @@ class _WebDashboardMainState extends State<WebDashboardMain> {
       appBar: (Responsive.isMobile(context) && showTopNavBar(currentMarker ?? widget.dashboardMarker) && widget.isLoggedIn) ? AppBar(
         backgroundColor: widget.model.paletteColor,
         elevation: 0,
-        title: Text(widget.dashboardContainerItems[retrieveSelectedIndex(currentMarker ?? DashboardMarker.search)].tabTitle ?? '',),
+        title: Text(widget.dashboardContainerItems[retrieveSelectedIndex(currentMarker ?? DashboardMarker.search)].tabTitle,),
         titleTextStyle: TextStyle(color: widget.model.accentColor, fontSize: widget.model.secondaryQuestionTitleFontSize),
         automaticallyImplyLeading: false,
         leading: (subContainerIsHidden(currentMarker!)) ? IconButton(
@@ -187,65 +193,55 @@ class _WebDashboardMainState extends State<WebDashboardMain> {
         mobile: Column(
           children: [
             Expanded(
-              child: AnimatedContainer(
-                duration: Duration(milliseconds: 750),
-                child: MainMenuContainer(
-                  model: widget.model,
-                  mainContainer: updateMainContainer(currentMarker!) ?? Container(),
-                  subContainer: updateSubContainer(currentMarker!) ?? Container(),
-                  sidePanelMainContainer: mainContainerSidePanel(currentMarker!) ?? Container(),
-                  presentSideContainer: presentSidePanelContainer(currentMarker!),
-                  showDrawer: (subContainerIsHidden(currentMarker!)) && MediaQuery.of(context).size.width <= 900,
-                ),
+              child: MainMenuContainer(
+                model: widget.model,
+                mainContainer: updateMainContainer(currentMarker!) ?? Container(),
+                subContainer: updateSubContainer(currentMarker!) ?? Container(),
+                sidePanelMainContainer: mainContainerSidePanel(currentMarker!) ?? Container(),
+                presentSideContainer: presentSidePanelContainer(currentMarker!),
+                showDrawer: (subContainerIsHidden(currentMarker!)) && MediaQuery.of(context).size.width <= 900,
+                isFullBleed: isMainContainerFullBleeed(currentMarker!),
               ),
             ),
           ],
         ),
         tablet: Row(
           children: [
-            AnimatedContainer(
-                duration: Duration(milliseconds: 750),
-              child: SidePanelContainer(
+            SidePanelContainer(
+              model: widget.model,
+              currentMarker: currentMarker!,
+              sideMarkerItems: widget.dashboardContainerItems,
+              didSelectMarker: (marker) {
+                setState(() {
+                  currentMarker = marker;
+                });
+                widget.didSelectDashboardMarkerItem(marker);
+              },
+              optionsMarkerItem: widget.optionsMarkerItem
+            ),
+            if (subContainerIsHidden(currentMarker!)) Expanded(
+              flex: 5,
+              child: SubContainer(
                 model: widget.model,
                 currentMarker: currentMarker!,
-                sideMarkerItems: widget.dashboardContainerItems,
+                menuMarkerItems: widget.dashboardContainerItems,
+                subWidget: updateSubContainer(currentMarker!) ?? Container(),
                 didSelectMarker: (marker) {
-                  setState(() {
-                    currentMarker = marker;
-                  });
                   widget.didSelectDashboardMarkerItem(marker);
                 },
                 optionsMarkerItem: widget.optionsMarkerItem
               ),
             ),
-            if (subContainerIsHidden(currentMarker!)) Expanded(
-              flex: 5,
-              child: AnimatedContainer(
-                duration: Duration(milliseconds: 750),
-                child: SubContainer(
-                  model: widget.model,
-                  currentMarker: currentMarker!,
-                  menuMarkerItems: widget.dashboardContainerItems,
-                  subWidget: updateSubContainer(currentMarker!) ?? Container(),
-                  didSelectMarker: (marker) {
-                    widget.didSelectDashboardMarkerItem(marker);
-                  },
-                  optionsMarkerItem: widget.optionsMarkerItem
-                ),
-              ),
-            ),
             Expanded(
               flex: 10,
-              child: AnimatedContainer(
-                duration: Duration(milliseconds: 750),
-                child: MainMenuContainer(
-                  model: widget.model,
-                  mainContainer: updateMainContainer(currentMarker!) ?? Container(),
-                  subContainer: updateSubContainer(currentMarker!) ?? Container(),
-                  sidePanelMainContainer: mainContainerSidePanel(currentMarker!) ?? Container(),
-                  presentSideContainer: presentSidePanelContainer(currentMarker!),
-                  showDrawer: (subContainerIsHidden(currentMarker!)) && MediaQuery.of(context).size.width <= 900,
-                ),
+              child: MainMenuContainer(
+                model: widget.model,
+                mainContainer: updateMainContainer(currentMarker!) ?? Container(),
+                subContainer: updateSubContainer(currentMarker!) ?? Container(),
+                sidePanelMainContainer: mainContainerSidePanel(currentMarker!) ?? Container(),
+                presentSideContainer: presentSidePanelContainer(currentMarker!),
+                showDrawer: (subContainerIsHidden(currentMarker!)) && MediaQuery.of(context).size.width <= 900,
+                isFullBleed: isMainContainerFullBleeed(currentMarker!),
               ),
             )
 
@@ -295,6 +291,7 @@ class _WebDashboardMainState extends State<WebDashboardMain> {
                   sidePanelMainContainer: mainContainerSidePanel(currentMarker!) ?? Container(),
                   presentSideContainer: presentSidePanelContainer(currentMarker!),
                   showDrawer: (subContainerIsHidden(currentMarker!)) && MediaQuery.of(context).size.width <= 900,
+                  isFullBleed: isMainContainerFullBleeed(currentMarker!),
                 ),
               ),
             )

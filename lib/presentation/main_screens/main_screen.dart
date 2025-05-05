@@ -1,7 +1,9 @@
 import 'package:beamer/beamer.dart';
 import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_domain/check_in_domain.dart';
+import 'package:check_in_domain/domain/misc/explore_services/filter/explore_filter_item.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
+import 'package:check_in_presentation/explore_core_widgets/components/template_components/explore_search_shell.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -18,8 +20,9 @@ class MainScreen extends StatefulWidget {
   final DashboardMarker initialDashboardMarker;
   final bool? isCreatingNewActivity;
   final UniqueId? initialReservationId;
+  final ExploreFilterObject? initialExploreFilterObject;
 
-  const MainScreen({super.key, required this.initialDashboardMarker, this.initialReservationId, this.isCreatingNewActivity});
+  const MainScreen({super.key, required this.initialDashboardMarker, this.initialReservationId, this.isCreatingNewActivity, this.initialExploreFilterObject});
 
   @override
   State<MainScreen> createState() => _MainScreenState();
@@ -36,6 +39,7 @@ class _MainScreenState extends State<MainScreen> {
 
     /// foreground work to call local notification
     FirebaseMessaging.onMessage.listen((event) {
+      print('new notification - ${event}');
       /// TODO: update current user with new notification
       /// TODO: on selecting notification - update notification status to isRead = true
       if (kIsWeb) {
@@ -50,7 +54,7 @@ class _MainScreenState extends State<MainScreen> {
                     location: link,
                     // '/${DashboardMarker.reservations.toString()}/reservation/${ReservationHelperCore.selectedReservationItem?.reservationId.getOrCrash().toString()}'
                 ),
-                rebuild: true
+              rebuild: true
             );
           }
         );
@@ -124,6 +128,7 @@ class _MainScreenState extends State<MainScreen> {
         initialDashboardMarker: widget.initialDashboardMarker,
         initialReservationId: widget.initialReservationId,
         isCreatingNewActivity: widget.isCreatingNewActivity,
+        initialExploreFilterObject: widget.initialExploreFilterObject,
       );
     } else if (defaultTargetPlatform == TargetPlatform.iOS) {
       return MainMobileScreen(model: model);

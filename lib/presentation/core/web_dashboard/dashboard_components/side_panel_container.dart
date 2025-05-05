@@ -3,7 +3,6 @@ import 'package:check_in_presentation/check_in_presentation.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/web_dashboard/dashboard_helper.dart';
 import 'package:check_in_web_mobile_explore/presentation/core/web_dashboard/widgets/menu_marker_item.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 
@@ -47,15 +46,14 @@ class _SidePanelContainerState extends State<SidePanelContainer> {
     return Container(
       height: MediaQuery.of(context).size.height,
       width: 80,
-      padding: EdgeInsets.only(),
       color: widget.model.accentColor,
       child: Stack(
-        alignment: Alignment.topCenter,
+        alignment: Alignment.center,
         children: [
 
           Container(
             width: 80,
-            height: MediaQuery.of(context).size.height,
+            // height: MediaQuery.of(context).size.height,
           ),
 
           Positioned(
@@ -71,12 +69,18 @@ class _SidePanelContainerState extends State<SidePanelContainer> {
           Padding(
             padding: const EdgeInsets.only(top: 100.0, bottom: 180),
             child: Container(
-              height: MediaQuery.of(context).size.height,
+              decoration: BoxDecoration(
+                color: widget.model.accentColor,
+                borderRadius: BorderRadius.circular(40),
+                
+              ),
+              // height: MediaQuery.of(context).size.height,
               width: 80,
               child: ListView(
+                shrinkWrap: true,
                 children: widget.sideMarkerItems.where((element) => element.isVisible == true).toList().asMap().map(
                   (i, e) {
-
+              
                     return MapEntry(i, MouseRegion(
                       onEnter: (g) {
                           setState(() {
@@ -128,7 +132,13 @@ class _SidePanelContainerState extends State<SidePanelContainer> {
                           context,
                           widget.model,
                           null,
-                          null
+                          null,
+                          didSaveActivity: (res) {
+
+                          },
+                          didPublishActivity: (res) {
+                            
+                          }
                         );
                       },
                       icon: Icon(Icons.add_box_outlined, color: widget.model.disabledTextColor, size: 30),

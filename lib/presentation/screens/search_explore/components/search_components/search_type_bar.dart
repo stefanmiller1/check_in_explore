@@ -91,10 +91,10 @@ class _SearchTypeBarState extends State<SearchTypeBar> with TickerProviderStateM
                               children: [
                                 Padding(
                                   padding: const EdgeInsets.symmetric(vertical: 6.0),
-                                  child: SvgPicture.asset(getIconPathForActivity(context, e.activityId), fit: BoxFit.fitHeight, color: (isSelected) ? widget.model.accentColor : widget.model.paletteColor, height: 43.5),
+                                  child: SvgPicture.asset(getIconPathForActivity(e.activity), fit: BoxFit.fitHeight, color: (isSelected) ? widget.model.accentColor : widget.model.paletteColor, height: 43.5),
                                 ),
                                 const SizedBox(width: 5),
-                                Text(getTitleForActivityOption(context, e.activityId) ?? 'Activity', style: TextStyle(color: (isSelected) ? widget.model.accentColor : widget.model.paletteColor)),
+                                Text(getTitleForActivityOption(context, e.activity) ?? 'Activity', style: TextStyle(color: (isSelected) ? widget.model.accentColor : widget.model.paletteColor)),
                                 const SizedBox(width: 5),
                               ],
                             ),
@@ -162,7 +162,7 @@ class _SearchTypeBarState extends State<SearchTypeBar> with TickerProviderStateM
         itemBuilder: (context, index) {
           final activityItem = getActivityOptions()[index];
 
-          double selectedWidth = 50 + 6 + ((getTitleForActivityOption(context, activityItem.activityId)?.length ?? 1) * 13);
+          double selectedWidth = 50 + 6 + ((getTitleForActivityOption(context, activityItem.activity)?.length ?? 1) * 13);
           _aboveItems = (scrollController.offset)~/((MediaQuery.of(context).size.width + 35)/getActivityOptions().length);
 
           _belowItems = _aboveItems;

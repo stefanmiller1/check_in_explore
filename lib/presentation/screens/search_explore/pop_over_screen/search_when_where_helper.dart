@@ -180,9 +180,9 @@ Widget listOfDefaultLocations(DashboardModel model, UniqueId? selectedItem, {req
                                     borderRadius: const BorderRadius.all(
                                         Radius.circular(25)),
                                     child: SvgPicture.asset(e.locationIconOverlay ?? '', fit: BoxFit.fitWidth, color: isSelected ? model.accentColor : model.paletteColor, width: 130))
-                              ],
-                            ),
-                          )
+                            ],
+                          ),
+                        )
                       ),
                       const SizedBox(height: 5),
                       Center(

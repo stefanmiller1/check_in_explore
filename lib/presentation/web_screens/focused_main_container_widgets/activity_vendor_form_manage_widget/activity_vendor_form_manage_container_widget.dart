@@ -14,10 +14,10 @@ class ActivityVendorFormManageMainContainerWidget extends StatelessWidget {
   final DashboardModel model;
   final ReservationItem? initialReservation;
   // final ActivityManagerForm? activityManagerForm;
-  final VendorMerchantForm? selectedForm;
+  final String? selectedFormId;
   final Function() rebuild;
 
-  const ActivityVendorFormManageMainContainerWidget({super.key, required this.model, required this.initialReservation, required this.rebuild, this.selectedForm});
+  const ActivityVendorFormManageMainContainerWidget({super.key, required this.model, required this.initialReservation, required this.rebuild, this.selectedFormId});
 
   @override
   Widget build(BuildContext context) {
@@ -34,20 +34,20 @@ class ActivityVendorFormManageMainContainerWidget extends StatelessWidget {
               color: model.accentColor,
               borderRadius: BorderRadius.all(Radius.circular(20))
           ),
-        child: (selectedForm != null) ? retrieveReservationSource(selectedForm!) : defaultPagePreview()
+        child: (selectedFormId != null) ? retrieveReservationSource(selectedFormId!) : defaultPagePreview()
       ),
     );
   }
 
-  Widget retrieveReservationSource(VendorMerchantForm selectedForm) {
+  Widget retrieveReservationSource(String selectedFormId) {
     if (initialReservation != null) {
-      return getReservationListing(selectedForm, initialReservation!);
+      return getReservationListing(selectedFormId, initialReservation!);
     } else {
       return settingsFailureToLoadContainer();
     }
   }
 
-  Widget getReservationListing(VendorMerchantForm selectedForm, ReservationItem reservation) {
+  Widget getReservationListing(String selectedFormId, ReservationItem reservation) {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => getIt<ListingManagerWatcherBloc>()..add(ListingManagerWatcherEvent.watchListingManagerItemStarted(reservation.instanceId.getOrCrash()))),
@@ -58,7 +58,7 @@ class ActivityVendorFormManageMainContainerWidget extends StatelessWidget {
         builder: (context, state) {
           return state.maybeMap(
               loadListingManagerItemSuccess: (item) {
-                return getActivityForm(reservation, item.failure, selectedForm);
+                return getActivityForm(reservation, item.failure, selectedFormId);
               },
               orElse: () => settingsFailureToLoadContainer()
           );
@@ -67,12 +67,12 @@ class ActivityVendorFormManageMainContainerWidget extends StatelessWidget {
     );
   }
 
-  Widget getActivityForm(ReservationItem reservation, ListingManagerForm listingForm, VendorMerchantForm selectedForm) {
+  Widget getActivityForm(ReservationItem reservation, ListingManagerForm listingForm, String selectedFormId) {
     return BlocBuilder<ActivityManagerWatcherBloc, ActivityManagerWatcherState>(
       builder: (context, state) {
         return state.maybeMap(
             loadActivityManagerFormSuccess: (item) {
-              return retrieveAuthenticationState(context, reservation, listingForm, item.item, selectedForm);
+              return retrieveAuthenticationState(context, reservation, listingForm, item.item, selectedFormId);
             },
             orElse: () => settingsFailureToLoadContainer()
         );
@@ -80,7 +80,7 @@ class ActivityVendorFormManageMainContainerWidget extends StatelessWidget {
     );
   }
 
-  Widget retrieveAuthenticationState(BuildContext context, ReservationItem reservation, ListingManagerForm listingForm, ActivityManagerForm activityForm, VendorMerchantForm selectedForm) {
+  Widget retrieveAuthenticationState(BuildContext context, ReservationItem reservation, ListingManagerForm listingForm, ActivityManagerForm activityForm, String selectedFormId) {
     return BlocProvider(create: (_) => getIt<UserProfileWatcherBloc>()..add(const UserProfileWatcherEvent.watchUserProfileStarted()),
       child: BlocBuilder<UserProfileWatcherBloc, UserProfileWatcherState>(
         builder: (context, authState) {
@@ -90,14 +90,22 @@ class ActivityVendorFormManageMainContainerWidget extends StatelessWidget {
                 padding: const EdgeInsets.all(8.0),
                 child: GetLoginSignUpWidget(showFullScreen: true, model: model, didLoginSuccess: () {  },),
               ),
-              loadUserProfileSuccess: (item) => ActivityVendorApplicationsResultMain(
-                  model: model,
-                  selectedForm: selectedForm,
-                  reservationItem: reservation,
-                  listingForm: listingForm,
-                  activityOwnerProfile: item.profile,
-                  activityManagerForm: activityForm,
-                ),
+              loadUserProfileSuccess: (item) {
+                final VendorMerchantForm? selectedForm = (activityForm.rulesService.vendorMerchantForms?.map((e) => e.formId.getOrCrash()).contains(selectedFormId) == true) ? activityForm.rulesService.vendorMerchantForms?.firstWhere((element) => element.formId.getOrCrash() == selectedFormId) : null;
+
+                if (selectedForm == null) {
+                  return defaultPagePreview();
+                }
+
+                return ActivityVendorApplicationsResultMain(
+                    model: model,
+                    selectedForm: selectedForm!,
+                    reservationItem: reservation,
+                    listingForm: listingForm,
+                    activityOwnerProfile: item.profile,
+                    activityManagerForm: activityForm,
+                  );
+              },
               orElse: () {
               return JumpingDots(color: model.paletteColor, numberOfDots: 3);
             }

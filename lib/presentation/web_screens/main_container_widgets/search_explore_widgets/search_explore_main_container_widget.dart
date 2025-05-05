@@ -3,8 +3,10 @@ import 'dart:ui';
 import 'package:beamer/beamer.dart';
 import 'package:check_in_application/check_in_application.dart';
 import 'package:check_in_domain/check_in_domain.dart';
+import 'package:check_in_domain/domain/misc/explore_services/filter/explore_filter_item.dart';
 import 'package:check_in_presentation/check_in_presentation.dart';
 import 'package:check_in_presentation/core/router_helper.dart';
+import 'package:check_in_presentation/explore_core_widgets/components/template_components/explore_search_shell.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/list_search_component.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/map_search_component.dart';
 import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/search_components/search_explore_filter.dart';
@@ -25,16 +27,15 @@ class SearchExploreMainContainerWidget extends StatefulWidget {
   final DashboardModel model;
   final Function() didUpdate;
   final UserProfileModel? currentUser;
+  final ExploreFilterObject? initialFilterObject;
 
-  const SearchExploreMainContainerWidget({super.key, required this.model, required this.currentUser, required this.didUpdate});
+  const SearchExploreMainContainerWidget({super.key, required this.model, required this.currentUser, required this.didUpdate, this.initialFilterObject});
 
   @override
   State<SearchExploreMainContainerWidget> createState() => _SearchExploreMainContainerWidgetState();
 }
 
 class _SearchExploreMainContainerWidgetState extends State<SearchExploreMainContainerWidget> {
-
-
 
   @override
   void initState() {
@@ -45,183 +46,196 @@ class _SearchExploreMainContainerWidgetState extends State<SearchExploreMainCont
   Widget getMainContainer(BuildContext context, SearchExploreHelperMarker marker) {
     switch (marker) {
       case SearchExploreHelperMarker.map:
-        return Row(
-          children: [
-            Expanded(
-              child: Stack(
-                alignment: Alignment.bottomCenter,
-                children: [
-                  Container(
-                    height: MediaQuery.of(context).size.height,
-                    child: MapSearchContainer(
-                      model: widget.model,
-                      selectedListing: (listing) {
-                        setState(() {
-                          widget.didUpdate();
-                        });
-                      },
-                      didSelectListingPreview: (listing) {
+      return Container();
+        // return Row(
+        //   children: [
+        //     Expanded(
+        //       child: Stack(
+        //         alignment: Alignment.bottomCenter,
+        //         children: [
+        //           Container(
+        //             height: MediaQuery.of(context).size.height,
+        //             child: MapSearchContainer(
+        //               model: widget.model,
+        //               selectedListing: (listing) {
+        //                 setState(() {
+        //                   widget.didUpdate();
+        //                 });
+        //               },
+        //               didSelectListingPreview: (listing) {
 
-                        didSelectCreateNewActivity(
-                          context,
-                          widget.model,
-                          listing,
-                          2
-                        );
-                        // setState(() {
-                        //   ExploreWebHelperCore.didSelectFacilityItem(context, listing);
-                        // });
-                        //   Future.delayed(const Duration(seconds: 2), () {
-                        //     setState(() {
-                        //       ExploreWebHelperCore.isLoading = false;
-                        //    });
-                        // });
-                      },
-                    ),
-                  ),
+        //                 didSelectCreateNewActivity(
+        //                   context,
+        //                   widget.model,
+        //                   null,
+        //                   listing,
+        //                   didSaveActivity: (res) {
 
-                 getSearchHeaderToggleTopBar(),
-                 if (Responsive.isDesktop(context)) Positioned(
-                     bottom: 10,
-                     left: 10,
-                     child: SingleLineWebFooter(model: widget.model)
-                   ),
-                 // getFooterFilterBar(),
+        //                   },
+        //                   didPublishActivity: (res) {
 
-                  ],
-                ),
-              ),
-              Stack(
-                alignment: Alignment.topCenter,
-                children: [
-                  AnimatedContainer(
-                    width: (kIsWeb && Responsive.isDesktop(context)) ? 400 : 0,
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.bounceInOut,
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Container(
-                        width: 400,
-                        height: MediaQuery.of(context).size.height,
-                        child: ListView.builder(
-                            shrinkWrap: true,
-                            controller: MapHelper.scrollController,
-                            itemCount: context.read<ListingsSearchRequirementsBloc>().state.listings.length,
-                            itemBuilder: (_, index) {
-                              final listingItem = context.read<ListingsSearchRequirementsBloc>().state.listings.toList()[index];
+        //                   }
+        //                 );
+        //                 // setState(() {
+        //                 //   ExploreWebHelperCore.didSelectFacilityItem(context, listing);
+        //                 // });
+        //                 //   Future.delayed(const Duration(seconds: 2), () {
+        //                 //     setState(() {
+        //                 //       ExploreWebHelperCore.isLoading = false;
+        //                 //    });
+        //                 // });
+        //               },
+        //             ),
+        //           ),
 
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 25.0, vertical: 7.0),
-                                child: SizedBox(
-                                  height: 550,
-                                  width: 400,
-                                  child: ListingResultMainCard(
-                                    listing: listingItem,
-                                    model: widget.model,
-                                    showReservations: true,
-                                    isLoading: context.read<ListingsSearchRequirementsBloc>().state.isMarkersLoading,
-                                    didSelectEmbeddedRes: (listing, res) {
-                                      setState(() {
-                                        ExploreWebHelperCore.didSelectReservationItem(context, listing, res);
-                                      });
-                                      Future.delayed(const Duration(seconds: 2), () {
-                                      setState(() {
-                                        ExploreWebHelperCore.isLoading = false;
-                                        });
-                                      });
-                                    },
-                                    didSelectMainImage: (listing) {
+        //          getSearchHeaderToggleTopBar(),
+        //          if (Responsive.isDesktop(context)) Positioned(
+        //              bottom: 10,
+        //              left: 10,
+        //              child: SingleLineWebFooter(model: widget.model)
+        //            ),
+        //          // getFooterFilterBar(),
 
-                                      // Future.delayed(const Duration(seconds: 2), () async {
-                                      //   //   setState(() {
-                                      //   MapHelper.showMapReload = true;
-                                      //   //     context.read<ListingsSearchRequirementsBloc>().add(const ListingsSearchRequirementsEvent.isMarkersLoading(false));
-                                      //   //     widget.selectedListing(null);
-                                      // });
-                                      setState(() {
-                                        MapHelper.mapController.animateCamera(
-                                            CameraUpdate.newCameraPosition(
-                                                CameraPosition(
-                                                    zoom: 15,
-                                                    target: LatLng(
-                                                        listing.listingProfileService.listingLocationSetting.locationPosition!.latitude,
-                                                        listing.listingProfileService.listingLocationSetting.locationPosition!.longitude
-                                            )
-                                          )
-                                        )
-                                      );
+        //           ],
+        //         ),
+        //       ),
+        //       Stack(
+        //         alignment: Alignment.topCenter,
+        //         children: [
+        //           AnimatedContainer(
+        //             width: (kIsWeb && Responsive.isDesktop(context)) ? 400 : 0,
+        //             duration: const Duration(milliseconds: 300),
+        //             curve: Curves.bounceInOut,
+        //             child: SingleChildScrollView(
+        //               scrollDirection: Axis.horizontal,
+        //               child: Container(
+        //                 width: 400,
+        //                 height: MediaQuery.of(context).size.height,
+        //                 child: ListView.builder(
+        //                     shrinkWrap: true,
+        //                     controller: MapHelper.scrollController,
+        //                     itemCount: context.read<ListingsSearchRequirementsBloc>().state.listings.length,
+        //                     itemBuilder: (_, index) {
+        //                       final listingItem = context.read<ListingsSearchRequirementsBloc>().state.listings.toList()[index];
 
-                                        if (MapHelper.currentZoom != 15) {
-                                          MapHelper.initMarkers(context, mounted, widget.model, context.read<ListingsSearchRequirementsBloc>().state.listings.toList());
-                                          MapHelper.currentZoom = 15;
-                                        }
+        //                       return Padding(
+        //                         padding: const EdgeInsets.symmetric(horizontal: 25.0, vertical: 7.0),
+        //                         child: SizedBox(
+        //                           height: 550,
+        //                           width: 400,
+        //                           child: ListingResultMainCard(
+        //                             listing: listingItem,
+        //                             model: widget.model,
+        //                             showReservations: true,
+        //                             isLoading: context.read<ListingsSearchRequirementsBloc>().state.isMarkersLoading,
+        //                             didSelectEmbeddedRes: (listing, res) {
+        //                               setState(() {
+        //                                 ExploreWebHelperCore.didSelectReservationItem(context, listing, res);
+        //                               });
+        //                               Future.delayed(const Duration(seconds: 2), () {
+        //                               setState(() {
+        //                                 ExploreWebHelperCore.isLoading = false;
+        //                                 });
+        //                               });
+        //                             },
+        //                             didSelectMainImage: (listing) {
 
-                                    });
-                                  },
-                                  didSelectFooter: (ListingManagerForm listing) {
-                                    didSelectCreateNewActivity(
-                                        context,
-                                        widget.model,
-                                        listing,
-                                        2
-                                    );
-                                    // setState(() {
-                                    //   ExploreWebHelperCore.didSelectFacilityItem(context, listing);
-                                    // });
-                                    //   Future.delayed(const Duration(seconds: 2), () {
-                                    //     setState(() {
-                                    //       ExploreWebHelperCore.isLoading = false;
-                                    //     });
-                                    //
-                                    // });
-                                  },
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                  ),
+        //                               // Future.delayed(const Duration(seconds: 2), () async {
+        //                               //   //   setState(() {
+        //                               //   MapHelper.showMapReload = true;
+        //                               //   //     context.read<ListingsSearchRequirementsBloc>().add(const ListingsSearchRequirementsEvent.isMarkersLoading(false));
+        //                               //   //     widget.selectedListing(null);
+        //                               // });
+        //                               setState(() {
+        //                                 MapHelper.mapController.animateCamera(
+        //                                     CameraUpdate.newCameraPosition(
+        //                                         CameraPosition(
+        //                                             zoom: 15,
+        //                                             target: LatLng(
+        //                                                 listing.listingProfileService.listingLocationSetting.locationPosition!.latitude,
+        //                                                 listing.listingProfileService.listingLocationSetting.locationPosition!.longitude
+        //                                     )
+        //                                   )
+        //                                 )
+        //                               );
 
-                  Positioned(
-                    top: 20,
-                    child: AnimatedContainer(
-                      width: (kIsWeb && Responsive.isDesktop(context)) ? 300 : 0,
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.bounceInOut,
-                      child: Center(
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: context.read<ListingsSearchRequirementsBloc>().state.isMarkersLoading ? Shimmer.fromColors(
-                            enabled: context.read<ListingsSearchRequirementsBloc>().state.isMarkersLoading,
-                            baseColor: Colors.grey.shade400,
-                            highlightColor: Colors.grey.shade100,
-                            child: Container(
-                              height: 35,
-                              width: 190,
-                              decoration: BoxDecoration(
-                                color: widget.model.accentColor.withOpacity(0.15),
-                                borderRadius: const BorderRadius.all(Radius.circular(8)),
-                              ),
-                            ),
-                          ) : Chip(
-                              side: BorderSide.none,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
-                              backgroundColor: widget.model.paletteColor,
-                              label: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text('${context.read<ListingsSearchRequirementsBloc>().state.listings.length} Listings Found', style: TextStyle(color: widget.model.accentColor, fontWeight: FontWeight.bold)),
-                          ),
-                        )
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            )
-          ],
-        );
+        //                                 if (MapHelper.currentZoom != 15) {
+        //                                   MapHelper.initMarkers(context, mounted, widget.model, context.read<ListingsSearchRequirementsBloc>().state.listings.toList());
+        //                                   MapHelper.currentZoom = 15;
+        //                                 }
+
+        //                             });
+        //                           },
+        //                           didSelectFooter: (ListingManagerForm listing) {
+        //                             didSelectCreateNewActivity(
+        //                                 context,
+        //                                 widget.model,
+        //                                 null,
+        //                                 listing,
+        //                                 didSaveActivity: (res) {
+
+        //                                 },
+        //                                 didPublishActivity: (res) {
+                                          
+        //                                 }
+        //                             );
+        //                             // setState(() {
+        //                             //   ExploreWebHelperCore.didSelectFacilityItem(context, listing);
+        //                             // });
+        //                             //   Future.delayed(const Duration(seconds: 2), () {
+        //                             //     setState(() {
+        //                             //       ExploreWebHelperCore.isLoading = false;
+        //                             //     });
+        //                             //
+        //                             // });
+        //                           },
+        //                         ),
+        //                       ),
+        //                     );
+        //                   },
+        //                 ),
+        //               ),
+        //             ),
+        //           ),
+
+        //           Positioned(
+        //             top: 20,
+        //             child: AnimatedContainer(
+        //               width: (kIsWeb && Responsive.isDesktop(context)) ? 300 : 0,
+        //               duration: const Duration(milliseconds: 300),
+        //               curve: Curves.bounceInOut,
+        //               child: Center(
+        //                 child: SingleChildScrollView(
+        //                   scrollDirection: Axis.horizontal,
+        //                   child: context.read<ListingsSearchRequirementsBloc>().state.isMarkersLoading ? Shimmer.fromColors(
+        //                     enabled: context.read<ListingsSearchRequirementsBloc>().state.isMarkersLoading,
+        //                     baseColor: Colors.grey.shade400,
+        //                     highlightColor: Colors.grey.shade100,
+        //                     child: Container(
+        //                       height: 35,
+        //                       width: 190,
+        //                       decoration: BoxDecoration(
+        //                         color: widget.model.accentColor.withOpacity(0.15),
+        //                         borderRadius: const BorderRadius.all(Radius.circular(8)),
+        //                       ),
+        //                     ),
+        //                   ) : Chip(
+        //                       side: BorderSide.none,
+        //                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
+        //                       backgroundColor: widget.model.paletteColor,
+        //                       label: Padding(
+        //                         padding: const EdgeInsets.all(8.0),
+        //                         child: Text('${context.read<ListingsSearchRequirementsBloc>().state.listings.length} Listings Found', style: TextStyle(color: widget.model.accentColor, fontWeight: FontWeight.bold)),
+        //                   ),
+        //                 )
+        //               ),
+        //             ),
+        //           ),
+        //         ),
+        //       ],
+        //     )
+        //   ],
+        // );
       case SearchExploreHelperMarker.list:
         return Stack(
           alignment: Alignment.bottomCenter,
@@ -318,7 +332,23 @@ class _SearchExploreMainContainerWidgetState extends State<SearchExploreMainCont
          return Container();
        }
       case SearchExploreHelperMarker.search:
-        return Container();
+        return  AnimatedOpacity(
+          duration: Duration(milliseconds: 800),
+          opacity: (ExploreWebHelperCore.searchExploreMarker == SearchExploreHelperMarker.search || (ExploreWebHelperCore.searchExploreMarker != SearchExploreHelperMarker.activity && (kIsWeb) && Responsive.isMobile(context))) ? 1 : 0,
+            child: Visibility(
+                visible: ExploreWebHelperCore.searchExploreMarker == SearchExploreHelperMarker.search || (ExploreWebHelperCore.searchExploreMarker != SearchExploreHelperMarker.activity && (kIsWeb) && Responsive.isMobile(context)),
+                child: SlideInTransitionWidget(
+                  durationTime: 400,
+                  offset: const Offset(0.0, 1.0),
+                  transitionWidget: PointerInterceptor(
+                    child: ExploreSearchMainDashboard(
+                      model: widget.model,
+                      initialFilterObject: widget.initialFilterObject,
+                ),
+              ),
+            )
+          ),
+        );
     }
   }
 
@@ -331,58 +361,29 @@ class _SearchExploreMainContainerWidgetState extends State<SearchExploreMainCont
 
        getMainContainer(context, ExploreWebHelperCore.searchExploreMarker),
 
-        AnimatedOpacity(
-          duration: Duration(milliseconds: 800),
-          opacity: (ExploreWebHelperCore.searchExploreMarker == SearchExploreHelperMarker.search || (ExploreWebHelperCore.searchExploreMarker != SearchExploreHelperMarker.activity && (kIsWeb) && Responsive.isMobile(context))) ? 1 : 0,
-            child: Visibility(
-                visible: ExploreWebHelperCore.searchExploreMarker == SearchExploreHelperMarker.search || (ExploreWebHelperCore.searchExploreMarker != SearchExploreHelperMarker.activity && (kIsWeb) && Responsive.isMobile(context)),
-                child: SlideInTransitionWidget(
-                  durationTime: 400,
-                  offset: const Offset(0.0, 1.0),
-                  transitionWidget: PointerInterceptor(
-                    child: DiscoverySearchComponent(
-                      model: widget.model,
-                        // didSelectCreateNewActivity(
-                        //     context,
-                        //     widget.model,
-                        //     listing,
-                        //     2
-                        // );
-                      //   setState(() {
-                      //     ExploreWebHelperCore.didSelectFacilityItem(context, listing);
-                      //   });
-                      // Future.delayed(const Duration(seconds: 2), () {
-                      //   setState(() {
-                      //     ExploreWebHelperCore.isLoading = false;
-                      //   });
-                      // });
-                ),
-              ),
-            )
-          ),
-        ),
+     
 
-        Visibility(
-          visible: ExploreWebHelperCore.searchExploreMarker == SearchExploreHelperMarker.search,
-          child: Positioned(
-              top: 15,
-              right: 15,
-              child: IconButton(
-                icon: Icon(Icons.cancel, color: widget.model.paletteColor, size: 35),
-                onPressed: () {
-                  setState(() {
-                    Beamer.of(context).update(
-                        configuration: RouteInformation(
-                            location: homeTabRoute(DashboardMarker.search),
-                        ),
-                        rebuild: false
-                    );
-                    ExploreWebHelperCore.searchExploreMarker = SearchExploreHelperMarker.map;
-                });
-              },
-            )
-          ),
-        ),
+        // Visibility(
+        //   visible: ExploreWebHelperCore.searchExploreMarker == SearchExploreHelperMarker.search,
+        //   child: Positioned(
+        //       top: 15,
+        //       right: 15,
+        //       child: IconButton(
+        //         icon: Icon(Icons.cancel, color: widget.model.paletteColor, size: 35),
+        //         onPressed: () {
+        //           setState(() {
+        //             Beamer.of(context).update(
+        //                 configuration: RouteInformation(
+        //                     location: homeTabRoute(DashboardMarker.search),
+        //                 ),
+        //                 rebuild: false
+        //             );
+        //             ExploreWebHelperCore.searchExploreMarker = SearchExploreHelperMarker.map;
+        //         });
+        //       },
+        //     )
+        //   ),
+        // ),
 
 
         // Visibility(

@@ -14,7 +14,6 @@ class ReservationMainContainerWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-
     return (ReservationHelperCore.selectedReservationItem != null) ? Padding(
       padding: const EdgeInsets.all(8.0),
       child: ClipRRect(

@@ -30,12 +30,47 @@
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
-
+  <!-- version: 1.1.1 -->
   <title>a circle</title>
   <link rel="manifest" href="manifest.json">
 
-  <!-- This script adds the flutter initialization JS code -->
+  <!-- Firebase SDK (Latest) -->
+  <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-messaging.js"></script>
+
+  <!-- Flutter Initialization -->
   <script src="flutter.js" defer></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyD-bDqaVGZmESyC-lCjIY_OkgSkZSXKRD0",
+      authDomain: "cico-8298b.firebaseapp.com",
+      projectId: "cico-8298b",
+      storageBucket: "cico-8298b.appspot.com",
+      messagingSenderId: "686667962875",
+      appId: "1:686667962875:web:3d0fb0f07a951871fd535e",
+      measurementId: "G-K2S4DN0XGL"
+    };
+  
+    firebase.initializeApp(firebaseConfig);
+    const messaging = firebase.messaging();
+    
+
+    // Listen for **foreground** messages
+    messaging.onMessage((payload) => {
+      console.log("Foreground message received:", payload);
+
+      if (Notification.permission === "granted") {
+        const notificationTitle = payload.notification.title;
+        const notificationOptions = {
+          body: payload.notification.body,
+          icon: "favicon.png",
+          data: payload.data
+        };
+        new Notification(notificationTitle, notificationOptions);
+      }
+    });
+  </script>
 </head>
 <body>
   <style>
@@ -416,7 +451,7 @@
   <script>
 
   // The value below is injected by flutter build, do not touch.
-    var serviceWorkerVersion = '{{flutter_service_worker_version}}';
+      var serviceWorkerVersion = '{{flutter_service_worker_version}}';
 
       if ('serviceWorker' in navigator) {
           navigator.serviceWorker.register('/firebase-messaging-sw.js?v=' + serviceWorkerVersion)
@@ -451,7 +486,8 @@
             var loaderContent = document.querySelector('#loader-content');
         // Detect if the device is mobile and choose the renderer type
         const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-        const renderer = isMobile ? 'html' : 'canvaskit';
+        const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+        const renderer = isMobile || isSafari ? 'html' : 'canvaskit';
 
         // Load the Flutter app with the chosen renderer
         const appRunner = await _flutter.loader.load({
@@ -459,13 +495,14 @@
             serviceWorerVersion: serviceWorkerVersion,
           },
           onEntrypointLoaded: async (engineInitializer) => {
-            await engineInitializer.initializeEngine({ renderer }).then(async function(appRunner) {
+              await engineInitializer.initializeEngine({ useColorEmoji: true }).then(async function(appRunner) {
               loaderContent.style.opacity = '0';
               await delay(400);
               await appRunner.runApp();
             });
           }
         });
+      });
 
         // Run the app after initialization
         // appRunner();

@@ -17,7 +17,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.1.0
+version: 1.1.1
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -46,11 +46,11 @@ dependencies:
       url: https://github.com/elbeicktalat/flutter_auth_buttons.git
       ref: main
   sliding_up_panel:
-    path: /Users/stefanmiller/AndroidStudioProjects/sliding_up_panel
+    path: /Users/stefanmiller/Documents/AndroidStudioProject/sliding_up_panel
   check_in_presentation:
-    path: /Users/stefanmiller/AndroidStudioProjects/check_in_presentation
+    path: /Users/stefanmiller/Documents/AndroidStudioProject/check_in_presentation
   reservation_post:
-    path: /Users/stefanmiller/AndroidStudioProjects/reservation_post
+    path: /Users/stefanmiller/Documents/AndroidStudioProject/check_in_reservation_post
 
 dev_dependencies:
 
@@ -142,6 +142,8 @@ flutter:
     - assets/images/activity_creator/onboarding/IMG_7389.png
     - assets/images/activity_creator/onboarding/IMG_6792.png
     - assets/images/activity_creator/onboarding/IMG_6794.png
+    - assets/fonts/Roboto-Italic-VariableFont_wdth.ttf
+    - assets/fonts/Roboto-VariableFont_wdth.ttf
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

@@ -84,12 +84,15 @@ Future<Uint8List> loadLogoFromAssets(String path) async {
 
 
 
-Future<Uint8List> generateRefundPdf(ActivityManagerForm activity, UserProfileModel vendorUser, EventMerchantVendorProfile vendorProfile, VendorMerchantForm vendorForm) {
+Future<Uint8List> generateRefundPdf(ActivityManagerForm activity, UserProfileModel vendorUser, EventMerchantVendorProfile vendorProfile, VendorMerchantForm vendorForm) async {
   final pdf = pw.Document();
   final fontSize = 9.0;
   final lineThickness = 1.0;
   final double columnWidth = PdfPageFormat.a4.width / 2 - 48; // Subtracting padding from width
   final greyColor = PdfColors.grey; // Define the grey color
+  // Load the Unicode font
+  final fontData = await rootBundle.load("assets/fonts/Roboto-VariableFont_wdth.ttf");
+  final font = pw.Font.ttf(fontData);
 
   pdf.addPage(
     pw.MultiPage(
@@ -205,9 +208,9 @@ Future<Uint8List> generateRefundPdf(ActivityManagerForm activity, UserProfileMod
               pw.SizedBox(height: 20),
 
               // Previous Total and New Total with dividers
-              buildSummaryRow('Previous Total', 'CA\$81.72', fontSize),
+              buildSummaryRow('Previous Total', 'CA\$81.72', fontSize, font: font),
               pw.Divider(thickness: lineThickness, color: greyColor),
-              buildSummaryRow('New Total', 'CA\$90.00', fontSize, isBold: true),
+              buildSummaryRow('New Total', 'CA\$90.00', fontSize, isBold: true, font: font),
               pw.Divider(thickness: lineThickness, color: greyColor),
 
               pw.SizedBox(height: 35),
@@ -223,6 +226,7 @@ Future<Uint8List> generateRefundPdf(ActivityManagerForm activity, UserProfileMod
                 amount: 'CA\$23.23',
                 fontSize: fontSize,
                 isRefund: true,
+                font: font
               ),
               pw.SizedBox(height: 30),
 

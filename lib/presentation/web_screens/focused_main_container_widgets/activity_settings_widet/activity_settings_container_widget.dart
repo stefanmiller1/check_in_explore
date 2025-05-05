@@ -108,7 +108,6 @@ class ActivitySettingsMainContainerWidget extends StatelessWidget {
                 } else {
                   return retrieveCurrentAttendee(reservation, activityManagerForm, item.profile);
                 }
-              return settingsFailureToLoadContainer(model);
             },
             orElse: () {
               return JumpingDots(color: model.paletteColor, numberOfDots: 3);

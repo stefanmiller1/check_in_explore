@@ -33,7 +33,7 @@ class _OwnerSettingsListContainerState extends State<OwnerSettingsListContainer>
     settingsList.addAll(subActivitySettingItems(activityForm));
 
     for (ReservationSlotItem reservationSlot in widget.currentReservationItem.reservationSlotItem) {
-      settingsList.insert(3, SettingsItemModel(settingIcon: getIconDataForActivity(context, reservationSlot.selectedActivityType), sectionNavItem: SettingSectionMarker.profile, navItem: SettingNavMarker.reservation, settingsTitle: '${DateFormat.MMMd().format(reservationSlot.selectedDate)} Activity', settingSubTitle: getTitleForActivityOption(context, reservationSlot.selectedActivityType) ?? '', resSlotItem: reservationSlot));
+      // settingsList.insert(3, SettingsItemModel(settingIcon: getIconDataForActivity(reservationSlot.selectedActivi,tyType.), sectionNavItem: SettingSectionMarker.profile, navItem: SettingNavMarker.reservation, settingsTitle: '${DateFormat.MMMd().format(reservationSlot.selectedDate)} Activity', settingSubTitle: getTitleForActivityOption(context, reservationSlot.selectedActivityType) ?? '', resSlotItem: reservationSlot));
     }
     return settingsList;
   }
@@ -80,11 +80,11 @@ class _OwnerSettingsListContainerState extends State<OwnerSettingsListContainer>
                               }
                           ).toList(),
                         ),
-                        const SizedBox(height: 15),
-                        Divider(color: widget.model.disabledTextColor, thickness: 0.25),
-                      ],
-                    ),
-                  )
+                      const SizedBox(height: 15),
+                      Divider(color: widget.model.disabledTextColor, thickness: 0.25),
+                    ],
+                  ),
+                )
               ).toList(),
             ]
         ),

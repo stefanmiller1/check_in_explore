@@ -9,9 +9,10 @@ class MainMenuContainer extends StatefulWidget {
   final Widget sidePanelMainContainer;
   final Widget subContainer;
   final bool presentSideContainer;
+  final bool isFullBleed;
   final bool showDrawer;
 
-  const MainMenuContainer({super.key, required this.model, required this.mainContainer, required this.sidePanelMainContainer, required this.presentSideContainer, required this.showDrawer, required this.subContainer});
+  const MainMenuContainer({super.key, required this.model, required this.mainContainer, required this.sidePanelMainContainer, required this.presentSideContainer, required this.showDrawer, required this.isFullBleed, required this.subContainer});
 
   @override
   State<MainMenuContainer> createState() => _MainMenuContainerState();
@@ -46,7 +47,7 @@ class _MainMenuContainerState extends State<MainMenuContainer> {
                   model: widget.model,
                   mainContainer: widget.mainContainer,
                   sidePanelContainer: widget.sidePanelMainContainer,
-                  presentSidePanelContainer: widget.presentSideContainer,
+                  isFullBleed: widget.isFullBleed,
                 ),
               )
             ],

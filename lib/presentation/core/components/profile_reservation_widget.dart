@@ -1,14 +1,14 @@
-import 'dart:ui';
+// import 'dart:ui';
 
-import 'package:avatar_stack/avatar_stack.dart';
-import 'package:check_in_domain/check_in_domain.dart';
-import 'package:check_in_presentation/check_in_presentation.dart';
-import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/search_components/search_helper.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_contacts/contact.dart';
-import 'package:intl/intl.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+// import 'package:avatar_stack/avatar_stack.dart';
+// import 'package:check_in_domain/check_in_domain.dart';
+// import 'package:check_in_presentation/check_in_presentation.dart';
+// import 'package:check_in_web_mobile_explore/presentation/screens/search_explore/components/search_components/search_helper.dart';
+// import 'package:flutter/cupertino.dart';
+// import 'package:flutter/material.dart';
+// import 'package:flutter_contacts/contact.dart';
+// import 'package:intl/intl.dart';
+// import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 /// top header component - reservation details, title, join, create, message, watching, participating/members, likes
 /// feed

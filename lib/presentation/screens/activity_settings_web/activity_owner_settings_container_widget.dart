@@ -115,7 +115,7 @@ class _SettingsMainContainerWidgetState extends State<SettingsMainContainerWidge
           resOwner: activityOwner,
           listing: widget.listingForm,
           didSelectedManageForm: (form) {
-            ActivityVendorHelperCore.selectedForm = form;
+            ActivityVendorHelperCore.selectedFormId = form.formId.getOrCrash();
             Beamer.of(context).update(
                 configuration: RouteInformation(
                     location: reservationVendorFormRoute(widget.reservationItem.reservationId.getOrCrash())
@@ -178,6 +178,7 @@ class _SettingsMainContainerWidgetState extends State<SettingsMainContainerWidge
                           widget.model,
                           true,
                           true,
+                          widget.userProfileModel.userId.getOrCrash(),
                           context.read<UpdateActivityFormBloc>().state.activitySettingsForm,
                           widget.reservationItem,
                           [],
@@ -451,10 +452,10 @@ class _SettingsMainContainerWidgetState extends State<SettingsMainContainerWidge
                                   child: Padding(
                                     padding: const EdgeInsets.all(8.0),
                                     child: getSideSettingsContainer(context, widget.currentNavItem, activityOwner),
-                                )
-                              ),
+                              )
                             ),
-                          )
+                          ),
+                        )
                       ),
                       Positioned(
                         bottom: 10,

@@ -297,8 +297,10 @@ void showFilterOptions(BuildContext context, DashboardModel model, ActivityManag
             vendorForm: vendorForm,
             activityForm: activityForm,
             filterModel: filterModel,
-            model: model,
-            didFinishUpdatingFilter: (VendorContactFilterModel ) {  },
+            model: model, 
+            didFinishUpdatingFilter: (VendorContactFilterModel ) {  
+              
+            },
           );
         })
     );

@@ -38,12 +38,15 @@ class DashboardMainContainerModel {
   final Widget sidePanelMainContainer;
   final bool isSubContainerAllowed;
   final bool presentSidePanel;
+  late bool? isFullBleed;
 
   DashboardMainContainerModel({
       required this.mainContainer,
       required this.sidePanelMainContainer,
       required this.isSubContainerAllowed,
-      required this.presentSidePanel});
+      required this.presentSidePanel,
+      this.isFullBleed,
+  });
 
   DashboardMainContainerModel empty() => DashboardMainContainerModel(mainContainer: Container(), sidePanelMainContainer: Container(), isSubContainerAllowed: false, presentSidePanel: false);
 }

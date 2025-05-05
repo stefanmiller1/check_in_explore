@@ -23,7 +23,7 @@ class ReservationSubContainerWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const SizedBox(height: 25),
+        const SizedBox(height: 50),
         Expanded(
           child: ReservationScreen(
             initialReservationId: (ReservationHelperCore.selectedReservationItem == null) ? (ReservationHelperCore.selectedReservationItem?.reservationId != initialReservationId) ? initialReservationId : initialReservationId : null,
