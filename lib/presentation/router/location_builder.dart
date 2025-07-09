@@ -24,9 +24,8 @@ final simpleLocationBuilder = RoutesLocationBuilder(
         );
       },
       '/:mainId': (context, state, data) {
-        final isWebMobile = kIsWeb && (defaultTargetPlatform == TargetPlatform.iOS || defaultTargetPlatform == TargetPlatform.android);
         final initialMarker = state.pathParameters['mainId'];
-        ExploreWebHelperCore.searchExploreMarker = isWebMobile ? SearchExploreHelperMarker.search : SearchExploreHelperMarker.map;
+        ExploreWebHelperCore.searchExploreMarker = SearchExploreHelperMarker.search;
 
         return BeamPage(
           key: ValueKey(initialMarker),
@@ -37,10 +36,12 @@ final simpleLocationBuilder = RoutesLocationBuilder(
           ),
         );
       },
-      '/home/mainId:/': (context, state, data) {
-        final isWebMobile = kIsWeb && (defaultTargetPlatform == TargetPlatform.iOS || defaultTargetPlatform == TargetPlatform.android);
+      '/home/:mainId': (context, state, data) {
+        
+        print('this is the home page');
         final initialMarker = state.pathParameters['mainId'];
-        ExploreWebHelperCore.searchExploreMarker = isWebMobile ? SearchExploreHelperMarker.search : SearchExploreHelperMarker.map;
+        print(state.pathParameters['mainId']);
+        ExploreWebHelperCore.searchExploreMarker = SearchExploreHelperMarker.search;
 
         return BeamPage(
           key: ValueKey(initialMarker),
@@ -97,12 +98,12 @@ final simpleLocationBuilder = RoutesLocationBuilder(
       '/:mainId/:searchType': (context, state, data) {
         final mainId = state.pathParameters['mainId'];
         final searchType = state.pathParameters['searchType'];
-        ExploreWebHelperCore.searchExploreMarker = getSearchExploreMarker(searchType);
+        // ExploreWebHelperCore.searchExploreMarker = getSearchExploreMarker(searchType);
 
           return BeamPage(
-            key: ValueKey('search-${searchType}'),
+            key: ValueKey('search'),
             name: 'search',
-            title: 'search $searchType',
+            title: 'search',
             child: MainScreen(
                 initialDashboardMarker: getDashboardMarker(mainId)
           ),

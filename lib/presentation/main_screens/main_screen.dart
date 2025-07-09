@@ -122,7 +122,6 @@ class _MainScreenState extends State<MainScreen> {
     //   );
     // } else
 
-      if (kIsWeb) {
       return MainWebScreen(
         model: model,
         initialDashboardMarker: widget.initialDashboardMarker,
@@ -130,11 +129,5 @@ class _MainScreenState extends State<MainScreen> {
         isCreatingNewActivity: widget.isCreatingNewActivity,
         initialExploreFilterObject: widget.initialExploreFilterObject,
       );
-    } else if (defaultTargetPlatform == TargetPlatform.iOS) {
-      return MainMobileScreen(model: model);
-    }
-
-    return Container();
-
   }
 }

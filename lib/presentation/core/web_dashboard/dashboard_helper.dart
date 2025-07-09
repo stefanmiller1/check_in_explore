@@ -1,6 +1,8 @@
 import 'package:check_in_domain/check_in_domain.dart';
 import 'package:flutter/material.dart';
 
+import 'widgets/tab_floating_dropdown_helper.dart';
+
 class DashboardContainerModel {
 
   final DashboardMainContainerModel mainContainer;
@@ -14,6 +16,8 @@ class DashboardContainerModel {
   late bool? isPrivate;
   late bool? isLive;
   late int? notificationCount;
+  late bool? isDropdownExpanded;
+  late FloatingDropdownModel? tabDropdownModel;
 
   DashboardContainerModel({
       required this.mainContainer,
@@ -26,7 +30,9 @@ class DashboardContainerModel {
       this.isVisible,
       this.isPrivate,
       this.isLive,
-      this.notificationCount
+      this.notificationCount,
+      this.isDropdownExpanded,
+      this.tabDropdownModel,
   });
 
 }

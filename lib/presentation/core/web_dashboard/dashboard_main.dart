@@ -165,49 +165,169 @@ class _WebDashboardMainState extends State<WebDashboardMain> {
           ),
         ],
       ) : null,
-      bottomNavigationBar: (Responsive.isMobile(context) && widget.isLoggedIn) ? BottomNavigationBar(
-        onTap: (i) {
-          setState(() {
-            currentMarker = widget.dashboardContainerItems[i].dashboardMarker;
-          });
-          widget.didSelectDashboardMarkerItem(widget.dashboardContainerItems[i].dashboardMarker);
-        },
-        backgroundColor: widget.model.mobileBackgroundColor,
-        elevation: 0,
-        currentIndex: ((retrieveSelectedIndex(currentMarker!)) >= 4) ? 0 : retrieveSelectedIndex(currentMarker!),
-        enableFeedback: true,
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: widget.model.paletteColor,
-        unselectedItemColor: widget.model.paletteColor.withOpacity(0.65),
-        items: widget.dashboardContainerItems.where((element) => element.isVisible == true).map(
-                (e) => BottomNavigationBarItem(
-          label: e.tabTitle,
-          icon: (e.imageUrl != null && e.imageUrl?.isNotEmpty == true) ? CircleAvatar(
-              backgroundImage: Image.asset('assets/profile-avatar.png').image,
-              foregroundImage: (e.imageUrl?[0] != '') ? Image.network(e.imageUrl?[0] ?? '').image : null
-            ) : Icon(e.iconTab)
-          )
-        ).toList(),
-      ) : null,
-      body: Responsive(
-        mobile: Column(
-          children: [
-            Expanded(
-              child: MainMenuContainer(
-                model: widget.model,
-                mainContainer: updateMainContainer(currentMarker!) ?? Container(),
-                subContainer: updateSubContainer(currentMarker!) ?? Container(),
-                sidePanelMainContainer: mainContainerSidePanel(currentMarker!) ?? Container(),
-                presentSideContainer: presentSidePanelContainer(currentMarker!),
-                showDrawer: (subContainerIsHidden(currentMarker!)) && MediaQuery.of(context).size.width <= 900,
-                isFullBleed: isMainContainerFullBleeed(currentMarker!),
-              ),
-            ),
-          ],
-        ),
-        tablet: Row(
-          children: [
-            SidePanelContainer(
+      // bottomNavigationBar: (Responsive.isMobile(context) && widget.isLoggedIn) ? BottomNavigationBar(
+      //   onTap: (i) {
+      //     setState(() {
+      //       currentMarker = widget.dashboardContainerItems[i].dashboardMarker;
+      //     });
+      //     widget.didSelectDashboardMarkerItem(widget.dashboardContainerItems[i].dashboardMarker);
+      //   },
+      //   backgroundColor: widget.model.mobileBackgroundColor,
+      //   elevation: 0,
+      //   currentIndex: ((retrieveSelectedIndex(currentMarker!)) >= 4) ? 0 : retrieveSelectedIndex(currentMarker!),
+      //   enableFeedback: true,
+      //   type: BottomNavigationBarType.fixed,
+      //   selectedItemColor: widget.model.paletteColor,
+      //   unselectedItemColor: widget.model.paletteColor.withOpacity(0.65),
+      //   items: widget.dashboardContainerItems.where((element) => element.isVisible == true).map(
+      //           (e) => BottomNavigationBarItem(
+      //     label: e.tabTitle,
+      //     icon: (e.imageUrl != null && e.imageUrl?.isNotEmpty == true) ? CircleAvatar(
+      //         backgroundImage: Image.asset('assets/profile-avatar.png').image,
+      //         foregroundImage: (e.imageUrl?[0] != '') ? Image.network(e.imageUrl?[0] ?? '').image : null
+      //       ) : Icon(e.iconTab)
+      //     )
+      //   ).toList(),
+      // ) : null,
+      body: Stack(
+        children: [
+          // Responsive(
+          //   mobile: Column(
+          //     children: [
+          //       Expanded(
+          //         child: MainMenuContainer(
+          //           model: widget.model,
+          //           mainContainer: updateMainContainer(currentMarker!) ?? Container(),
+          //           subContainer: updateSubContainer(currentMarker!) ?? Container(),
+          //           sidePanelMainContainer: mainContainerSidePanel(currentMarker!) ?? Container(),
+          //           presentSideContainer: presentSidePanelContainer(currentMarker!),
+          //           showDrawer: (subContainerIsHidden(currentMarker!)) && MediaQuery.of(context).size.width <= 900,
+          //           isFullBleed: isMainContainerFullBleeed(currentMarker!),
+          //         ),
+          //       ),
+          //     ],
+          //   ),
+          //   tablet: Row(
+          //     children: [
+                
+          //       if (subContainerIsHidden(currentMarker!)) Expanded(
+          //         flex: 5,
+          //         child: SubContainer(
+          //           model: widget.model,
+          //           currentMarker: currentMarker!,
+          //           menuMarkerItems: widget.dashboardContainerItems,
+          //           subWidget: updateSubContainer(currentMarker!) ?? Container(),
+          //           didSelectMarker: (marker) {
+          //             widget.didSelectDashboardMarkerItem(marker);
+          //           },
+          //           optionsMarkerItem: widget.optionsMarkerItem
+          //         ),
+          //       ),
+          //       Expanded(
+          //         flex: 10,
+          //         child: MainMenuContainer(
+          //           model: widget.model,
+          //           mainContainer: updateMainContainer(currentMarker!) ?? Container(),
+          //           subContainer: updateSubContainer(currentMarker!) ?? Container(),
+          //           sidePanelMainContainer: mainContainerSidePanel(currentMarker!) ?? Container(),
+          //           presentSideContainer: presentSidePanelContainer(currentMarker!),
+          //           showDrawer: (subContainerIsHidden(currentMarker!)) && MediaQuery.of(context).size.width <= 900,
+          //           isFullBleed: isMainContainerFullBleeed(currentMarker!),
+          //         ),
+          //       )
+          
+          //     ],
+          //   ),
+          //   desktop: Row(
+          //     children: [
+          //       // if (!(Responsive.isMobile(context))) AnimatedContainer(
+          //       //   duration: Duration(milliseconds: 750),
+          //       //   child: SidePanelContainer(
+          //       //     model: widget.model,
+          //       //     currentMarker: currentMarker!,
+          //       //     sideMarkerItems: widget.dashboardContainerItems,
+          //       //     didSelectMarker: (marker) {
+          //       //       setState(() {
+          //       //         currentMarker = marker;
+          //       //       });
+          //       //       widget.didSelectDashboardMarkerItem(marker);
+          //       //     },
+          //       //     optionsMarkerItem: widget.optionsMarkerItem
+          //       //   ),
+          //       // ),
+          //       if (subContainerIsHidden(currentMarker!) && (!(Responsive.isMobile(context)))) Expanded(
+          //         flex: _size.width > 1340 ? 3 : 5,
+          //         child: AnimatedContainer(
+          //           duration: Duration(milliseconds: 750),
+          //           child: SubContainer(
+          //             model: widget.model,
+          //             currentMarker: currentMarker!,
+          //             menuMarkerItems: widget.dashboardContainerItems,
+          //             subWidget: updateSubContainer(currentMarker!) ?? Container(),
+          //             didSelectMarker: (marker) {
+          //               widget.didSelectDashboardMarkerItem(marker);
+          //             },
+          //             optionsMarkerItem: widget.optionsMarkerItem
+          //           ),
+          //         ),
+          //       ),
+          //       Expanded(
+          //         flex: _size.width > 1340 ? 9 : 11,
+          //         child: AnimatedContainer(
+          //           duration: const Duration(milliseconds: 750),
+          //           child: MainMenuContainer(
+          //             model: widget.model,
+          //             mainContainer: updateMainContainer(currentMarker!) ?? Container(),
+          //             subContainer: updateSubContainer(currentMarker!) ?? Container(),
+          //             sidePanelMainContainer: mainContainerSidePanel(currentMarker!) ?? Container(),
+          //             presentSideContainer: presentSidePanelContainer(currentMarker!),
+          //             showDrawer: (subContainerIsHidden(currentMarker!)) && MediaQuery.of(context).size.width <= 900,
+          //             isFullBleed: isMainContainerFullBleeed(currentMarker!),
+          //           ),
+          //         ),
+          //       )
+          //     ],
+          //   ),
+          // ),
+          Row(
+            children: [
+              if (subContainerIsHidden(currentMarker!) && (!(Responsive.isMobile(context)))) Container(
+                width: 450,
+                child: AnimatedContainer(
+                    duration: Duration(milliseconds: 750),
+                    child: SubContainer(
+                      model: widget.model,
+                      currentMarker: currentMarker!,
+                      menuMarkerItems: widget.dashboardContainerItems,
+                      subWidget: updateSubContainer(currentMarker!) ?? Container(),
+                      didSelectMarker: (marker) {
+                        widget.didSelectDashboardMarkerItem(marker);
+                      },
+                      optionsMarkerItem: widget.optionsMarkerItem
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: _size.width > 1340 ? 9 : 11,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 750),
+                    child: MainMenuContainer(
+                      model: widget.model,
+                      mainContainer: updateMainContainer(currentMarker!) ?? Container(),
+                      subContainer: updateSubContainer(currentMarker!) ?? Container(),
+                      sidePanelMainContainer: mainContainerSidePanel(currentMarker!) ?? Container(),
+                      presentSideContainer: presentSidePanelContainer(currentMarker!),
+                      showDrawer: (subContainerIsHidden(currentMarker!)) && MediaQuery.of(context).size.width <= 900,
+                      isFullBleed: isMainContainerFullBleeed(currentMarker!),
+                    ),
+                  ),
+                )
+            ],
+          ),
+
+          Positioned(
+            left: 12,
+            child: SidePanelContainer(
               model: widget.model,
               currentMarker: currentMarker!,
               sideMarkerItems: widget.dashboardContainerItems,
@@ -219,84 +339,8 @@ class _WebDashboardMainState extends State<WebDashboardMain> {
               },
               optionsMarkerItem: widget.optionsMarkerItem
             ),
-            if (subContainerIsHidden(currentMarker!)) Expanded(
-              flex: 5,
-              child: SubContainer(
-                model: widget.model,
-                currentMarker: currentMarker!,
-                menuMarkerItems: widget.dashboardContainerItems,
-                subWidget: updateSubContainer(currentMarker!) ?? Container(),
-                didSelectMarker: (marker) {
-                  widget.didSelectDashboardMarkerItem(marker);
-                },
-                optionsMarkerItem: widget.optionsMarkerItem
-              ),
-            ),
-            Expanded(
-              flex: 10,
-              child: MainMenuContainer(
-                model: widget.model,
-                mainContainer: updateMainContainer(currentMarker!) ?? Container(),
-                subContainer: updateSubContainer(currentMarker!) ?? Container(),
-                sidePanelMainContainer: mainContainerSidePanel(currentMarker!) ?? Container(),
-                presentSideContainer: presentSidePanelContainer(currentMarker!),
-                showDrawer: (subContainerIsHidden(currentMarker!)) && MediaQuery.of(context).size.width <= 900,
-                isFullBleed: isMainContainerFullBleeed(currentMarker!),
-              ),
-            )
-
-          ],
-        ),
-        desktop: Row(
-          children: [
-            if (!(Responsive.isMobile(context))) AnimatedContainer(
-              duration: Duration(milliseconds: 750),
-              child: SidePanelContainer(
-                model: widget.model,
-                currentMarker: currentMarker!,
-                sideMarkerItems: widget.dashboardContainerItems,
-                didSelectMarker: (marker) {
-                  setState(() {
-                    currentMarker = marker;
-                  });
-                  widget.didSelectDashboardMarkerItem(marker);
-                },
-                optionsMarkerItem: widget.optionsMarkerItem
-              ),
-            ),
-            if (subContainerIsHidden(currentMarker!) && (!(Responsive.isMobile(context)))) Expanded(
-              flex: _size.width > 1340 ? 3 : 5,
-              child: AnimatedContainer(
-                duration: Duration(milliseconds: 750),
-                child: SubContainer(
-                  model: widget.model,
-                  currentMarker: currentMarker!,
-                  menuMarkerItems: widget.dashboardContainerItems,
-                  subWidget: updateSubContainer(currentMarker!) ?? Container(),
-                  didSelectMarker: (marker) {
-                    widget.didSelectDashboardMarkerItem(marker);
-                  },
-                  optionsMarkerItem: widget.optionsMarkerItem
-                ),
-              ),
-            ),
-            Expanded(
-              flex: _size.width > 1340 ? 9 : 11,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 750),
-                child: MainMenuContainer(
-                  model: widget.model,
-                  mainContainer: updateMainContainer(currentMarker!) ?? Container(),
-                  subContainer: updateSubContainer(currentMarker!) ?? Container(),
-                  sidePanelMainContainer: mainContainerSidePanel(currentMarker!) ?? Container(),
-                  presentSideContainer: presentSidePanelContainer(currentMarker!),
-                  showDrawer: (subContainerIsHidden(currentMarker!)) && MediaQuery.of(context).size.width <= 900,
-                  isFullBleed: isMainContainerFullBleeed(currentMarker!),
-                ),
-              ),
-            )
-          ],
-        ),
+          ),
+        ],
       )
     );
   }

@@ -64,7 +64,6 @@ class _MyAppState extends State<MyApp> {
 
   final routerDelegate = BeamerDelegate(
       transitionDelegate: const NoAnimationTransitionDelegate(),
-
       locationBuilder: simpleLocationBuilder
   );
   Locale? _locale;

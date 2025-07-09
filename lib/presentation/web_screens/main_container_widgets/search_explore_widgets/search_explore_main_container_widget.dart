@@ -45,269 +45,80 @@ class _SearchExploreMainContainerWidgetState extends State<SearchExploreMainCont
 
   Widget getMainContainer(BuildContext context, SearchExploreHelperMarker marker) {
     switch (marker) {
-      case SearchExploreHelperMarker.map:
-      return Container();
-        // return Row(
-        //   children: [
-        //     Expanded(
-        //       child: Stack(
-        //         alignment: Alignment.bottomCenter,
-        //         children: [
-        //           Container(
-        //             height: MediaQuery.of(context).size.height,
-        //             child: MapSearchContainer(
-        //               model: widget.model,
-        //               selectedListing: (listing) {
-        //                 setState(() {
-        //                   widget.didUpdate();
-        //                 });
-        //               },
-        //               didSelectListingPreview: (listing) {
+    //   case SearchExploreHelperMarker.map:
+    //   return Container();
+    //   case SearchExploreHelperMarker.list:
+    //     return Stack(
+    //       alignment: Alignment.bottomCenter,
+    //       children: [
+    //         ListSearchContainer(
+    //           model: widget.model,
+    //           currentUserId: widget.currentUser?.userId,
+    //           didSelectListing: (ListingManagerForm listing) {
+    //             setState(() {
+    //               ExploreWebHelperCore.didSelectFacilityItem(context, listing);
+    //             });
 
-        //                 didSelectCreateNewActivity(
-        //                   context,
-        //                   widget.model,
-        //                   null,
-        //                   listing,
-        //                   didSaveActivity: (res) {
+    //             Future.delayed(const Duration(seconds: 2), () {
+    //               setState(() {
+    //                 ExploreWebHelperCore.isLoading = false;
+    //               });
+    //             });
 
-        //                   },
-        //                   didPublishActivity: (res) {
+    //           },
+    //           didSelectReservation: (ListingManagerForm? listing, ReservationItem reservation) {
+    //             setState(() {
+    //               if (listing != null) {
+    //                 ExploreWebHelperCore.didSelectReservationItem(context, listing, reservation);
+    //               }
+    //             });
 
-        //                   }
-        //                 );
-        //                 // setState(() {
-        //                 //   ExploreWebHelperCore.didSelectFacilityItem(context, listing);
-        //                 // });
-        //                 //   Future.delayed(const Duration(seconds: 2), () {
-        //                 //     setState(() {
-        //                 //       ExploreWebHelperCore.isLoading = false;
-        //                 //    });
-        //                 // });
-        //               },
-        //             ),
-        //           ),
+    //             Future.delayed(const Duration(seconds: 2), () {
+    //               setState(() {
+    //                 ExploreWebHelperCore.isLoading = false;
+    //               });
+    //             });
+    //           },
+    //         ),
+    //         getSearchHeaderToggleTopBar(),
+    //         // getFooterFilterBar(),
+    //      ],
+    //   );
+    //   case SearchExploreHelperMarker.profile:
+    //     return Container();
+    //     // TODO: Handle this case.
+    //     break;
+    //   case SearchExploreHelperMarker.listing:
+    //     if (ExploreWebHelperCore.currentReservationItemId == null && ExploreWebHelperCore.currentFacilityItemId != null) {
+    //       return Stack(
+    //         alignment: Alignment.bottomCenter,
+    //         children: [
+    //           PointerInterceptor(
+    //                 child: FacilityPreviewScreen(
+    //                   model: widget.model,
+    //                   listingId: ExploreWebHelperCore.currentFacilityItemId!,
+    //                   listing: ExploreWebHelperCore.selectedFacilityItem,
+    //                   isAutoImplyLeading: true,
+    //                   selectedReservationsSlots: context.read<ListingsSearchRequirementsBloc>().state.selectedReservationsSlots?.toList() ?? [],
+    //                   didSelectBack: () {},
+    //                   didSelectReservation: (listing, res) {
+    //                       setState(() {
+    //                         ExploreWebHelperCore.didSelectReservationItem(context, listing, res);
+    //                       });
+    //                       Future.delayed(const Duration(seconds: 2), () {
+    //                         setState(() {
+    //                           ExploreWebHelperCore.isLoading = false;
+    //                         });
 
-        //          getSearchHeaderToggleTopBar(),
-        //          if (Responsive.isDesktop(context)) Positioned(
-        //              bottom: 10,
-        //              left: 10,
-        //              child: SingleLineWebFooter(model: widget.model)
-        //            ),
-        //          // getFooterFilterBar(),
-
-        //           ],
-        //         ),
-        //       ),
-        //       Stack(
-        //         alignment: Alignment.topCenter,
-        //         children: [
-        //           AnimatedContainer(
-        //             width: (kIsWeb && Responsive.isDesktop(context)) ? 400 : 0,
-        //             duration: const Duration(milliseconds: 300),
-        //             curve: Curves.bounceInOut,
-        //             child: SingleChildScrollView(
-        //               scrollDirection: Axis.horizontal,
-        //               child: Container(
-        //                 width: 400,
-        //                 height: MediaQuery.of(context).size.height,
-        //                 child: ListView.builder(
-        //                     shrinkWrap: true,
-        //                     controller: MapHelper.scrollController,
-        //                     itemCount: context.read<ListingsSearchRequirementsBloc>().state.listings.length,
-        //                     itemBuilder: (_, index) {
-        //                       final listingItem = context.read<ListingsSearchRequirementsBloc>().state.listings.toList()[index];
-
-        //                       return Padding(
-        //                         padding: const EdgeInsets.symmetric(horizontal: 25.0, vertical: 7.0),
-        //                         child: SizedBox(
-        //                           height: 550,
-        //                           width: 400,
-        //                           child: ListingResultMainCard(
-        //                             listing: listingItem,
-        //                             model: widget.model,
-        //                             showReservations: true,
-        //                             isLoading: context.read<ListingsSearchRequirementsBloc>().state.isMarkersLoading,
-        //                             didSelectEmbeddedRes: (listing, res) {
-        //                               setState(() {
-        //                                 ExploreWebHelperCore.didSelectReservationItem(context, listing, res);
-        //                               });
-        //                               Future.delayed(const Duration(seconds: 2), () {
-        //                               setState(() {
-        //                                 ExploreWebHelperCore.isLoading = false;
-        //                                 });
-        //                               });
-        //                             },
-        //                             didSelectMainImage: (listing) {
-
-        //                               // Future.delayed(const Duration(seconds: 2), () async {
-        //                               //   //   setState(() {
-        //                               //   MapHelper.showMapReload = true;
-        //                               //   //     context.read<ListingsSearchRequirementsBloc>().add(const ListingsSearchRequirementsEvent.isMarkersLoading(false));
-        //                               //   //     widget.selectedListing(null);
-        //                               // });
-        //                               setState(() {
-        //                                 MapHelper.mapController.animateCamera(
-        //                                     CameraUpdate.newCameraPosition(
-        //                                         CameraPosition(
-        //                                             zoom: 15,
-        //                                             target: LatLng(
-        //                                                 listing.listingProfileService.listingLocationSetting.locationPosition!.latitude,
-        //                                                 listing.listingProfileService.listingLocationSetting.locationPosition!.longitude
-        //                                     )
-        //                                   )
-        //                                 )
-        //                               );
-
-        //                                 if (MapHelper.currentZoom != 15) {
-        //                                   MapHelper.initMarkers(context, mounted, widget.model, context.read<ListingsSearchRequirementsBloc>().state.listings.toList());
-        //                                   MapHelper.currentZoom = 15;
-        //                                 }
-
-        //                             });
-        //                           },
-        //                           didSelectFooter: (ListingManagerForm listing) {
-        //                             didSelectCreateNewActivity(
-        //                                 context,
-        //                                 widget.model,
-        //                                 null,
-        //                                 listing,
-        //                                 didSaveActivity: (res) {
-
-        //                                 },
-        //                                 didPublishActivity: (res) {
-                                          
-        //                                 }
-        //                             );
-        //                             // setState(() {
-        //                             //   ExploreWebHelperCore.didSelectFacilityItem(context, listing);
-        //                             // });
-        //                             //   Future.delayed(const Duration(seconds: 2), () {
-        //                             //     setState(() {
-        //                             //       ExploreWebHelperCore.isLoading = false;
-        //                             //     });
-        //                             //
-        //                             // });
-        //                           },
-        //                         ),
-        //                       ),
-        //                     );
-        //                   },
-        //                 ),
-        //               ),
-        //             ),
-        //           ),
-
-        //           Positioned(
-        //             top: 20,
-        //             child: AnimatedContainer(
-        //               width: (kIsWeb && Responsive.isDesktop(context)) ? 300 : 0,
-        //               duration: const Duration(milliseconds: 300),
-        //               curve: Curves.bounceInOut,
-        //               child: Center(
-        //                 child: SingleChildScrollView(
-        //                   scrollDirection: Axis.horizontal,
-        //                   child: context.read<ListingsSearchRequirementsBloc>().state.isMarkersLoading ? Shimmer.fromColors(
-        //                     enabled: context.read<ListingsSearchRequirementsBloc>().state.isMarkersLoading,
-        //                     baseColor: Colors.grey.shade400,
-        //                     highlightColor: Colors.grey.shade100,
-        //                     child: Container(
-        //                       height: 35,
-        //                       width: 190,
-        //                       decoration: BoxDecoration(
-        //                         color: widget.model.accentColor.withOpacity(0.15),
-        //                         borderRadius: const BorderRadius.all(Radius.circular(8)),
-        //                       ),
-        //                     ),
-        //                   ) : Chip(
-        //                       side: BorderSide.none,
-        //                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
-        //                       backgroundColor: widget.model.paletteColor,
-        //                       label: Padding(
-        //                         padding: const EdgeInsets.all(8.0),
-        //                         child: Text('${context.read<ListingsSearchRequirementsBloc>().state.listings.length} Listings Found', style: TextStyle(color: widget.model.accentColor, fontWeight: FontWeight.bold)),
-        //                   ),
-        //                 )
-        //               ),
-        //             ),
-        //           ),
-        //         ),
-        //       ],
-        //     )
-        //   ],
-        // );
-      case SearchExploreHelperMarker.list:
-        return Stack(
-          alignment: Alignment.bottomCenter,
-          children: [
-            ListSearchContainer(
-              model: widget.model,
-              currentUserId: widget.currentUser?.userId,
-              didSelectListing: (ListingManagerForm listing) {
-                setState(() {
-                  ExploreWebHelperCore.didSelectFacilityItem(context, listing);
-                });
-
-                Future.delayed(const Duration(seconds: 2), () {
-                  setState(() {
-                    ExploreWebHelperCore.isLoading = false;
-                  });
-                });
-
-              },
-              didSelectReservation: (ListingManagerForm? listing, ReservationItem reservation) {
-                setState(() {
-                  if (listing != null) {
-                    ExploreWebHelperCore.didSelectReservationItem(context, listing, reservation);
-                  }
-                });
-
-                Future.delayed(const Duration(seconds: 2), () {
-                  setState(() {
-                    ExploreWebHelperCore.isLoading = false;
-                  });
-                });
-              },
-            ),
-            getSearchHeaderToggleTopBar(),
-            // getFooterFilterBar(),
-         ],
-      );
-      case SearchExploreHelperMarker.profile:
-        return Container();
-        // TODO: Handle this case.
-        break;
-      case SearchExploreHelperMarker.listing:
-        if (ExploreWebHelperCore.currentReservationItemId == null && ExploreWebHelperCore.currentFacilityItemId != null) {
-          return Stack(
-            alignment: Alignment.bottomCenter,
-            children: [
-              PointerInterceptor(
-                    child: FacilityPreviewScreen(
-                      model: widget.model,
-                      listingId: ExploreWebHelperCore.currentFacilityItemId!,
-                      listing: ExploreWebHelperCore.selectedFacilityItem,
-                      isAutoImplyLeading: true,
-                      selectedReservationsSlots: context.read<ListingsSearchRequirementsBloc>().state.selectedReservationsSlots?.toList() ?? [],
-                      didSelectBack: () {},
-                      didSelectReservation: (listing, res) {
-                          setState(() {
-                            ExploreWebHelperCore.didSelectReservationItem(context, listing, res);
-                          });
-                          Future.delayed(const Duration(seconds: 2), () {
-                            setState(() {
-                              ExploreWebHelperCore.isLoading = false;
-                            });
-
-                        });
-                      },
-                    ),
-                  ),
-            ],
-          );
-            } else {
-          return Container();
-        }
+    //                     });
+    //                   },
+    //                 ),
+    //               ),
+    //         ],
+    //       );
+    //         } else {
+    //       return Container();
+    //     }
       case SearchExploreHelperMarker.activity:
        if (ExploreWebHelperCore.currentReservationItemId != null && ExploreWebHelperCore.currentFacilityItemId != null) {
          return Stack(
@@ -332,23 +143,27 @@ class _SearchExploreMainContainerWidgetState extends State<SearchExploreMainCont
          return Container();
        }
       case SearchExploreHelperMarker.search:
-        return  AnimatedOpacity(
-          duration: Duration(milliseconds: 800),
-          opacity: (ExploreWebHelperCore.searchExploreMarker == SearchExploreHelperMarker.search || (ExploreWebHelperCore.searchExploreMarker != SearchExploreHelperMarker.activity && (kIsWeb) && Responsive.isMobile(context))) ? 1 : 0,
-            child: Visibility(
-                visible: ExploreWebHelperCore.searchExploreMarker == SearchExploreHelperMarker.search || (ExploreWebHelperCore.searchExploreMarker != SearchExploreHelperMarker.activity && (kIsWeb) && Responsive.isMobile(context)),
-                child: SlideInTransitionWidget(
-                  durationTime: 400,
-                  offset: const Offset(0.0, 1.0),
-                  transitionWidget: PointerInterceptor(
-                    child: ExploreSearchMainDashboard(
-                      model: widget.model,
-                      initialFilterObject: widget.initialFilterObject,
-                ),
-              ),
-            )
+        return  SlideInTransitionWidget(
+          durationTime: 400,
+          offset: const Offset(0.0, 1.0),
+          transitionWidget: PointerInterceptor(
+            child: ExploreSearchMainDashboard(
+              model: widget.model,
+              initialFilterObject: widget.initialFilterObject,
+        ),
+                  ),
+                );
+      default: 
+        return  SlideInTransitionWidget(
+          durationTime: 400,
+          offset: const Offset(0.0, 1.0),
+          transitionWidget: PointerInterceptor(
+            child: ExploreSearchMainDashboard(
+              model: widget.model,
+              initialFilterObject: widget.initialFilterObject,
           ),
-        );
+        ),
+      );
     }
   }
 
@@ -358,7 +173,16 @@ class _SearchExploreMainContainerWidgetState extends State<SearchExploreMainCont
     return Stack(
       alignment: Alignment.center,
       children: [
-
+        // SlideInTransitionWidget(
+        //           durationTime: 400,
+        //           offset: const Offset(0.0, 1.0),
+        //           transitionWidget: PointerInterceptor(
+        //             child: ExploreSearchMainDashboard(
+        //               model: widget.model,
+        //               initialFilterObject: widget.initialFilterObject,
+        //         ),
+        //       ),
+        //     )
        getMainContainer(context, ExploreWebHelperCore.searchExploreMarker),
 
      
@@ -405,60 +229,60 @@ class _SearchExploreMainContainerWidgetState extends State<SearchExploreMainCont
         //   )
         // ),
 
-        if (ExploreWebHelperCore.searchExploreMarker == SearchExploreHelperMarker.activity || ExploreWebHelperCore.searchExploreMarker == SearchExploreHelperMarker.listing) Positioned(
-          bottom: 130,
-          child: Visibility(
-            visible: ExploreWebHelperCore.isLoading == false,
-            child: InkWell(
-              onTap: () {
-                setState(() {
-                  ExploreWebHelperCore.searchExploreMarker = SearchExploreHelperMarker.search;
-                  ExploreWebHelperCore.isLoading = true;
+  //       if (ExploreWebHelperCore.searchExploreMarker == SearchExploreHelperMarker.activity || ExploreWebHelperCore.searchExploreMarker == SearchExploreHelperMarker.listing) Positioned(
+  //         bottom: 130,
+  //         child: Visibility(
+  //           visible: ExploreWebHelperCore.isLoading == false,
+  //           child: InkWell(
+  //             onTap: () {
+  //               setState(() {
+  //                 ExploreWebHelperCore.searchExploreMarker = SearchExploreHelperMarker.search;
+  //                 ExploreWebHelperCore.isLoading = true;
 
-                        Beamer.of(context).update(
-                            configuration: RouteInformation(
-                                location: homeTabRoute(DashboardMarker.search),
-                            ),
-                            rebuild: false
-                        );
+  //                       Beamer.of(context).update(
+  //                           configuration: RouteInformation(
+  //                               location: homeTabRoute(DashboardMarker.search),
+  //                           ),
+  //                           rebuild: false
+  //                       );
 
-                  Future.delayed(const Duration(milliseconds: 600), () {
-                    setState(() {
-                      ExploreWebHelperCore.isLoading = false;
-                    });
-                  });
-                });
-              },
-              child: Container(
-                height: 40,
-                decoration: BoxDecoration(
-                  color: widget.model.paletteColor,
-                  borderRadius: BorderRadius.circular(30),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 3.0),
-                  child: Center(
-                    child: Chip(
-                        side: BorderSide.none,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                        backgroundColor: widget.model.paletteColor,
-                        label: Text('Back',
-                            style: TextStyle(color: widget.model.accentColor, fontWeight: FontWeight.bold)),
-                        avatar: Icon(Icons.u_turn_left_rounded, color: widget.model.accentColor)
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
+  //                 Future.delayed(const Duration(milliseconds: 600), () {
+  //                   setState(() {
+  //                     ExploreWebHelperCore.isLoading = false;
+  //                   });
+  //                 });
+  //               });
+  //             },
+  //             child: Container(
+  //               height: 40,
+  //               decoration: BoxDecoration(
+  //                 color: widget.model.paletteColor,
+  //                 borderRadius: BorderRadius.circular(30),
+  //               ),
+  //               child: Padding(
+  //                 padding: const EdgeInsets.symmetric(horizontal: 3.0),
+  //                 child: Center(
+  //                   child: Chip(
+  //                       side: BorderSide.none,
+  //                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+  //                       backgroundColor: widget.model.paletteColor,
+  //                       label: Text('Back',
+  //                           style: TextStyle(color: widget.model.accentColor, fontWeight: FontWeight.bold)),
+  //                       avatar: Icon(Icons.u_turn_left_rounded, color: widget.model.accentColor)
+  //                   ),
+  //                 ),
+  //               ),
+  //             ),
+  //           ),
+  //         ),
+  //       ),
 
-        if (ExploreWebHelperCore.isLoading) Container(
-            width: double.infinity,
-            height: double.infinity,
-            color: widget.model.mobileBackgroundColor,
-            child: JumpingDots(color: widget.model.paletteColor, numberOfDots: 3)
-        ),
+  //       if (ExploreWebHelperCore.isLoading) Container(
+  //           width: double.infinity,
+  //           height: double.infinity,
+  //           color: widget.model.mobileBackgroundColor,
+  //           child: JumpingDots(color: widget.model.paletteColor, numberOfDots: 3)
+  //       ),
       ],
     );
   }
@@ -709,5 +533,4 @@ class _SearchExploreMainContainerWidgetState extends State<SearchExploreMainCont
       ],
     );
   }
-
 }
